@@ -25,7 +25,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
 
     // Statistics by date
 
-    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(b.createAt, COUNT(b.id), SUM(b.totalAmount)) " +
+    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(DATE(b.createAt), COUNT(b.id), SUM(b.totalAmount)) " +
             "FROM Bookings b " +
             "WHERE b.createAt BETWEEN :startDate AND :endDate " +
             "GROUP BY DATE(b.createAt) " +

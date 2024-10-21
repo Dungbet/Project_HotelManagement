@@ -26,4 +26,7 @@ public class BookingDTO {
 	private String bookingName;
 	private String bookingEmail;
 	private String bookingPhone;
+	private Date createAt;
+	private Date updateAt;
+
 }

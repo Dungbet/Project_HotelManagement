@@ -2,7 +2,8 @@ package com.example.demo.Controller;
 
 import com.example.demo.DTO.*;
 import com.example.demo.Service.BookingService;
-import com.example.demo.jobscheduler.Jobscheduler;
+
+import com.example.demo.Service.Jobscheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -11,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -74,6 +75,7 @@ public class AdminBookingController {
         List<CountBookingsFromDateDTO> count = bookingService.countBookingsFromDate(startDate, endDate);
         return ResponseDTO.<List<CountBookingsFromDateDTO>>builder().status(200).data(count).msg("ok").build();
     }
+
 
 
     @GetMapping("/export-excel")

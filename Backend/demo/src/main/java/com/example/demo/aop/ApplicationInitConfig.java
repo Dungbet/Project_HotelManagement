@@ -31,6 +31,7 @@ public class ApplicationInitConfig {
                 user = new Users();
                 user.setUsername("admin");
                 user.setPassword(new BCryptPasswordEncoder().encode("admin"));
+                user.setEnable(true);
 
                 // Tạo và gán vai trò cho người dùng
                 Roles adminRole = roleRepo.findByName("ROLE_ADMIN");

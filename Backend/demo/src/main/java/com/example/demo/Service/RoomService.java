@@ -4,6 +4,8 @@ import com.example.demo.DTO.PageDTO;
 import com.example.demo.DTO.RoomsDTO;
 import com.example.demo.DTO.SearchDTO;
 import com.example.demo.Entity.Bookings;
+import com.example.demo.Entity.Hotels;
+import com.example.demo.Entity.RoomCategories;
 import com.example.demo.Entity.Rooms;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.RoomRepo;
@@ -210,6 +212,8 @@ class RoomServiceImpl implements RoomService {
             room.setName(roomsDTO.getName());
             room.setPrice(roomsDTO.getPrice());
             room.setView(roomsDTO.getView());
+            room.setDiscount(room.getDiscount());
+            room.setDiscountedPrice(room.getDiscountedPrice());
             room.setRoomImgPublicId(roomsDTO.getRoomImgPublicId());
 
             roomRepo.save(room);

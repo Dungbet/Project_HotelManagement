@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { format, parse } from 'date-fns'; // Importing date-fns functions
+import { format, parse, parseISO } from 'date-fns'; // Corrected import statement
 
 function InformationBooking() {
     const [bookings, setBookings] = useState([]);
@@ -36,6 +36,16 @@ function InformationBooking() {
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="alert alert-danger">{error}</div>;
 
+    const formatDate = (dateString) => {
+        try {
+            const parsedDate = parseISO(dateString); // parse ISO string to Date object
+            return format(parsedDate, 'dd/MM/yyyy HH:mm'); // format as "Ngày/Tháng/Năm Giờ:Phút"
+        } catch (e) {
+            console.error('Date parsing error:', e);
+            return 'N/A';
+        }
+    };
+
     // Helper function to parse date string
     const parseDate = (dateString) => {
         try {
@@ -60,6 +70,7 @@ function InformationBooking() {
             <table className="table table-bordered table-hover order-table">
                 <thead className="thead-dark">
                     <tr>
+                        <th>Ngày đặt</th>
                         <th>Tên người đặt</th>
                         <th>Phòng số</th>
                         <th>SĐT</th>
@@ -75,6 +86,7 @@ function InformationBooking() {
                     {bookings.length > 0 ? (
                         bookings.map((booking, index) => (
                             <tr key={index}>
+                                <td>{formatDate(booking.createAt) || 'N/A'}</td> {/* Format createAt */}
                                 <td>{booking.bookingName || 'N/A'}</td>
                                 <td>{booking.room ? booking.room.roomNumber : 'N/A'}</td>
                                 <td>{booking.bookingPhone || 'N/A'}</td>
@@ -88,13 +100,12 @@ function InformationBooking() {
                                         currency: 'VND',
                                     })}
                                 </td>
-
                                 <td>{renderStatus(booking.status)}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="8" className="text-center">
+                            <td colSpan="10" className="text-center">
                                 Không có dữ liệu
                             </td>
                         </tr>
