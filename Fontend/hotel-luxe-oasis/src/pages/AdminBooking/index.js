@@ -57,8 +57,10 @@ function AdminBooking() {
             console.error('Error updating status', error);
         }
     };
+
+    // Delete bookings
     const deleteBooking = async (bookingId, status) => {
-        if (status) {
+        if (status === 'Đã hủy') {
             setMessages({
                 ...messages,
                 deleteMessageFail: 'Không thể xóa đặt phòng đã thanh toán',
@@ -84,6 +86,70 @@ function AdminBooking() {
         } catch (error) {
             setMessages({ deleteMessageFail: 'Xóa đặt phòng thất bại', deleteMessageSuccess: '' });
             console.error('Error deleting booking', error);
+        }
+    };
+
+    const finishBooking = async (bookingId) => {
+        const confirmFinish = window.confirm('Bạn có chắc chắn muốn hoàn thành không?');
+        if (!confirmFinish) return;
+
+        try {
+            const token = getToken();
+            await axios.put(
+                'http://localhost:8080/admin/booking/finish-booking',
+                { id: bookingId },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+            setMessages({ ...messages, updateMessageSuccess: 'Hoàn thành đặt phòng thành công' });
+            fetchBookings();
+        } catch (error) {
+            setMessages({ ...messages, updateMessageFail: 'Hoàn thành đặt phòng thất bại' });
+            console.error('Error finishing booking', error);
+        }
+    };
+
+    const cancelBooking = async (bookingId) => {
+        const confirmCancel = window.confirm('Bạn có chắc chắn muốn hủy không?');
+        if (!confirmCancel) return;
+
+        try {
+            const token = getToken();
+            await axios.put(
+                'http://localhost:8080/admin/booking/cancel-booking',
+                { id: bookingId },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                },
+            );
+            setMessages({ ...messages, deleteMessageSuccess: 'Hủy đặt phòng thành công' });
+            fetchBookings();
+        } catch (error) {
+            setMessages({ ...messages, deleteMessageFail: 'Hủy đặt phòng thất bại' });
+            console.error('Error cancelling booking', error);
+        }
+    };
+
+    const confirmCancelBooking = async (bookingId, confirm) => {
+        const confirmConfirm = window.confirm('Bạn có chắc chắn muốn xác nhận không?');
+        if (!confirmConfirm) return;
+
+        try {
+            const token = getToken();
+            await axios.put(
+                'http://localhost:8080/admin/booking/confirm-cancel',
+                { id: bookingId },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { confirm }, // Truyền tham số confirm từ hàm
+                },
+            );
+            setMessages({ ...messages, updateMessageSuccess: 'Xác nhận hủy thành công' });
+            fetchBookings();
+        } catch (error) {
+            setMessages({ ...messages, updateMessageFail: 'Xác nhận hủy thất bại' });
+            console.error('Error confirming cancel booking', error);
         }
     };
 
@@ -115,9 +181,10 @@ function AdminBooking() {
                                 <th scope="col">ID</th>
                                 <th scope="col">Tên Người Đặt</th>
                                 <th scope="col">Phòng</th>
-                                <th scope="col">Ngày Check-in</th>
-                                <th scope="col">Ngày Check-out</th>
+                                <th scope="col">Check-in</th>
+                                <th scope="col">Check-out</th>
                                 <th scope="col">Tổng Tiền</th>
+                                <th scope="col">Thanh Toán</th>
                                 <th scope="col">Trạng Thái</th>
                                 <th scope="col">Hành Động</th>
                             </tr>
@@ -140,16 +207,63 @@ function AdminBooking() {
                                     </td>
                                     <td>{booking.totalAmount}</td>
                                     <td>
-                                        {booking.status ? (
-                                            <span className="text-success">Đã thanh toán</span>
-                                        ) : (
-                                            <span className="text-danger">Chưa thanh toán</span>
-                                        )}
+                                        <span
+                                            className={
+                                                booking.status === 'Đã thanh toán'
+                                                    ? 'text-success'
+                                                    : booking.status === 'Chưa thanh toán'
+                                                    ? 'text-danger'
+                                                    : booking.status === 'Hoàn tiền'
+                                                    ? 'text-primary'
+                                                    : ''
+                                            }
+                                        >
+                                            {booking.status}
+                                        </span>
                                     </td>
                                     <td>
-                                        <a onClick={() => deleteBooking(booking.id, booking.status)}>
-                                            <i className="fa-solid fa-trash-can"></i>
-                                        </a>
+                                        <span
+                                            className={
+                                                booking.bookingStatus === 'Hoàn thành'
+                                                    ? 'text-success'
+                                                    : booking.bookingStatus === 'Đã hủy'
+                                                    ? 'text-danger'
+                                                    : booking.bookingStatus === 'Yêu cầu hủy'
+                                                    ? 'text-danger'
+                                                    : booking.bookingStatus === 'Đã đặt'
+                                                    ? 'text-success'
+                                                    : ''
+                                            }
+                                        >
+                                            {booking.bookingStatus}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {booking.bookingStatus === 'Đã đặt' && (
+                                            <>
+                                                <a onClick={() => finishBooking(booking.id)}>
+                                                    <i className="fa-solid fa-circle-check" title="Hoàn thành"></i>
+                                                </a>
+                                                <a onClick={() => cancelBooking(booking.id)}>
+                                                    <i className="fas fa-times" title="Hủy"></i>
+                                                </a>
+                                            </>
+                                        )}
+                                        {booking.bookingStatus === 'Yêu cầu hủy' && (
+                                            <>
+                                                <a onClick={() => confirmCancelBooking(booking.id, true)}>
+                                                    <i className="fa-solid fa-check " title="Xác nhận hủy"></i>
+                                                </a>
+                                                <a onClick={() => confirmCancelBooking(booking.id, false)}>
+                                                    <i className="fas fa-times" title="Hủy yêu cầu hủy"></i>
+                                                </a>
+                                            </>
+                                        )}
+                                        {booking.bookingStatus === 'Đã hủy' && (
+                                            <a onClick={() => deleteBooking(booking.id, booking.statusBooking)}>
+                                                <i className="fa-solid fa-trash-can" title="Xóa"></i>
+                                            </a>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

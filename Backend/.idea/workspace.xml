@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="06076eb7-8c04-4bbe-85c2-0a6a46d0c24f" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/AdminReviewController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/DialogflowController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/EmailController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/ReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/AdminBookingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/AdminBookingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/BookingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/BookingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/CouponController.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/CouponController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/RoomController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/VPNPaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller/VPNPaymentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/DTO/BookingDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/DTO/BookingDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/DTO/ReviewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/DTO/ReviewDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Entity/Bookings.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Entity/Bookings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/CouponRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/CouponRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/ReviewRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/ReviewRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/RoomRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Repository/RoomRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/BookingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/BookingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/CouponService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/CouponService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/DataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/DataHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/MessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/MessageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/ReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/RoomService.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Service/RoomService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/aop/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/aop/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayout/ChatIcon/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayout/ChatIcon/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayout/Footer/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayout/Footer/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayoutAdmin/Sidebar/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/components/Layout/DefaultLayoutAdmin/Sidebar/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/AdminBooking/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/AdminBooking/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/Home/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/Home/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/InformationBooking/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/InformationBooking/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/Payment/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/Payment/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/RoomDetail/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/pages/RoomDetail/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../Fontend/hotel-luxe-oasis/src/routes/index.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2osZFE05PQ8rJ7uYv4GumzLWDwU" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="06076eb7-8c04-4bbe-85c2-0a6a46d0c24f" name="Changes" comment="" />
+      <created>1731660139474</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1731660139474</updated>
+      <workItem from="1731660140785" duration="28000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

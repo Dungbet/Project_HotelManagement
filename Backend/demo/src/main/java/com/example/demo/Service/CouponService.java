@@ -23,6 +23,9 @@ public interface CouponService {
     void create(CouponDTO couponDTO);
     void update(CouponDTO couponDTO);
     void delete(int id);
+    List<CouponDTO> findCouponsByExpiryDate (Date currentDate);
+    List<CouponDTO> findCouponsByExpiryDateCurrent ();
+
 }
 
 @Service
@@ -98,5 +101,15 @@ class CouponServiceImpl implements CouponService {
     @Override
     public void delete(int id) {
         couponRepo.deleteById(id);
+    }
+
+    @Override
+    public List<CouponDTO> findCouponsByExpiryDate(Date currentDate) {
+        return couponRepo.findCouponsByExpiryDate(currentDate).stream().map( r -> convert(r)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CouponDTO> findCouponsByExpiryDateCurrent() {
+        return couponRepo.findCouponsByExpiryDateCurrent().stream().map( r -> convert(r)).collect(Collectors.toList());
     }
 }

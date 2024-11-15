@@ -20,7 +20,7 @@ function Home() {
 
     const testimonialSliderSettings = {
         dots: true,
-        infinite: true,
+        infinite: false,
         speed: 500,
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -31,7 +31,7 @@ function Home() {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [error, setError] = useState('');
-
+    const [reviews, setReviews] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -39,6 +39,18 @@ function Home() {
             .get('http://localhost:8080/room/get-room-random')
             .then((response) => {
                 setRooms(response.data.data);
+            })
+            .catch((error) => {
+                console.error('Có lỗi xảy ra khi gọi API', error);
+            });
+    }, []);
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:8080/review/get-review-good')
+            .then((response) => {
+                console.log(response.data); // Kiểm tra dữ liệu nhận được
+                setReviews(response.data.data); // Lưu trữ dữ liệu vào state
             })
             .catch((error) => {
                 console.error('Có lỗi xảy ra khi gọi API', error);
@@ -136,6 +148,20 @@ function Home() {
                                             locale={vi}
                                         />
                                         <i className="icon_calendar"></i>
+                                    </div>
+                                    <div class="select-option">
+                                        <label for="guest">Số người:</label>
+                                        <select id="guest">
+                                            <option value="">2 Người</option>
+                                            <option value="">3 Người</option>
+                                        </select>
+                                    </div>
+                                    <div class="select-option">
+                                        <label for="room">Số phòng:</label>
+                                        <select id="room">
+                                            <option value="">1 Phòng</option>
+                                            <option value="">2 Phòng</option>
+                                        </select>
                                     </div>
                                     {error && <p className="error-message">{error}</p>}{' '}
                                     {/* Hiển thị thông báo lỗi nếu có */}
@@ -385,54 +411,38 @@ function Home() {
                     </div>
                     <div className="row">
                         <div className="col-lg-8 offset-lg-2">
-                            <Slider {...testimonialSliderSettings} className="testimonial-slider">
-                                <div className="ts-item">
-                                    <p>
-                                        After a construction project took longer than expected, my husband, my daughter
-                                        and I needed a place to stay for a few nights. As a Chicago resident, we know a
-                                        lot about our city, neighborhood and the types of housing options available and
-                                        absolutely love our vacation at Sona Hotel.
-                                    </p>
-                                    <div className="ti-author">
-                                        <div className="rating">
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star-half_alt"></i>
+                            {reviews.length === 0 ? (
+                                <p>Chưa có đánh giá nào.</p>
+                            ) : (
+                                <Slider {...testimonialSliderSettings} className="testimonial-slider">
+                                    {reviews.map((review) => (
+                                        <div key={review.id} className="ts-item">
+                                            <p>{review.comment}</p>
+                                            <div className="ti-author">
+                                                <div className="rating">
+                                                    {Array.from({ length: 5 }, (_, index) => (
+                                                        <i
+                                                            key={index}
+                                                            className={
+                                                                index < review.rating ? 'icon_star' : 'icon_star-empty'
+                                                            }
+                                                        ></i>
+                                                    ))}
+                                                </div>
+                                                <h5>- {review.booking.user.name || 'Anonymous'}</h5>
+                                            </div>
+                                            {review.booking.user.avatar && (
+                                                <img
+                                                    src={review.booking.user.avatar}
+                                                    alt="User Avatar"
+                                                    style={{ width: '50px', borderRadius: '50%', margin: '0 auto' }}
+                                                    // style={{ width: 'auto', margin: '0 auto' }}
+                                                />
+                                            )}
                                         </div>
-                                        <h5> - Alexander Vasquez</h5>
-                                    </div>
-                                    <img
-                                        src="img/testimonial-logo.png"
-                                        alt=""
-                                        style={{ width: 'auto', margin: '0 auto' }}
-                                    />
-                                </div>
-                                <div className="ts-item">
-                                    <p>
-                                        After a construction project took longer than expected, my husband, my daughter
-                                        and I needed a place to stay for a few nights. As a Chicago resident, we know a
-                                        lot about our city, neighborhood and the types of housing options available and
-                                        absolutely love our vacation at Sona Hotel.
-                                    </p>
-                                    <div className="ti-author">
-                                        <div className="rating">
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star-half_alt"></i>
-                                        </div>
-                                        <h5> - Alexander Vasquez</h5>
-                                    </div>
-                                    <img
-                                        src="img/testimonial-logo.png"
-                                        alt=""
-                                        style={{ width: 'auto', margin: '0 auto' }}
-                                    />
-                                </div>
-                            </Slider>
+                                    ))}
+                                </Slider>
+                            )}
                         </div>
                     </div>
                 </div>

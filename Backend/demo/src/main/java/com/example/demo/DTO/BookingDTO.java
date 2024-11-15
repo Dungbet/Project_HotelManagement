@@ -19,9 +19,11 @@ public class BookingDTO {
 	private Date checkOutDate;
 	private int guest;
 	private double totalAmount;
-	private boolean status;
+	private String status;
+	private String bookingStatus;
 	private Users user;
 	private Rooms room;
+	private boolean isRated;
 	// Booking-specific information
 	private String bookingName;
 	private String bookingEmail;

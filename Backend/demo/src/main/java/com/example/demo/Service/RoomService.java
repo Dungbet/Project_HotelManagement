@@ -35,6 +35,7 @@ public interface RoomService {
     void create (RoomsDTO roomsDTO);
     void update (RoomsDTO roomsDTO);
     void delete (int id);
+    List<RoomsDTO> findAvailableRooms(int numberOfGuests);
 }
 @Service
 class RoomServiceImpl implements RoomService {
@@ -225,5 +226,10 @@ class RoomServiceImpl implements RoomService {
     public void delete(int id) {
         roomRepo.deleteById(id);
 
+    }
+
+    @Override
+    public List<RoomsDTO> findAvailableRooms(int numberOfGuests) {
+        return roomRepo.findAvailableRooms(numberOfGuests).stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
     }
 }

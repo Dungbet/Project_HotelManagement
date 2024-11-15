@@ -1,5 +1,6 @@
 package com.example.demo.Service;
 
+import com.example.demo.DTO.CouponDTO;
 import com.example.demo.DTO.UsersDTO;
 import com.example.demo.Entity.Bookings;
 import com.example.demo.Entity.Users;
@@ -17,12 +18,16 @@ import org.springframework.stereotype.Service;
 import javax.management.RuntimeErrorException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class EmailService {
 
     @Autowired
     private JavaMailSender javaMailSender;
+
+    @Autowired
+    CouponService couponService;
 
     //    public void sendVerificationEmail(String to, String token){
 //        SimpleMailMessage message = new SimpleMailMessage();
@@ -45,6 +50,60 @@ public class EmailService {
             // Handle exception
         }
     }
+
+    public void sendCouponExp(String to) {
+        String subject = "Hotel Luxeoasis";
+        Date today = new Date();
+        List<CouponDTO> activeCoupons = couponService.findCouponsByExpiryDate(today);
+
+        // Tạo nội dung email với CSS
+        StringBuilder body = new StringBuilder();
+        body.append("<!DOCTYPE html>")
+                .append("<html lang=\"en\">")
+                .append("<head>")
+                .append("<meta charset=\"UTF-8\">")
+                .append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">")
+                .append("<title>Ưu đãi từ Hotel Luxeoasis</title>")
+                .append("<style>")
+                .append("body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }")
+                .append(".container { background-color: #ffffff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }")
+                .append("h1 { color: #333; }")
+                .append("p { color: #555; }")
+                .append("ul { list-style-type: none; padding: 0; }")
+                .append("li { background-color: #f9f9f9; margin: 10px 0; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0; }")
+                .append("strong { color: #007bff; }")
+                .append("</style>")
+                .append("</head>")
+                .append("<body>")
+                .append("<div class=\"container\">");
+
+        if (activeCoupons.isEmpty()) {
+            body.append("<p>Hiện tại Hotel chúng tôi đang không còn ưu đãi.</p>");
+        } else {
+            body.append("<h1>Hiện tại Hotel chúng tôi đang có các ưu đãi vô cùng hấp dẫn!</h1>")
+                    .append("<p>Xin chào,</p>")
+                    .append("<p>Dưới đây là danh sách các mã giảm giá của Hotel chúng tôi:</p>")
+                    .append("<ul>");
+            for (CouponDTO coupon : activeCoupons) {
+                body.append("<li>")
+                        .append("<strong>Mã:</strong> ").append(coupon.getCode())
+                        .append(", <strong>Giảm giá:</strong> ").append(coupon.getDiscountPercentage()).append("%")
+                        .append(", <strong>Hạn sử dụng:</strong> ").append(coupon.getExpiryDate())
+                        .append("</li>");
+            }
+            body.append("</ul>")
+                    .append("<p>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!</p>");
+        }
+
+        body.append("</div>")
+                .append("</body>")
+                .append("</html>");
+
+        // Gửi email
+        sendVerificationEmail(to, subject, body.toString());
+    }
+
+
 
     public void sendBookingInvoice(Bookings booking) {
         String subject = "Hóa đơn đặt phòng #" + booking.getId();

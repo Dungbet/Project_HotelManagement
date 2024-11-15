@@ -116,7 +116,7 @@ public class VPNPaymentController extends HttpServlet {
         if (responseCode.equals("00")) {
             Bookings booking = bookingRepo.findById(Integer.parseInt(bookingId)).orElse(null);
             if (booking != null) {
-                booking.setStatus(true);
+                booking.setStatus("Đã thanh toán");
                 bookingRepo.save(booking);
 
                 Payments payments = new Payments();

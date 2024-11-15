@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -10,6 +10,7 @@ function ChatIcon() {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const chatBoxRef = useRef(null);
 
     useEffect(() => {
         const fetchUsername = async () => {
@@ -18,6 +19,23 @@ function ChatIcon() {
             console.log('Logged in username:', loggedInUsername);
         };
         fetchUsername();
+    }, []);
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Check if the chat box is open and the click is outside of it and the icon
+            if (
+                chatBoxRef.current &&
+                !chatBoxRef.current.contains(event.target) &&
+                !event.target.closest('.chat-icon')
+            ) {
+                setIsChatBoxOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
 
     useEffect(() => {
@@ -79,7 +97,7 @@ function ChatIcon() {
             alert('Bạn cần đăng nhập để gửi tin nhắn.');
             navigate('/login');
         } else {
-            setIsChatBoxOpen(!isChatBoxOpen);
+            setIsChatBoxOpen((prevState) => !prevState);
         }
     };
 
@@ -150,12 +168,12 @@ function ChatIcon() {
     return (
         <>
             <div className="chat-messenger-icons">
-                <button className="chat-icon" onClick={toggleChatBox} aria-label="Open Chat">
+                <button className="chat-icon" onClick={toggleChatBox} aria-label="Open Chat" title="Chat với admin">
                     <i className="fab fa-facebook-messenger"></i>
                 </button>
             </div>
 
-            <div className={`chat-box ${isChatBoxOpen ? 'active' : ''}`}>
+            <div className={`chat-box ${isChatBoxOpen ? 'active' : ''}`} ref={chatBoxRef}>
                 <div className="chat-box-header">Nhắn tin với Admin</div>
                 {error && <div className="chat-box-error">{error}</div>}
                 <div className="chat-box-content">

@@ -30,6 +30,10 @@ public interface   BookingService {
     // Các phương thức thống kê
     List<CountBookingsFromDateDTO> countBookingsFromDate(Date startDate, Date endDate);
     List<BookingDTO> getBookingsByUserId(int userId);
+    void confirmCancel (BookingDTO bookingDTO, boolean confirm);
+    void requestCancel (BookingDTO bookingDTO);
+    public void AdminCancel(BookingDTO bookingDTO);
+    void finishBooking (BookingDTO bookingDTO);
 
 
 
@@ -101,7 +105,7 @@ class BookingServiceImpl implements BookingService {
 
         // Set the current user
         booking.setUser(currentUser);
-
+        booking.setBookingStatus("Đã đặt");
         // Save booking
         Bookings bookingSaved = bookingRepo.save(booking);
         return convertToDTO(bookingSaved);
@@ -112,7 +116,7 @@ class BookingServiceImpl implements BookingService {
     public void update(BookingDTO bookingDTO) {
         Bookings booking = bookingRepo.findById(bookingDTO.getId()).orElse(null);
         if(booking != null){
-            booking.setStatus(bookingDTO.isStatus());
+            booking.setStatus("Đã thanh toán");
             bookingRepo.save(booking);
         }
     }
@@ -132,5 +136,77 @@ class BookingServiceImpl implements BookingService {
         return bookingRepo.getBookingsByUserId(userId).stream().map(b -> convertToDTO(b)).collect(Collectors.toList());
     }
 
+    @Override
+    public void requestCancel(BookingDTO bookingDTO) {
+        // Tìm đơn đặt phòng
+        Bookings booking = bookingRepo.findById(bookingDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
+
+        // Kiểm tra nếu trạng thái hiện tại chưa phải là "Yêu cầu hủy"
+        if (!booking.getBookingStatus().equals("Yêu cầu hủy")) {
+            booking.setBookingStatus("Yêu cầu hủy");
+            bookingRepo.save(booking);
+        } else {
+            throw new RuntimeException("Booking đã yêu cầu hủy");
+        }
+    }
+    @Override
+    public void AdminCancel(BookingDTO bookingDTO) {
+        // Tìm đơn đặt phòng
+        Bookings booking = bookingRepo.findById(bookingDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
+
+        // Kiểm tra nếu trạng thái hiện tại chưa phải là "Yêu cầu hủy"
+        if (booking.getBookingStatus().equals("Đã đặt")) {
+            booking.setBookingStatus("Đã hủy");
+            if(booking.getStatus().equals("Đã thanh toán")){
+                booking.setStatus("Hoàn tiền");
+            }
+            bookingRepo.save(booking);
+        } else {
+            throw new RuntimeException("Booking hủy thất bại");
+        }
+    }
+
+    @Override
+    public void finishBooking(BookingDTO bookingDTO) {
+        // Tìm đơn đặt phòng
+        Bookings booking = bookingRepo.findById(bookingDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
+
+        if (booking.getBookingStatus().equals("Đã đặt")) {
+            // Admin từ chối hủy, chuyển lại trạng thái "Đã xác nhận"
+            booking.setBookingStatus("Hoàn thành");
+            bookingRepo.save(booking);
+        } else {
+            throw new RuntimeException("Booking không ở trạng thái đã đặt");
+        }
+    }
+
+    @Override
+    public void confirmCancel(BookingDTO bookingDTO, boolean confirm) {
+        // Tìm đơn đặt phòng
+        Bookings booking = bookingRepo.findById(bookingDTO.getId())
+                .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
+
+        // Chỉ xử lý đơn có trạng thái "Yêu cầu hủy"
+        if (booking.getBookingStatus().equals("Yêu cầu hủy")) {
+            if (confirm) {
+                // Admin xác nhận hủy
+                booking.setBookingStatus("Đã hủy");
+                if(booking.getStatus().equals("Đã thanh toán")){
+                    booking.setStatus("Hoàn tiền");
+                }
+                booking.setStatus("Hoàn tiền"); // nếu có hoàn tiền
+
+                } else {
+                    // Admin từ chối hủy, chuyển lại trạng thái "Đã xác nhận"
+                    booking.setBookingStatus("Đã đặt");
+                }
+            bookingRepo.save(booking);
+        } else {
+            throw new RuntimeException("Booking không ở trạng thái yêu cầu hủy");
+        }
+    }
 
 }

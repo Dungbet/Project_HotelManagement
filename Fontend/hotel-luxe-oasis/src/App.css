@@ -2434,7 +2434,10 @@ ol {
     border-color: var(--primary);
 }
 /* css delete */
-tbody a .fa-trash-can {
+tbody a .fa-trash-can,
+.fa-circle-check,
+.fa-times,
+.fa-check {
     width: 24px;
     height: 24px;
     color: #007bff;
@@ -2482,6 +2485,12 @@ tbody a .fa-pen-to-square {
 
 .text-success {
     color: green;
+}
+.text-cancel {
+    color: orange;
+}
+.text-dadat {
+    color: #009cff;
 }
 /* css cho giảm giá tất cả */
 .admin-room-discount {
@@ -2898,7 +2907,7 @@ select {
 /* Chat user */
 .chat-messenger-icons {
     position: fixed;
-    bottom: 20px;
+    bottom: 80px;
     right: 20px;
     display: flex;
     flex-direction: column;
@@ -2963,7 +2972,7 @@ select {
 /* Chatbox */
 .chat-box {
     position: fixed;
-    bottom: 80px;
+    bottom: 160px;
     right: 20px;
     width: 300px;
     height: 400px;
@@ -3206,4 +3215,90 @@ select {
 
 .custom-btn-submit:hover {
     background-color: #c6864e;
+}
+
+/* Css đánh giá (review) */
+/* Modal background */
+.custom-modal {
+    display: block;
+    /* Ẩn modal theo mặc định */
+    position: fixed; /* Giữ modal ở vị trí cố định */
+    z-index: 1000; /* Đặt modal lên trên các phần tử khác */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Bỏ qua cuộn nếu cần */
+    background-color: rgba(0, 0, 0, 0.5); /* Màu nền bán trong suốt */
+}
+
+/* Nội dung modal */
+.custom-review-box {
+    background-color: #fff;
+    margin: 15% auto; /* Giữa màn hình */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px; /* Kích thước nhỏ hơn */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng */
+}
+
+.custom-review-box h2 {
+    margin-bottom: 15px;
+    font-size: 18px; /* Kích thước tiêu đề nhỏ hơn */
+}
+
+.custom-star-rating {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+.custom-star {
+    font-size: 30px;
+    cursor: pointer;
+    color: gray;
+}
+
+.custom-star.selected {
+    color: gold;
+}
+
+.custom-textarea {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    margin: 10px auto; /* Căn giữa theo chiều ngang */
+    resize: vertical;
+    display: block; /* Đảm bảo nó là một block element */
+}
+.button-review {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    width: 100%; /* Full width button */
+}
+
+.button-review:hover {
+    background-color: #218838;
+}
+/* Nút mở modal */
+.open-modal {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.open-modal:hover {
+    background-color: #0056b3;
 }

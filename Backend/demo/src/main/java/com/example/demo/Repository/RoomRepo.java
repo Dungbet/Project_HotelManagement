@@ -29,4 +29,13 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Modifying
     @Query("UPDATE Rooms r SET r.discount = :discount, r.discountedPrice = r.price - (r.price * :discount / 100)")
     void updateAllRoomsDiscount(@Param("discount") double discount);
+
+    @Query(value = "SELECT * FROM rooms r WHERE r.id NOT IN (" +
+            "SELECT b.room_id FROM bookings b WHERE CURRENT_DATE < b.check_out_date " +
+            "AND CURRENT_DATE + INTERVAL 1 DAY > b.check_in_date) " +
+            "AND r.capacity >= :numberOfGuests", nativeQuery = true)
+    List<Rooms> findAvailableRooms(@Param("numberOfGuests") int numberOfGuests);
+
+
+
 }

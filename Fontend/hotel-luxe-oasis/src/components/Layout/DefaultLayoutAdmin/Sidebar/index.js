@@ -103,8 +103,8 @@ function Sidebar() {
                     </Link>
 
                     <Link
-                        to="/feedback/1"
-                        className={`nav-item nav-link ${location.pathname === '/feedback/1' ? 'active' : ''}`}
+                        to="/admin/review"
+                        className={`nav-item nav-link ${location.pathname === '/admin/review' ? 'active' : ''}`}
                     >
                         <i className="fa-solid fa-comment me-2"></i>Đánh giá
                     </Link>

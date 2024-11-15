@@ -38,7 +38,11 @@ public class BookingController {
     public ResponseDTO<List<BookingDTO>> getAll(){
         return ResponseDTO.<List<BookingDTO>>builder().status(200).data(bookingService.getAll()).msg("ok").build();
     }
-//
+    @PutMapping("/request-cancel")
+    public ResponseDTO<BookingDTO> requestCancel(@RequestBody BookingDTO bookingDTO) {
+        bookingService.requestCancel(bookingDTO);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
+    }
     @PostMapping("/create")
     public ResponseDTO<BookingDTO> createBooking(
             @RequestBody BookingDTO bookingDTO,
@@ -50,7 +54,6 @@ public class BookingController {
         @GetMapping("/bookings")
     public ResponseDTO<List<BookingDTO>> getUserBookings(@RequestHeader("Authorization") String token) {
         String username = jwtTokenService.getUserName(token);
-        System.out.println("Username: " +username);
         // Parse the token to get the user ID
         Users user = userRepo.findByUsername(username);
         return ResponseDTO.<List<BookingDTO>>builder().status(200).data( bookingService.getBookingsByUserId(user.getId())).msg("ok").build();

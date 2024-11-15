@@ -38,6 +38,14 @@ public class RoomController {
                 .data(roomService.getAllRooms(searchDTO))
                 .build();
     }
+    @GetMapping("/romtrong")
+    public ResponseDTO<List<RoomsDTO>> getAllRoomstrong() {
+        return ResponseDTO.<List<RoomsDTO>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findAvailableRooms(2))
+                .build();
+    }
 
         @GetMapping("/get-room-random")
     public ResponseDTO<List<RoomsDTO>> getRoomsByRandom(){

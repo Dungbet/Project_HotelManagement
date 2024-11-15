@@ -4,6 +4,7 @@ import { Link, useParams, useLocation, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import vi from 'date-fns/locale/vi';
+import { format, parseISO, parse } from 'date-fns';
 
 function RoomDetail() {
     const { id } = useParams();
@@ -14,6 +15,8 @@ function RoomDetail() {
     const [guestCount, setGuestCount] = useState(0);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [reviews, setReviews] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
 
     useEffect(() => {
         axios
@@ -24,6 +27,24 @@ function RoomDetail() {
             .catch((error) => {
                 console.error('Có lỗi xảy ra khi gọi API', error);
             });
+    }, [id]);
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/review/review-by-room?id=${id}`);
+                setReviews(response.data.data); // Set reviews from API
+
+                // Calculate the average rating
+                const totalRating = response.data.data.reduce((sum, review) => sum + review.rating, 0);
+                const avgRating = totalRating / response.data.data.length || 0;
+                setAverageRating(avgRating);
+            } catch (error) {
+                console.error('Có lỗi xảy ra khi lấy đánh giá:', error);
+            }
+        };
+
+        fetchReviews();
     }, [id]);
 
     useEffect(() => {
@@ -132,6 +153,23 @@ function RoomDetail() {
         return new Date(dateString.split('/').reverse().join('-'));
     };
 
+    const formatDate2 = (dateString) => {
+        try {
+            // Kiểm tra nếu dateString không phải là null hoặc undefined
+            if (!dateString) {
+                return 'N/A'; // Hoặc xử lý theo cách bạn muốn
+            }
+
+            // Nếu ngày đã được định dạng như "28/10/2024 13:57"
+            const parsedDate = parse(dateString, 'dd/MM/yyyy HH:mm', new Date());
+
+            return format(parsedDate, 'dd/MM/yyyy HH:mm'); // format lại theo định dạng mong muốn
+        } catch (e) {
+            console.error('Date parsing error:', e);
+            return 'N/A'; // Hoặc xử lý lỗi theo cách bạn muốn
+        }
+    };
+
     if (!room) {
         return (
             <div id="preloder">
@@ -176,11 +214,20 @@ function RoomDetail() {
                                         <h3>{room.name}</h3>
                                         <div className="rdt-right">
                                             <div className="rating">
-                                                <i className="icon_star"></i>
-                                                <i className="icon_star"></i>
-                                                <i className="icon_star"></i>
-                                                <i className="icon_star"></i>
-                                                <i className="icon_star-half_alt"></i>
+                                                {Array.from({ length: 5 }).map((_, index) => {
+                                                    if (index < Math.floor(averageRating)) {
+                                                        return <i key={index} className="icon_star"></i>; // Full star
+                                                    } else if (
+                                                        index === Math.floor(averageRating) &&
+                                                        averageRating % 1 > 0.1 // Chỉ hiển thị half star khi phần thập phân > 0.1
+                                                    ) {
+                                                        return <i key={index} className="icon_star-half_alt"></i>; // Half star
+                                                    } else {
+                                                        return <i key={index} className="icon_star-empty"></i>; // Empty star
+                                                    }
+                                                })}
+
+                                                <span>({averageRating.toFixed(1)} / 5)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -232,23 +279,40 @@ function RoomDetail() {
                             </div>
                             <div className="rd-reviews">
                                 <h4>Đánh giá</h4>
-                                <div className="review-item">
-                                    <div className="ri-pic">
-                                        <img src="img/room/avatar/avatar-1.jpg" alt="" />
-                                    </div>
-                                    <div className="ri-text">
-                                        <span>27 Aug 2019</span>
-                                        <div className="rating">
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star"></i>
-                                            <i className="icon_star-half_alt"></i>
+                                {reviews.length > 0 ? (
+                                    reviews.map((review) => (
+                                        <div className="review-item" key={review.id}>
+                                            <div className="ri-pic">
+                                                {/* <img
+                                                    src={review.user.avatar || 'img/room/avatar/default-avatar.jpg'}
+                                                    alt=""
+                                                /> */}
+                                            </div>
+                                            <div className="ri-text">
+                                                <span>{formatDate2(review.createAt)}</span>
+                                                <div className="rating">
+                                                    {[...Array(5)].map((_, index) => (
+                                                        <i
+                                                            key={index}
+                                                            className={
+                                                                index < review.rating ? 'icon_star' : 'icon_star_half'
+                                                            }
+                                                        ></i>
+                                                    ))}
+                                                </div>
+                                                <h5>
+                                                    {review.user
+                                                        ? review.user.name || review.user.username
+                                                        : 'Anonymous'}
+                                                </h5>
+
+                                                <p>{review.comment}</p>
+                                            </div>
                                         </div>
-                                        <h5>Tạ Quang Dũng</h5>
-                                        <p>Phòng đẹp, sạch sẽ, view triệu đô.</p>
-                                    </div>
-                                </div>
+                                    ))
+                                ) : (
+                                    <p>Chưa có đánh giá nào cho phòng này.</p>
+                                )}
                             </div>
                         </div>
                         <div className="col-lg-4">

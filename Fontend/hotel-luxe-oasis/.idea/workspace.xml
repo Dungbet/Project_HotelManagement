@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bbb3b33c-f599-44ac-bab0-6099d42155fe" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/AdminReviewController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/DialogflowController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/EmailController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/ReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/AdminBookingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/AdminBookingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/BookingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/BookingController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/CouponController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/CouponController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/RoomController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/VPNPaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Controller/VPNPaymentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/DTO/BookingDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/DTO/BookingDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/DTO/ReviewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/DTO/ReviewDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Entity/Bookings.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Entity/Bookings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/CouponRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/CouponRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/ReviewRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/ReviewRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/RoomRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Repository/RoomRepo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/BookingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/BookingService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/CouponService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/CouponService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/DataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/DataHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/EmailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/EmailService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/MessageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/MessageService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/ReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/RoomService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/Service/RoomService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/aop/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/java/com/example/demo/aop/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Backend/demo/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../Backend/demo/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Layout/DefaultLayout/ChatIcon/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Layout/DefaultLayout/ChatIcon/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Layout/DefaultLayout/Footer/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Layout/DefaultLayout/Footer/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Layout/DefaultLayoutAdmin/Sidebar/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Layout/DefaultLayoutAdmin/Sidebar/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/AdminBooking/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/AdminBooking/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Home/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Home/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/InformationBooking/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/InformationBooking/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Payment/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Payment/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/RoomDetail/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/RoomDetail/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/index.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2ok6lyvrivZJXZ6dbvA6XU8kXrf" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bbb3b33c-f599-44ac-bab0-6099d42155fe" name="Changes" comment="" />
+      <created>1731401384845</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1731401384845</updated>
+      <workItem from="1731401392042" duration="16000" />
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

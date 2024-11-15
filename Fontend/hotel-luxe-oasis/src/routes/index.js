@@ -32,6 +32,7 @@ import EditPayment from '~/pages/AdminPayment/EditPayment';
 import AdminCoupon from '~/pages/AdminCoupon';
 import AdminLogin from '~/pages/AdminLogin';
 import AdminChangePassword from '~/pages/AdminChangePassword';
+import AdminReview from '~/pages/AdminReview';
 
 // Khong can login
 const publicRoutes = [
@@ -75,6 +76,7 @@ const adminRoutes = [
     { path: '/admin/edit-payment', component: EditPayment },
     { path: '/admin/coupon', component: AdminCoupon },
     { path: '/admin/login', component: AdminLogin, layout: null },
+    { path: '/admin/review', component: AdminReview },
 ];
 
 export { adminRoutes, publicRoutes, privateRoutes };

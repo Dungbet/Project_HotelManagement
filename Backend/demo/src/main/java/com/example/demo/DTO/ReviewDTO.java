@@ -5,12 +5,14 @@ import java.util.Date;
 import com.example.demo.Entity.Bookings;
 import com.example.demo.Entity.Rooms;
 import com.example.demo.Entity.Users;
+import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
+@Data
 public class ReviewDTO {
 
 	private int id;

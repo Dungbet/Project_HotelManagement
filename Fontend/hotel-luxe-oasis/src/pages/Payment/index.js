@@ -90,7 +90,7 @@ function Payment() {
                     <dd className="col-sm-9">{txnRef}</dd>
 
                     <dt className="col-sm-3">Tổng tiền</dt>
-                    <dd className="col-sm-9">{totalPrice}</dd>
+                    <dd className="col-sm-9">{totalPrice / 100}</dd>
 
                     <dt className="col-sm-3">Ngày thanh toán</dt>
                     <dd className="col-sm-9">{paymentDate}</dd>

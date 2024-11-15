@@ -18,9 +18,11 @@ public class Bookings extends TimeAuditable {
 	private Date  checkOutDate;
 	private double totalAmount;
 	private int guest;
-	private boolean status;
+	private String status;
+	private String bookingStatus;
+	private boolean isRated = false;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "user_id")
 	private Users user;
 

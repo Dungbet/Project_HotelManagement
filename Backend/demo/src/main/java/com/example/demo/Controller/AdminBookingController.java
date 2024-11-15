@@ -38,9 +38,26 @@ public class AdminBookingController {
         return ResponseDTO.<BookingDTO>builder().status(200).data(createdBooking).msg("Booking created successfully").build();
     }
 
+
     @PutMapping("/update")
     public ResponseDTO<BookingDTO> update(@RequestBody BookingDTO bookingDTO) {
         bookingService.update(bookingDTO);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
+    }
+
+    @PutMapping("/cancel-booking")
+    public ResponseDTO<BookingDTO> AdminCancel(@RequestBody BookingDTO bookingDTO) {
+        bookingService.AdminCancel(bookingDTO);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
+    }
+    @PutMapping("/confirm-cancel")
+    public ResponseDTO<BookingDTO> confirmCancel(@RequestBody BookingDTO bookingDTO, @RequestParam boolean confirm) {
+        bookingService.confirmCancel(bookingDTO, confirm);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
+    }
+    @PutMapping("/finish-booking")
+    public ResponseDTO<BookingDTO> finishBooking(@RequestBody BookingDTO bookingDTO) {
+        bookingService.finishBooking(bookingDTO);
         return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
     }
 
@@ -116,10 +133,10 @@ public class AdminBookingController {
     public ResponseDTO<Void> delete(@RequestParam int id){
         BookingDTO booking = bookingService.getBookingById(id);
         // Kiểm tra trạng thái thanh toán
-        if (booking.isStatus()) {
+        if (booking.getBookingStatus().equals("Đã hoàn thành")) {
             return ResponseDTO.<Void>builder()
                     .status(400)
-                    .msg("Không thể xóa đặt phòng đã thanh toán")
+                    .msg("Không thể xóa phòng đã hoàn thành")
                     .build();
         }
 
