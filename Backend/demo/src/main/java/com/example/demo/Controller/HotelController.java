@@ -4,6 +4,9 @@ import com.example.demo.DTO.HotelsDTO;
 import com.example.demo.DTO.ResponseDTO;
 import com.example.demo.Entity.Hotels;
 import com.example.demo.Service.HotelService;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,8 @@ public class HotelController {
 		hotelService.create(hotelsDTO);
 		return ResponseDTO.<Void>builder().status(200).msg("ok").build();
 	}
+
+
 
 	@PutMapping("/update")
 	public ResponseDTO<HotelsDTO> update(@RequestBody HotelsDTO hotelsDTO){

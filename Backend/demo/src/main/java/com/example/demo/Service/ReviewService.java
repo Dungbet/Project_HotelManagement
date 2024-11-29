@@ -5,9 +5,11 @@ import com.example.demo.DTO.ReviewDTO;
 import com.example.demo.DTO.SearchDTO;
 import com.example.demo.Entity.Bookings;
 import com.example.demo.Entity.Reviews;
+import com.example.demo.Entity.Rooms;
 import com.example.demo.Entity.Users;
 import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.ReviewRepo;
+import com.example.demo.Repository.RoomRepo;
 import com.example.demo.Repository.UserRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +31,15 @@ public interface ReviewService {
     List<ReviewDTO> findByUserId(int id);
 
     List<ReviewDTO> findReviewsByRate();
+    public boolean isRoomReviewed(int bookingId, int roomId);
 
 }
 
 @Service
 class ReviewServiceImpl implements ReviewService{
 
+    @Autowired
+    RoomRepo roomRepo;
     @Autowired
     UserRepo userRepo;
     @Autowired
@@ -66,12 +71,24 @@ class ReviewServiceImpl implements ReviewService{
             int bookingId = reviewDTO.getBooking().getId(); // Lấy ID của Booking từ DTO
             Bookings booking = bookingRepo.findById(bookingId).orElseThrow(() -> new IllegalArgumentException("Booking không tồn tại."));
 
-            // Cập nhật isRated của Booking đã tồn tại
-            booking.setRated(true);
-            bookingRepo.save(booking); // Lưu lại booking sau khi đã cập nhật isRated
+            // Kiểm tra xem phòng được đánh giá có tồn tại trong booking
+            if (reviewDTO.getRoom() == null || reviewDTO.getRoom().getId() == 0) {
+                throw new IllegalArgumentException("Phòng cần được cung cấp để tạo review.");
+            }
+            int roomId = reviewDTO.getRoom().getId();
+            Rooms room = roomRepo.findById(roomId)
+                    .orElseThrow(() -> new IllegalArgumentException("Phòng không tồn tại."));
 
-            // Liên kết booking với review
+            if (!booking.getRooms().contains(room)) {
+                throw new IllegalArgumentException("Phòng không thuộc booking đã cung cấp.");
+            }
+            // Đặt isRate của phòng thành true
+            roomRepo.save(room);
+
+            // Liên kết review với phòng và booking
+            reviews.setRoom(room);
             reviews.setBooking(booking);
+
         } else {
             throw new IllegalArgumentException("Booking không tồn tại.");
         }
@@ -120,5 +137,10 @@ class ReviewServiceImpl implements ReviewService{
     @Override
     public List<ReviewDTO> findReviewsByRate() {
         return reviewRepo.findReviewsByRate().stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isRoomReviewed(int bookingId, int roomId) {
+        return reviewRepo.existsByBookingIdAndRoomId(bookingId, roomId);
     }
 }

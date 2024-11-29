@@ -18,7 +18,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("UPDATE Bookings b SET b.status = :bookingStatus WHERE b.id = :bookingId")
     void updateStatus(@Param("bookingStatus") boolean status,@Param("bookingId") Integer id);
 
-    @Query("SELECT b FROM Bookings b WHERE b.room.id = :roomId AND :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate")
+    @Query("SELECT b FROM Bookings b JOIN b.rooms r WHERE r.id = :roomId AND :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate")
     List<Bookings> checkBooked(@Param("roomId") int roomId,
                                @Param("checkinDate") Date checkinDate,
                                @Param("checkoutDate") Date checkoutDate);
@@ -40,4 +40,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
 
     @Query("SELECT b FROM Bookings b WHERE b.user.id = :userId")
     List<Bookings> getBookingsByUserId (@Param("userId") int userId);
+    @Query("SELECT b FROM Bookings b JOIN FETCH b.rooms WHERE b.id = :bookingId")
+    Bookings findByIdWithRooms(@Param("bookingId") int bookingId);
+
 }

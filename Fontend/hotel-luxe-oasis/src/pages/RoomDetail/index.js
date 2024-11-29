@@ -13,6 +13,7 @@ function RoomDetail() {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [guestCount, setGuestCount] = useState(0);
+    const [numChildren, setNumChildren] = useState(0);
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const [reviews, setReviews] = useState([]);
@@ -115,7 +116,7 @@ function RoomDetail() {
             return;
         }
 
-        if (guestCount > room.capacity) {
+        if (guestCount + numChildren > room.capacity) {
             setError(
                 `Phòng không vượt quá ${room.capacity} người. Vui lòng chọn phòng lớn hơn hoặc đặt thêm phòng! Xin cảm ơn!`,
             );
@@ -141,7 +142,7 @@ function RoomDetail() {
         navigate(
             `/booking?checkinDate=${formatDate(startDate)}&checkoutDate=${formatDate(
                 endDate,
-            )}&guests=${guestCount}&price=${formattedDiscountedPrice}&id=${id}`,
+            )}&guests=${guestCount}&numChildren=${numChildren}&price=${formattedDiscountedPrice}&id=${id}&numRooms=1`,
         );
     };
 
@@ -354,7 +355,7 @@ function RoomDetail() {
                                     </div>
                                     <div className="select-option">
                                         <label htmlFor="guestCount">
-                                            Số người lớn (tối đa {room.capacity} người) + 1 trẻ nhỏ:
+                                            Số người lớn(tổng cộng {room.capacity} người)
                                         </label>
                                         <input
                                             type="number"
@@ -362,9 +363,35 @@ function RoomDetail() {
                                             value={guestCount || ''}
                                             onChange={handleGuestCountChange}
                                             className="guest-count-input"
-                                            placeholder="Số lượng người"
+                                            placeholder="Số người lớn"
                                         />
                                     </div>
+                                    <div className="select-option">
+                                        <label htmlFor="guestCount">
+                                            Số trẻ em (Tối đa {room.capacity - guestCount} trẻ em, tổng cộng{' '}
+                                            {room.capacity} người)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="guestCount"
+                                            value={numChildren || ''}
+                                            onChange={(e) =>
+                                                setNumChildren(
+                                                    Math.max(
+                                                        0,
+                                                        Math.min(
+                                                            room.capacity - guestCount,
+                                                            parseInt(e.target.value, 10),
+                                                        ),
+                                                    ),
+                                                )
+                                            }
+                                            className="guest-count-input"
+                                            placeholder="Số trẻ em"
+                                            min="0"
+                                        />
+                                    </div>
+
                                     <button type="submit" className="button-check-room">
                                         Đặt Ngay
                                     </button>

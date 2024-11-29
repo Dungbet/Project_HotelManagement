@@ -2,8 +2,10 @@ package com.example.demo.Service;
 
 import com.example.demo.DTO.*;
 import com.example.demo.Entity.Bookings;
+import com.example.demo.Entity.Rooms;
 import com.example.demo.Entity.Users;
 import com.example.demo.Repository.BookingRepo;
+import com.example.demo.Repository.RoomRepo;
 import com.example.demo.Repository.UserRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.management.RuntimeErrorException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +48,9 @@ class BookingServiceImpl implements BookingService {
     JwtTokenService jwtTokenService;
     @Autowired
     BookingRepo bookingRepo;
+
+    @Autowired
+    RoomRepo roomRepo;
 
     @Autowired
     UserRepo userRepo;
@@ -91,7 +97,8 @@ class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDTO getBookingById(int id) {
-        return convertToDTO(bookingRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tồn tại booking có id: " + id)));
+        //return convertToDTO(bookingRepo.findById(id).orElseThrow(() -> new RuntimeException("Không tồn tại booking có id: " + id)));
+        return convertToDTO(bookingRepo.findByIdWithRooms(id));
 
     }
 
@@ -100,13 +107,21 @@ class BookingServiceImpl implements BookingService {
         // Get the currently logged-in user
         String username = jwtTokenService.getUserName(token);
         Users currentUser = userRepo.findByUsername(username);
+        if (currentUser == null) {
+            throw new RuntimeException("User not found.");
+        }
+
+        System.out.println("Room IDs: " + bookingDTO.getRoomId());  // Add logging here
 
         Bookings booking = new ModelMapper().map(bookingDTO, Bookings.class);
-
         // Set the current user
         booking.setUser(currentUser);
         booking.setBookingStatus("Đã đặt");
-        // Save booking
+
+        // Add selected rooms to booking
+        List<Rooms> selectedRooms = roomRepo.findAllById(bookingDTO.getRoomId());
+        booking.setRooms(selectedRooms);
+
         Bookings bookingSaved = bookingRepo.save(booking);
         return convertToDTO(bookingSaved);
     }

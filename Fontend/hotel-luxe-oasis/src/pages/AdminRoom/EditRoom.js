@@ -122,6 +122,7 @@ function EditRoom() {
         data.append('name', formData.name);
         data.append('roomNumber', formData.roomNumber);
         data.append('price', formData.price);
+        data.append('discount', formData.discount);
         data.append('description', formData.description);
         data.append('bed', formData.bed);
         data.append('size', formData.size);

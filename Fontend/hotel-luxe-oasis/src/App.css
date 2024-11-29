@@ -478,12 +478,17 @@ ol {
     position: relative;
     z-index: 9;
 }
-.menu-item .logo {
-    padding: 25px 0;
+
+.menu-item img {
+    /* padding: 25px 0; */
+    height: 78px;
 }
-.menu-item .logo a {
+.logo-text {
+    font-size: 17px; /* Adjust font size */
+}
+/* .menu-item .logo a {
     display: inline-block;
-}
+}  */
 .menu-item .nav-menu {
     text-align: right;
 }
@@ -747,6 +752,9 @@ ol {
 /* Style for date pickers and search button */
 .booking-form-item {
     flex: 1;
+}
+.booking-form-item .guest-info {
+    width: 300px;
 }
 
 .booking-form-item label {
@@ -1163,7 +1171,7 @@ ol {
 
 .breadcrumb-section {
     padding-top: 70px;
-    padding-bottom: 80px;
+    /* padding-bottom: 80px; */
 }
 .breadcrumb-text {
     text-align: center;
@@ -3288,6 +3296,7 @@ select {
 .button-review:hover {
     background-color: #218838;
 }
+
 /* Nút mở modal */
 .open-modal {
     margin-top: 20px;
@@ -3301,4 +3310,166 @@ select {
 
 .open-modal:hover {
     background-color: #0056b3;
+}
+
+/* home */
+
+.guest-selector {
+    border: 1px solid #ccc;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.guest-selection-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 100;
+    width: 320px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.guest-selection-box-check {
+    top: 80%;
+    position: absolute;
+
+    background: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    width: 320px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    z-index: 1000; /* Ensure it appears above other elements */
+    /* margin-top: 5px; */
+}
+
+.field {
+    display: flex;
+    flex-direction: column; /* Chuyển các thành phần thành dọc */
+    margin-bottom: 20px;
+}
+
+.field label {
+    font-size: 14px;
+    /* font-weight: bold; */
+    margin-bottom: 5px; /* Tạo khoảng cách giữa label và adjuster */
+}
+
+.adjuster {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.adjuster button {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    background-color: #f2f2f2;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.adjuster button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.adjuster span {
+    flex: 1 1 auto;
+    /* font-weight: bold; */
+    text-align: center;
+}
+
+.reset-btn {
+    margin-top: 15px;
+    padding: 8px 15px;
+    background-color: #dfa974;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.reset-btn:hover {
+    background-color: #dba065;
+}
+
+.guest-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* đặt ngay */
+/* fixed-footer */
+.fixed-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #c5b29f;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    border-top: 1px solid #e1a86e; /* border-t */
+    padding: 16px; /* p-4 */
+    z-index: 1000; /* Ensures the footer stays on top */
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 20px;
+}
+
+/* footer-container */
+.footer-container {
+    max-width: 1140px; /* max-w-7xl */
+    margin: 0 auto; /* mx-auto */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* footer-content */
+.footer-content {
+    display: flex;
+    align-items: center;
+}
+
+/* footer-text */
+.footer-text {
+    font-weight: 500; /* font-medium */
+}
+
+/* separator */
+.separator {
+    margin: 0 16px; /* mx-4 */
+}
+
+/* total-price */
+.total-price {
+    font-weight: bold; /* font-bold */
+}
+
+/* book-now-button */
+.book-now-button {
+    background-color: #fb923c; /* bg-orange-500 */
+    color: white;
+    padding: 12px 32px; /* px-8 py-3 */
+    border-radius: 8px; /* rounded-lg */
+    font-weight: 500; /* font-medium */
+    transition: background-color 0.3s;
+}
+
+.book-now-button:hover {
+    background-color: #ea580c; /* hover:bg-orange-600 */
+}
+.room-item .form-check-input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
 }

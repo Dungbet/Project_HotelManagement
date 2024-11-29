@@ -18,8 +18,10 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Query(value = "SELECT * FROM Rooms ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Rooms> getRoomsByRandom();
 
-    @Query("SELECT r FROM Rooms r WHERE r.id NOT IN (SELECT b.room.id FROM Bookings b WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
-    Page<Rooms> findAvailableRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
+    @Query("SELECT r FROM Rooms r WHERE r.capacity >= :totalGuest AND r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    Page<Rooms> findAvailableRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate, int totalGuest);
+    @Query("SELECT r FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    List<Rooms> findAvailableRoomsAdmin(@Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
     @Transactional
     @Modifying
     @Query("UPDATE Rooms r SET r.discount = :discount, r.discountedPrice = r.price - (r.price * :discount / 100) WHERE r.id = :roomId")

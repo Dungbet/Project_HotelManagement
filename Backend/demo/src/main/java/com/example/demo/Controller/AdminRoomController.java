@@ -30,18 +30,14 @@ public class AdminRoomController {
 
 
     @GetMapping("/available-rooms")
-    public ResponseDTO<PageDTO<List<RoomsDTO>>> getAvailableRooms(
+    public ResponseDTO<List<RoomsDTO>> getAvailableRooms(
             @RequestParam("checkinDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date checkinDate,
-            @RequestParam("checkoutDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  checkoutDate,
-            SearchDTO searchDTO) {
-        System.out.println("Check-in Date: " + checkinDate);
-        System.out.println("Check-out Date: " + checkoutDate);
+                @RequestParam("checkoutDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  checkoutDate) {
 
-
-        return ResponseDTO.<PageDTO<List<RoomsDTO>>>builder()
+        return ResponseDTO.<List<RoomsDTO>>builder()
                 .status(200)
                 .msg("ok")
-                .data(roomService.findAvailableRooms(searchDTO, checkinDate, checkoutDate))
+                .data(roomService.findAvailableRoomsAdmin(checkinDate, checkoutDate))
                 .build();
     }
 

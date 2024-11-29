@@ -4,6 +4,7 @@ import com.example.demo.DTO.ResponseDTO;
 import com.example.demo.DTO.ReviewDTO;
 import com.example.demo.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,14 @@ public class ReviewController {
     @GetMapping("/get-review-good")
     public ResponseDTO<List<ReviewDTO>> getReviewByRate (){
         return ResponseDTO.<List<ReviewDTO>>builder().status(200).msg("ok").data(reviewService.findReviewsByRate()).build();
+    }
+
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> checkReviewExists(
+            @RequestParam int bookingId,
+            @RequestParam int roomId) {
+        boolean exists = reviewService.isRoomReviewed(bookingId, roomId);
+        return ResponseEntity.ok(exists);
     }
 
 }

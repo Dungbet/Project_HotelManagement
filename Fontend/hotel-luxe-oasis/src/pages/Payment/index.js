@@ -117,10 +117,19 @@ function Payment() {
                     {bookingDetails ? (
                         <tr>
                             <td>{bookingDetails.bookingName || 'N/A'}</td>
-                            <td>{bookingDetails.room.roomNumber || 'N/A'}</td>
+                            <td>
+                                {bookingDetails.rooms && bookingDetails.rooms.length > 0
+                                    ? bookingDetails.rooms.map((room, index) => room.roomNumber).join(' và ')
+                                    : 'N/A'}
+                            </td>
+
                             <td>{bookingDetails.bookingPhone || 'N/A'}</td>
                             <td>{bookingDetails.bookingEmail || 'N/A'}</td>
-                            <td>{bookingDetails.guest}</td>
+                            <td>
+                                {bookingDetails.guest > 0 ? `${bookingDetails.guest} người lớn` : ''}
+                                {bookingDetails.numChildren > 0 ? `, ${bookingDetails.numChildren} trẻ em/phòng` : ''}
+                            </td>
+
                             <td>
                                 {bookingDetails.checkInDate
                                     ? new Date(bookingDetails.checkInDate).toLocaleDateString('vi-VN')

@@ -105,16 +105,18 @@ public class RoomController {
     @GetMapping("/available-rooms")
     public ResponseDTO<PageDTO<List<RoomsDTO>>> getAvailableRooms(
             @RequestParam("checkinDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date checkinDate,
-            @RequestParam("checkoutDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  checkoutDate,
+            @RequestParam("checkoutDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  checkoutDate,@RequestParam("numAdults") int numAdults,
+            @RequestParam("numChildren") int numChildren,
+
             SearchDTO searchDTO) {
         System.out.println("Check-in Date: " + checkinDate);
         System.out.println("Check-out Date: " + checkoutDate);
 
-
+        int totalGuest = numAdults + numChildren;
         return ResponseDTO.<PageDTO<List<RoomsDTO>>>builder()
                 .status(200)
                 .msg("ok")
-                .data(roomService.findAvailableRooms(searchDTO, checkinDate, checkoutDate))
+                .data(roomService.findAvailableRooms(searchDTO, checkinDate, checkoutDate,totalGuest))
                 .build();
     }
 //

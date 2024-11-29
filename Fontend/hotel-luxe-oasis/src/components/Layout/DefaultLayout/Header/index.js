@@ -43,6 +43,25 @@ function Header() {
         localStorage.removeItem('username');
         navigate('/login'); // Redirect to login page
     };
+    const handleBookNow = () => {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1);
+
+        const formatDate = (date) => {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        };
+
+        const checkinDate = formatDate(today);
+        const checkoutDate = formatDate(tomorrow);
+
+        navigate(
+            `/rooms-available?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&sortedField=price&keyword=&numAdults=1&numChildren=0&numRooms=1`,
+        );
+    };
 
     return (
         <>
@@ -82,7 +101,7 @@ function Header() {
                                     </Link>
                                     {data.username ? (
                                         <div className="language-option">
-                                            <img src={data.avatar} alt="Avatar" className="user-avatar" />
+                                            <img src={data.avatar} className="user-avatar" />
                                             <span>
                                                 {data.username} <i className="fa fa-angle-down"></i>
                                             </span>
@@ -121,8 +140,9 @@ function Header() {
                             <div className="col-lg-2">
                                 <div className="logo">
                                     <Link to="/">
-                                        <img src="img/logo.png" alt="" />
+                                        <img src="img/logo luxe.png" alt="" />
                                     </Link>
+                                    <span className="logo-text">Luxe Oasis</span>
                                 </div>
                             </div>
                             <div className="col-lg-10">
@@ -133,8 +153,18 @@ function Header() {
                                                 <Link to="/">Trang Chủ</Link>
                                             </li>
                                             <li className={location.pathname === '/rooms' ? 'active' : ''}>
-                                                <Link to="/rooms">Đặt Phòng</Link>
+                                                <Link
+                                                    to="/rooms"
+                                                    // to="#"
+                                                    // onClick={(event) => {
+                                                    //     event.preventDefault(); // Ngăn chặn hành vi mặc định của Link
+                                                    //     handleBookNow(); // Gọi hàm để chuyển hướng
+                                                    // }}
+                                                >
+                                                    Đặt Phòng
+                                                </Link>
                                             </li>
+
                                             <li className={location.pathname === '/about-us' ? 'active' : ''}>
                                                 <Link to="/about-us">Về Chúng Tôi</Link>
                                             </li>

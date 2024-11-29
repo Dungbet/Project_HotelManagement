@@ -1,7 +1,11 @@
 package com.example.demo.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Data
@@ -31,4 +35,15 @@ public class Rooms {
 	@ManyToOne
 	@JoinColumn(name="category_id")
 	private RoomCategories category;
+
+
+	@ManyToMany(mappedBy = "rooms") // 'rooms' is the property name in Bookings entity
+	@JsonIgnore
+	private List<Bookings> bookings;
+
+	@OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonBackReference("room-reviews")
+	private List<Reviews> reviews;
+
+
 }

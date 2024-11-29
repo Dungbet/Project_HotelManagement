@@ -81,9 +81,10 @@ function AdminPayment() {
                             {payments.map((payment) => (
                                 <tr key={payment.id}>
                                     <td>{payment.id}</td>
+
                                     <td>
-                                        {payment.booking && payment.booking.room
-                                            ? payment.booking.room.roomNumber
+                                        {payment.booking && payment.booking.rooms && payment.booking.rooms.length > 0
+                                            ? payment.booking.rooms.map((room) => room.roomNumber).join(' & ')
                                             : 'N/A'}
                                     </td>
                                     <td>{new Date(payment.paymentDate).toLocaleDateString()}</td>

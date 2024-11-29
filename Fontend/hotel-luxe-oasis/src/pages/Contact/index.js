@@ -13,7 +13,9 @@ function Contact() {
         axios
             .get('http://localhost:8080/hotel/?id=1')
             .then((response) => {
-                setHotel(response.data.data);
+                if (response.data.data && response.data.data.length > 0) {
+                    setHotel(response.data.data[0]); // Lấy phần tử đầu tiên
+                }
             })
             .catch((error) => {
                 console.error('Có lỗi xảy ra khi gọi API', error);
@@ -129,7 +131,7 @@ function Contact() {
                     </div>
                     <div className="map">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.0606825994123!2d-72.8735845851828!3d40.760690042573295!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e85b24c9274c91%3A0xf310d41b791bcb71!2sWilliam%20Floyd%20Pkwy%2C%20Mastic%20Beach%2C%20NY%2C%20USA!5e0!3m2!1sen!2sbd!4v1578582744646!5m2!1sen!2sbd"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.9068984427265!2d105.73544931533124!3d21.036681792841473!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab0d092a4161%3A0x18fa5e1c7973e7a2!2sHanoi%20University%20of%20Industry!5e0!3m2!1sen!2s!4v1697443415728!5m2!1sen!2s"
                             height="470"
                             style={{ border: 0 }}
                             allowFullScreen=""

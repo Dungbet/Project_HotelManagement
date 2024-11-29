@@ -3,13 +3,16 @@ package com.example.demo.Service;
 import com.example.demo.DTO.PageDTO;
 import com.example.demo.DTO.PaymentsDTO;
 import com.example.demo.DTO.SearchDTO;
+import com.example.demo.Entity.Bookings;
 import com.example.demo.Entity.Payments;
+import com.example.demo.Repository.BookingRepo;
 import com.example.demo.Repository.PaymentRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +28,9 @@ public interface PaymentService {
 class PaymentServiceImpl implements PaymentService {
     @Autowired
     private PaymentRepo paymentRepo;
+
+    @Autowired
+    private BookingRepo bookingRepo;
 
     private ModelMapper modelMapper = new ModelMapper();
 
@@ -71,9 +77,19 @@ class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void create(PaymentsDTO paymentsDTO) {
         Payments payment = new ModelMapper().map(paymentsDTO, Payments.class);
-        paymentRepo.save(payment);
+        if (payment.getBooking() != null) {
+            Bookings booking = bookingRepo.findById(payment.getBooking().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+            booking.setStatus("Đã thanh toán");
+            bookingRepo.save(booking); // Save the managed booking
+        }
+
+        paymentRepo.save(payment);  // Lưu lại payment
+
+
     }
 
 

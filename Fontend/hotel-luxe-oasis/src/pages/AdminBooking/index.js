@@ -89,7 +89,14 @@ function AdminBooking() {
         }
     };
 
-    const finishBooking = async (bookingId) => {
+    const finishBooking = async (bookingId, bookingStatus) => {
+        // Check if the booking status is "Chưa thanh toán" (Unpaid)
+        if (bookingStatus === 'Chưa thanh toán') {
+            // Display a warning message or box
+            alert('Phòng chưa thanh toán');
+            return; // Stop further execution
+        }
+
         const confirmFinish = window.confirm('Bạn có chắc chắn muốn hoàn thành không?');
         if (!confirmFinish) return;
 
@@ -194,7 +201,11 @@ function AdminBooking() {
                                 <tr key={booking.id}>
                                     <td>{booking.id}</td>
                                     <td>{booking.bookingName}</td>
-                                    <td>{booking.room ? booking.room.name : 'N/A'}</td>
+                                    <td>
+                                        {booking.rooms && booking.rooms.length > 0
+                                            ? booking.rooms.map((room, index) => room.roomNumber).join(' & ')
+                                            : 'N/A'}
+                                    </td>
                                     <td>
                                         {parseDate(booking.checkInDate)
                                             ? parseDate(booking.checkInDate).toLocaleDateString('vi-VN')
@@ -241,7 +252,7 @@ function AdminBooking() {
                                     <td>
                                         {booking.bookingStatus === 'Đã đặt' && (
                                             <>
-                                                <a onClick={() => finishBooking(booking.id)}>
+                                                <a onClick={() => finishBooking(booking.id, booking.status)}>
                                                     <i className="fa-solid fa-circle-check" title="Hoàn thành"></i>
                                                 </a>
                                                 <a onClick={() => cancelBooking(booking.id)}>

@@ -8,6 +8,7 @@ function AddPayment() {
         amount: '',
         paymentMethod: '',
         bookingId: '', // ID của booking
+        status: 'Đã thanh toán',
     });
 
     const navigate = useNavigate();
@@ -25,7 +26,9 @@ function AddPayment() {
                 console.log('API Response:', response.data); // Log toàn bộ response để kiểm tra cấu trúc dữ liệu
                 if (response.data.status === 200) {
                     // Lọc các booking có status là false (Chưa thanh toán)
-                    const filteredBookings = response.data.data.filter((booking) => !booking.status);
+                    const filteredBookings = response.data.data.filter((booking) => {
+                        return booking.status === 'Chưa thanh toán'; // Điều chỉnh tùy thuộc vào giá trị trả về
+                    });
                     console.log('Filtered Bookings:', filteredBookings); // Log các booking đã lọc
                     setBookings(filteredBookings);
                 } else {
@@ -69,6 +72,7 @@ function AddPayment() {
                     paymentDate: new Date().toISOString(), // Gán ngày thanh toán là thời điểm hiện tại
                     amount: formData.amount,
                     paymentMethod: formData.paymentMethod,
+
                     booking: {
                         id: parseInt(formData.bookingId), // Chuyển đổi bookingId thành số nguyên và gán vào đối tượng booking
                     },
@@ -82,16 +86,6 @@ function AddPayment() {
             );
 
             console.log('Payment added successfully:', response.data);
-
-            await axios.post('http://localhost:8080/admin/booking/update-status', null, {
-                params: {
-                    bookingStatus: true, // Đã thanh toán
-                    bookingId: formData.bookingId,
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
 
             navigate('/admin/payment');
         } catch (error) {

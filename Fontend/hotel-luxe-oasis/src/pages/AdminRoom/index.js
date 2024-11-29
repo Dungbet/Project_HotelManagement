@@ -68,7 +68,6 @@ function AdminRoom() {
             console.error('Error fetching hotels', error);
         }
     };
-
     const deleteRoom = async (id) => {
         if (window.confirm('Bạn có đồng ý xóa phòng này?')) {
             try {
@@ -78,10 +77,26 @@ function AdminRoom() {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setMessages({ ...messages, deleteMessageSuccess: 'Xóa phòng thành công' });
+                // Reset all messages before adding success message
+                setMessages({
+                    addMessageSuccess: '',
+                    addMessageFail: '',
+                    updateMessageSuccess: '',
+                    updateMessageFail: '',
+                    deleteMessageSuccess: 'Xóa phòng thành công',
+                    deleteMessageFail: '',
+                });
                 fetchRooms();
             } catch (error) {
-                setMessages({ ...messages, deleteMessageFail: 'Xóa phòng thất bại' });
+                // Reset all messages before adding failure message
+                setMessages({
+                    addMessageSuccess: '',
+                    addMessageFail: '',
+                    updateMessageSuccess: '',
+                    updateMessageFail: '',
+                    deleteMessageSuccess: '',
+                    deleteMessageFail: 'Xóa phòng thất bại',
+                });
                 console.error('Error deleting room', error);
             }
         }

@@ -3,6 +3,7 @@ package com.example.demo.Service;
 import com.example.demo.DTO.CouponDTO;
 import com.example.demo.DTO.UsersDTO;
 import com.example.demo.Entity.Bookings;
+import com.example.demo.Entity.Rooms;
 import com.example.demo.Entity.Users;
 import com.example.demo.Repository.UserRepo;
 import jakarta.mail.MessagingException;
@@ -19,6 +20,7 @@ import javax.management.RuntimeErrorException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EmailService {
@@ -211,12 +213,16 @@ public class EmailService {
                 "</html>";
 
         // Thay thế các biến trong HTML bằng dữ liệu thực tế
+        String roomNames = booking.getRooms().isEmpty() ? "Không có phòng" : String.join(", ",
+                booking.getRooms().stream().map(Rooms::getName).collect(Collectors.toList()));
+
+        // Thay thế các biến trong HTML bằng dữ liệu thực tế
         return htmlTemplate
                 .replace("{{bookingId}}", String.valueOf(booking.getId()))
                 .replace("{{bookingName}}", booking.getBookingName())
                 .replace("{{bookingEmail}}", booking.getBookingEmail())
                 .replace("{{bookingPhone}}", booking.getBookingPhone())
-                .replace("{{roomName}}", booking.getRoom().getName())
+                .replace("{{roomName}}", roomNames)
                 .replace("{{checkInDate}}", booking.getCheckInDate().toString())
                 .replace("{{checkOutDate}}", booking.getCheckOutDate().toString())
                 .replace("{{guest}}", String.valueOf(booking.getGuest()))

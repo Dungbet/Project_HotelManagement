@@ -24,6 +24,7 @@ public class RoomsDTO {
 	private RoomCategories category;
 	private String roomImgPublicId;
 
+
 	@JsonIgnore
 	private MultipartFile file;
 }

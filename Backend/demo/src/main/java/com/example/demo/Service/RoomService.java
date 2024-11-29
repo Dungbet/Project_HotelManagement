@@ -25,7 +25,8 @@ public interface RoomService {
     PageDTO<List<RoomsDTO>> getAllRooms (SearchDTO searchDTO);
     List<RoomsDTO> getAll();
     List<RoomsDTO> getRoomsByRandom();
-    PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date checkinDate, Date  checkoutDate);
+    PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date checkinDate, Date  checkoutDate,int totalGuest);
+    List<RoomsDTO> findAvailableRoomsAdmin(Date checkinDate, Date  checkoutDate);
     PageDTO<List<RoomsDTO>> sortByPrice (SearchDTO searchDTO);
     PageDTO<List<RoomsDTO>> sortByCapacity(SearchDTO searchDTO);
     PageDTO<List<RoomsDTO>> selectBySale(SearchDTO searchDTO);
@@ -96,7 +97,7 @@ class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date  checkinDate, Date  checkoutDate) {
+    public PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date  checkinDate, Date  checkoutDate, int totalGuest) {
         if (searchDTO.getCurrentPage() == null) {
             searchDTO.setCurrentPage(0);
         }
@@ -105,13 +106,17 @@ class RoomServiceImpl implements RoomService {
         }
 
         PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
-        Page<Rooms> page = roomRepo.findAvailableRooms(pageRequest, checkinDate, checkoutDate);
+        Page<Rooms> page = roomRepo.findAvailableRooms(pageRequest, checkinDate, checkoutDate, totalGuest);
 
         return PageDTO.<List<RoomsDTO>>builder()
                 .totalPages(page.getTotalPages())
                 .totalElements(page.getTotalElements())
                 .data(page.get().map(r -> convertToDTO(r)).collect(Collectors.toList()))
                 .build();
+    }
+    @Override
+    public List<RoomsDTO> findAvailableRoomsAdmin( Date  checkinDate, Date  checkoutDate) {
+        return roomRepo.findAvailableRoomsAdmin(checkinDate,checkoutDate).stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
     }
 
     @Override

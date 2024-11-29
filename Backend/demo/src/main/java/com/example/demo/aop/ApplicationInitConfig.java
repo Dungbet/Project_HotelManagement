@@ -1,7 +1,9 @@
 package com.example.demo.aop;
 
+import com.example.demo.Entity.Hotels;
 import com.example.demo.Entity.Roles;
 import com.example.demo.Entity.Users;
+import com.example.demo.Repository.HotelRepo;
 import com.example.demo.Repository.RoleRepo;
 import com.example.demo.Repository.UserRepo;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,9 @@ public class ApplicationInitConfig {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private HotelRepo hotelRepo;
 
     @Bean
     ApplicationRunner applicationRunner() {
@@ -47,6 +52,21 @@ public class ApplicationInitConfig {
                 log.info("Người dùng 'admin' đã được tạo với mật khẩu mặc định: admin. Vui lòng thay đổi mật khẩu.");
             } else {
                 log.info("Người dùng 'admin' đã tồn tại.");
+            }
+
+            // Kiểm tra và tạo hotel mặc định
+            String defaultHotelName = "Luxe Oasis";
+            Hotels hotel = hotelRepo.findByName(defaultHotelName);
+            if (hotel == null) {
+                hotel = new Hotels();
+                hotel.setName(defaultHotelName);
+                hotel.setAddress("Thanh Vân - Hiệp Hòa - Bắc Giang");
+                hotel.setPhoneNumber("0974.410.454");
+                hotel.setEmail("contact@hotel-luxe-oasis.com");
+                hotelRepo.save(hotel);
+                log.info("Hotel mặc định đã được tạo: {}", defaultHotelName);
+            } else {
+                log.info("Hotel '{}' đã tồn tại.", defaultHotelName);
             }
         };
     }

@@ -66,6 +66,7 @@ public class DialogflowController {
         return responseJson;
     }
 
+    @GetMapping("/getcoupon")
     private String getCouponDetails() {
         List<CouponDTO> coupons = couponService.findCouponsByExpiryDateCurrent(); // Lấy danh sách coupon
 
@@ -88,6 +89,7 @@ public class DialogflowController {
         }
     }
 
+    @GetMapping("/Search-rooms")
     private Map<String, Object> getAvailableRooms(int numberOfGuests) {
         List<RoomsDTO> availableRooms = roomService.findAvailableRooms(numberOfGuests);
         Map<String, Object> responseJson = new HashMap<>();

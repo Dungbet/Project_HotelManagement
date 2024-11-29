@@ -99,22 +99,41 @@ function AdminReview() {
                             </tr>
                         </thead>
                         <tbody>
-                            {reviews.map((review) => (
-                                <tr key={review.id}>
-                                    <td>{review.id}</td>
-                                    <td>{formatDate(review.createAt)}</td>
-                                    <td>{review.booking.user.id}</td>
-                                    {/* <td>{review.booking.id}</td> */}
-                                    <td>{review.booking.room.id}</td>
-                                    <td>{renderStars(review.rating)}</td>
-                                    <td>{review.comment}</td>
-                                    <td>
-                                        <a onClick={() => deleteReview(review.id)}>
-                                            <i className="fa-solid fa-trash-can"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            ))}
+                            {reviews.map((review) =>
+                                review.booking && review.booking.rooms.length > 0 ? (
+                                    review.booking.rooms.map((room, index) => (
+                                        <tr key={`${review.id}-${room.id}-${index}`}>
+                                            <td>{review.id}</td>
+                                            <td>{formatDate(review.createAt)}</td>
+                                            <td>{review.booking.user.id}</td>
+                                            {/* Hiển thị ID phòng */}
+                                            <td>{room.id}</td>
+                                            <td>{renderStars(review.rating)}</td>
+                                            <td>{review.comment}</td>
+                                            <td>
+                                                <a onClick={() => deleteReview(review.id)}>
+                                                    <i className="fa-solid fa-trash-can"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    // Nếu không có phòng, hiển thị dòng với N/A
+                                    <tr key={review.id}>
+                                        <td>{review.id}</td>
+                                        <td>{formatDate(review.createAt)}</td>
+                                        <td>{review.booking.user.id}</td>
+                                        <td>N/A</td>
+                                        <td>{renderStars(review.rating)}</td>
+                                        <td>{review.comment}</td>
+                                        <td>
+                                            <a onClick={() => deleteReview(review.id)}>
+                                                <i className="fa-solid fa-trash-can"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                ),
+                            )}
                         </tbody>
                     </table>
                     <div className="d-flex justify-content-center">

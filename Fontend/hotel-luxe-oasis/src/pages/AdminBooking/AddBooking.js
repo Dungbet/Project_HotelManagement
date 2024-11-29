@@ -19,7 +19,7 @@ function AddBooking() {
         couponCode: '',
         discountedPrice: 0,
         guestCount: '',
-        status: false,
+        status: 'Chưa thanh toán',
     });
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [errors, setErrors] = useState({});
@@ -66,11 +66,11 @@ function AddBooking() {
             const formattedStartDate = format(startDate, 'dd/MM/yyyy');
             const formattedEndDate = format(endDate, 'dd/MM/yyyy');
             const roomsResponse = await axios.get(
-                `http://localhost:8080/admin/room/available-rooms?checkinDate=${formattedStartDate}&checkoutDate=${formattedEndDate}&sortedField=price&keyword=`,
+                `http://localhost:8080/admin/room/available-rooms?checkinDate=${formattedStartDate}&checkoutDate=${formattedEndDate}`,
                 { headers: { Authorization: `Bearer ${token}` } },
             );
 
-            const roomsData = Array.isArray(roomsResponse.data.data.data) ? roomsResponse.data.data.data : [];
+            const roomsData = Array.isArray(roomsResponse.data.data) ? roomsResponse.data.data : [];
             setRooms(roomsData);
         } catch (error) {
             console.error('Error fetching available rooms', error);
@@ -173,8 +173,11 @@ function AddBooking() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        console.log('Form Data:', formData); // Log the form data to ensure it's correct
+
         // Validate form data
         const validationErrors = {};
+        if (!formData.guestCount) validationErrors.guestCount = 'Số khách là bắt buộc';
         if (!formData.startDate) validationErrors.startDate = 'Ngày đến là bắt buộc';
         if (!formData.endDate) validationErrors.endDate = 'Ngày đi là bắt buộc';
         if (!formData.roomId) validationErrors.roomId = 'Chọn phòng là bắt buộc';
@@ -186,7 +189,10 @@ function AddBooking() {
 
         setErrors(validationErrors);
 
-        if (Object.keys(validationErrors).length > 0) return;
+        if (Object.keys(validationErrors).length > 0) {
+            console.log('Validation Errors:', validationErrors); // Log errors if validation fails
+            return;
+        }
 
         try {
             const startDate = formData.startDate ? new Date(formData.startDate) : null;
@@ -201,23 +207,32 @@ function AddBooking() {
             const totalAmount = numberOfNights * originalPrice;
             const discountedPrice = parseFloat(formData.discountedPrice) || totalAmount;
 
+            const roomIdString = formData.roomId ? String(formData.roomId) : '';
+            const roomIds = roomIdString ? roomIdString.split(',').map((id) => parseInt(id.trim(), 10)) : [];
+
+            console.log('formData.roomId:', formData.roomId);
+
             const bookingData = {
                 checkInDate: format(startDate, 'dd/MM/yyyy'),
                 checkOutDate: format(endDate, 'dd/MM/yyyy'),
                 totalAmount: discountedPrice,
                 guest: parseInt(formData.guestCount, 10) || 0,
                 status: formData.status,
-                room: { id: parseInt(formData.roomId) },
+                roomId: roomIds,
                 bookingName: formData.name,
                 bookingEmail: formData.email,
                 bookingPhone: formData.phoneNumber,
             };
 
-            await axios.post('http://localhost:8080/admin/booking/create', bookingData, {
+            console.log('Booking Data:', bookingData); // Log the booking data before sending the API request
+
+            const response = await axios.post('http://localhost:8080/admin/booking/create', bookingData, {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
 
-            navigate('/admin/booking'); // Redirect to the payment page
+            console.log('API Response:', response); // Log the API response for debugging
+
+            navigate('/admin/booking'); // Redirect to the booking page
         } catch (error) {
             console.error('Error creating booking:', error);
         }

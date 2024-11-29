@@ -21,19 +21,20 @@ public class Exceptioncontroller {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     //Chú thích này cho biết hàm badRequest sẽ xử lý các ngoại lệ thuộc loại BindException.
-    @ExceptionHandler ({BindException.class})
-    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
-    public ResponseDTO<String> badRequest(BindException e){
-        logger.info("bad request");
-        //: Lấy danh sách các lỗi từ kết quả ràng buộc (BindingResult) của ngoại lệ BindException.
-        List<ObjectError> errors = e.getBindingResult().getAllErrors();
-        String msg ="";
-        for (ObjectError err : errors){
-            //Chuyển đổi lỗi hiện tại thành đối tượng FieldError.
-            FieldError fieldError =(FieldError) err;
-            // VD username và password rỗng, fieldError.getField() cho username trả về "username", err.getDefaultMessage() cho username trả về "must not be empty".
-            msg += fieldError.getField()+ ":" + err.getDefaultMessage() + ";" ;
-        }
-        return ResponseDTO.<String>builder().status(404).msg("No Data").data(msg).build();
-    }
+//    @ExceptionHandler ({BindException.class})
+//    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+//    public ResponseDTO<String> badRequest(BindException e){
+//        logger.info("bad request");
+//
+//        //: Lấy danh sách các lỗi từ kết quả ràng buộc (BindingResult) của ngoại lệ BindException.
+//        List<ObjectError> errors = e.getBindingResult().getAllErrors();
+//        String msg ="";
+//        for (ObjectError err : errors){
+//            //Chuyển đổi lỗi hiện tại thành đối tượng FieldError.
+//            FieldError fieldError =(FieldError) err;
+//            // VD username và password rỗng, fieldError.getField() cho username trả về "username", err.getDefaultMessage() cho username trả về "must not be empty".
+//            msg += fieldError.getField()+ ":" + err.getDefaultMessage() + ";" ;
+//        }
+//        return ResponseDTO.<String>builder().status(404).msg("No Data").data(msg).build();
+//    }
 }

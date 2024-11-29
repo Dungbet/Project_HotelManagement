@@ -5,6 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 function AddRoom() {
     const [hotels, setHotels] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [errors, setErrors] = useState({});
+
     const [formData, setFormData] = useState({
         name: '',
         roomNumber: '',
@@ -25,6 +27,26 @@ function AddRoom() {
     const navigate = useNavigate();
     // Hàm lấy token từ localStorage
     const getToken = () => localStorage.getItem('token');
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = 'Tên phòng không được để trống.';
+        if (!formData.roomNumber.trim()) newErrors.roomNumber = 'Số phòng không được để trống.';
+        if (!formData.price) newErrors.price = 'Giá phòng không được để trống.';
+        if (formData.price <= 0) newErrors.price = 'Giá phòng phải lớn hơn 0.';
+        if (!formData.description.trim()) newErrors.description = 'Mô tả không được để trống.';
+        if (!formData.bed) newErrors.bed = 'Số lượng giường không được để trống.';
+        if (!formData.size) newErrors.size = 'Diện tích không được để trống.';
+        if (!formData.capacity) newErrors.capacity = 'Sức chứa không được để trống.';
+        if (formData.capacity <= 0) newErrors.capacity = 'Sức chứa phải lớn hơn 0.';
+        if (formData.discount <= 0) newErrors.discount = 'Vui lòng nhập discount (%)';
+        if (!formData.view.trim()) newErrors.view = 'View không được để trống.';
+        if (!formData.hotelId) newErrors.hotelId = 'Hãy chọn khách sạn.';
+        if (!formData.categoryId) newErrors.categoryId = 'Hãy chọn loại phòng.';
+        if (!formData.file) newErrors.file = 'Hãy chọn một ảnh phòng.';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     useEffect(() => {
         const fetchHotels = async () => {
@@ -85,6 +107,9 @@ function AddRoom() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) {
+            return;
+        }
 
         const data = new FormData();
         data.append('name', formData.name);
@@ -96,10 +121,10 @@ function AddRoom() {
         data.append('capacity', formData.capacity);
         data.append('view', formData.view);
         if (formData.hotelId) {
-            data.append('hotels.id', formData.hotelId); // Sử dụng 'hotels.id'
+            data.append('hotels.id', formData.hotelId);
         }
         if (formData.categoryId) {
-            data.append('category.id', formData.categoryId); // Sử dụng 'category.id'
+            data.append('category.id', formData.categoryId);
         }
         if (formData.file) {
             data.append('file', formData.file);
@@ -133,13 +158,13 @@ function AddRoom() {
                         </label>
                         <input
                             type="text"
-                            className="form-control"
+                            className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                             id="name"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            required
                         />
+                        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="roomNumber" className="form-label">
@@ -147,13 +172,13 @@ function AddRoom() {
                         </label>
                         <input
                             type="text"
-                            className="form-control"
+                            className={`form-control ${errors.roomNumber ? 'is-invalid' : ''}`}
                             id="roomNumber"
                             name="roomNumber"
                             value={formData.roomNumber}
                             onChange={handleChange}
-                            required
                         />
+                        {errors.roomNumber && <div className="invalid-feedback">{errors.roomNumber}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="price" className="form-label">
@@ -162,13 +187,13 @@ function AddRoom() {
                         <input
                             type="number"
                             step="0.01"
-                            className="form-control"
+                            className={`form-control ${errors.price ? 'is-invalid' : ''}`}
                             id="price"
                             name="price"
                             value={formData.price}
                             onChange={handleChange}
-                            required
                         />
+                        {errors.price && <div className="invalid-feedback">{errors.price}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="discount" className="form-label">
@@ -177,7 +202,7 @@ function AddRoom() {
                         <input
                             type="number"
                             step="0.01"
-                            className="form-control"
+                            className={`form-control ${errors.discount ? 'is-invalid' : ''}`}
                             id="discount"
                             name="discount"
                             value={formData.discount}
@@ -185,6 +210,7 @@ function AddRoom() {
                             min={0}
                             max={100}
                         />
+                        {errors.discount && <div className="invalid-feedback">{errors.discount}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="discountedPrice" className="form-label">
@@ -193,24 +219,26 @@ function AddRoom() {
                         <input
                             type="number"
                             step="0.01"
-                            className="form-control"
+                            className={`form-control ${errors.discountedPrice ? 'is-invalid' : ''}`}
                             id="discountedPrice"
                             name="discountedPrice"
                             value={formData.discountedPrice}
                             readOnly
                         />
+                        {errors.discountedPrice && <div className="invalid-feedback">{errors.discountedPrice}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="description" className="form-label">
                             Mô tả
                         </label>
                         <textarea
-                            className="form-control"
+                            className={`form-control ${errors.description ? 'is-invalid' : ''}`}
                             id="description"
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
                         ></textarea>
+                        {errors.description && <div className="invalid-feedback">{errors.description}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="bed" className="form-label">
@@ -218,12 +246,13 @@ function AddRoom() {
                         </label>
                         <input
                             type="number"
-                            className="form-control"
+                            className={`form-control ${errors.bed ? 'is-invalid' : ''}`}
                             id="bed"
                             name="bed"
                             value={formData.bed}
                             onChange={handleChange}
                         />
+                        {errors.bed && <div className="invalid-feedback">{errors.bed}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="size" className="form-label">
@@ -232,12 +261,13 @@ function AddRoom() {
                         <input
                             type="number"
                             step="0.01"
-                            className="form-control"
+                            className={`form-control ${errors.size ? 'is-invalid' : ''}`}
                             id="size"
                             name="size"
                             value={formData.size}
                             onChange={handleChange}
                         />
+                        {errors.size && <div className="invalid-feedback">{errors.size}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="capacity" className="form-label">
@@ -245,12 +275,13 @@ function AddRoom() {
                         </label>
                         <input
                             type="number"
-                            className="form-control"
+                            className={`form-control ${errors.capacity ? 'is-invalid' : ''}`}
                             id="capacity"
                             name="capacity"
                             value={formData.capacity}
                             onChange={handleChange}
                         />
+                        {errors.capacity && <div className="invalid-feedback">{errors.capacity}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="view" className="form-label">
@@ -258,24 +289,24 @@ function AddRoom() {
                         </label>
                         <input
                             type="text"
-                            className="form-control"
+                            className={`form-control ${errors.view ? 'is-invalid' : ''}`}
                             id="view"
                             name="view"
                             value={formData.view}
                             onChange={handleChange}
                         />
+                        {errors.view && <div className="invalid-feedback">{errors.view}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="hotelId" className="form-label">
                             Khách sạn
                         </label>
                         <select
-                            className="form-control"
+                            className={`form-control ${errors.hotelId ? 'is-invalid' : ''}`}
                             id="hotelId"
                             name="hotelId"
                             value={formData.hotelId}
                             onChange={handleChange}
-                            required
                         >
                             <option value="">Chọn khách sạn</option>
                             {hotels.map((hotel) => (
@@ -284,18 +315,18 @@ function AddRoom() {
                                 </option>
                             ))}
                         </select>
+                        {errors.hotelId && <div className="invalid-feedback">{errors.hotelId}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="categoryId" className="form-label">
                             Loại phòng
                         </label>
                         <select
-                            className="form-control"
+                            className={`form-control ${errors.categoryId ? 'is-invalid' : ''}`}
                             id="categoryId"
                             name="categoryId"
                             value={formData.categoryId}
                             onChange={handleChange}
-                            required
                         >
                             <option value="">Chọn loại phòng</option>
                             {categories.map((category) => (
@@ -304,6 +335,7 @@ function AddRoom() {
                                 </option>
                             ))}
                         </select>
+                        {errors.categoryId && <div className="invalid-feedback">{errors.categoryId}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="file" className="form-label">
@@ -311,7 +343,7 @@ function AddRoom() {
                         </label>
                         <input
                             type="file"
-                            className="form-control"
+                            className={`form-control ${errors.file ? 'is-invalid' : ''}`}
                             id="file"
                             name="file"
                             accept="image/*"
@@ -326,6 +358,7 @@ function AddRoom() {
                                 />
                             </div>
                         )}
+                        {errors.file && <div className="invalid-feedback">{errors.file}</div>}
                     </div>
                     <button type="submit" className="btn btn-primary">
                         Thêm phòng

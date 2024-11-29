@@ -20,5 +20,8 @@ public interface ReviewRepo extends JpaRepository<Reviews, Integer> {
     @Query("SELECT r FROM Reviews r WHERE r.rating = 5")
     List<Reviews> findReviewsByRate();
 
+    @Query("SELECT COUNT(r) > 0 FROM Reviews r WHERE r.booking.id = :bookingId AND r.room.id = :roomId")
+    boolean existsByBookingIdAndRoomId(@Param("bookingId") int bookingId, @Param("roomId") int roomId);
+
 
 }

@@ -18,8 +18,13 @@ function Booking() {
         couponCode: '',
         discountedPrice: '',
         paymentMethod: '',
+        numRooms: '',
+        numAdults: '',
+        numChildren: '',
+        selectedRooms: [],
     });
     const [discount, setDiscount] = useState(0);
+
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -57,6 +62,7 @@ function Booking() {
         fetchUserInfo();
 
         const queryParams = new URLSearchParams(location.search);
+        const roomIds = queryParams.get('id')?.split(',').map(Number) || [];
         setFormData((prevData) => ({
             ...prevData,
             id: queryParams.get('id'),
@@ -64,6 +70,11 @@ function Booking() {
             guestCount: queryParams.get('guests') || '',
             checkinDate: queryParams.get('checkinDate') || '',
             checkoutDate: queryParams.get('checkoutDate') || '',
+            checkoutDate: queryParams.get('checkoutDate') || '',
+            numRooms: parseInt(queryParams.get('numRooms') || 0, 10), // Chuyển đổi thành số nguyên
+            numAdults: parseInt(queryParams.get('numAdults') || 0, 10),
+            numChildren: parseInt(queryParams.get('numChildren') || 0, 10),
+            selectedRooms: roomIds,
         }));
     }, [location.search, navigate]);
 
@@ -74,14 +85,20 @@ function Booking() {
             [name]: value,
         }));
     };
+
     const handleApplyCoupon = async () => {
         if (!formData.couponCode.trim()) {
             setErrorMessage('');
             setSuccessMessage('');
             setDiscount(0);
+
+            // Tính lại giá chỉ với giảm giá trẻ em
+            const totalAmount = originalPrice * numberOfNights;
+            const childrenDiscount = calculateChildrenDiscount(totalAmount, formData.numChildren);
+
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: formData.price,
+                discountedPrice: (totalAmount - childrenDiscount).toFixed(2),
             }));
             return;
         }
@@ -90,39 +107,54 @@ function Booking() {
             const response = await axios.get(`http://localhost:8080/coupon/code?code=${formData.couponCode}`);
             if (response.data.status === 200) {
                 const coupon = response.data.data;
-                const originalPrice = parseFloat(formData.price);
-                const totalAmount = originalPrice * numberOfNights; // Tổng tiền cho số đêm
+                const totalAmount = originalPrice * numberOfNights;
 
-                // Tính số tiền giảm giá chính xác
-                const discountAmount = (coupon.discountPercentage / 100) * totalAmount;
-                setDiscount(discountAmount);
+                // Tính giảm giá trẻ em trước
+                const childrenDiscount = calculateChildrenDiscount(totalAmount, formData.numChildren);
 
-                // Tính toán giá cuối cùng sau khi giảm
+                // Tính giảm giá coupon trên số tiền sau khi đã giảm giá trẻ em
+                const priceAfterChildrenDiscount = totalAmount - childrenDiscount;
+                const couponDiscountAmount = (coupon.discountPercentage / 100) * priceAfterChildrenDiscount;
+
+                // Tổng số tiền giảm giá
+                const totalDiscount = childrenDiscount + couponDiscountAmount;
+                setDiscount(totalDiscount);
+
                 setFormData((prevData) => ({
                     ...prevData,
-                    discountedPrice: (totalAmount - discountAmount).toFixed(2), // Cập nhật giá trị
+                    discountedPrice: (totalAmount - totalDiscount).toFixed(2),
                 }));
                 setSuccessMessage('Áp dụng mã thành công');
                 setErrorMessage('');
             } else {
                 setErrorMessage('Mã giảm giá sai hoặc đã hết hạn!');
                 setSuccessMessage('');
-                setDiscount(0);
+                const totalAmount = originalPrice * numberOfNights;
+                const childrenDiscount = calculateChildrenDiscount(totalAmount, formData.numChildren);
+                setDiscount(childrenDiscount);
                 setFormData((prevData) => ({
                     ...prevData,
-                    discountedPrice: totalAmount.toFixed(2), // Đảm bảo giá không đổi nếu mã không hợp lệ
+                    discountedPrice: (totalAmount - childrenDiscount).toFixed(2),
                 }));
             }
         } catch (error) {
             console.error('Error applying coupon:', error);
             setErrorMessage('Mã giảm giá sai hoặc đã hết hạn!');
             setSuccessMessage('');
-            setDiscount(0);
+            const totalAmount = originalPrice * numberOfNights;
+            const childrenDiscount = calculateChildrenDiscount(totalAmount, formData.numChildren);
+            setDiscount(childrenDiscount);
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: totalAmount.toFixed(2), // Đảm bảo giá không đổi nếu có lỗi
+                discountedPrice: (totalAmount - childrenDiscount).toFixed(2),
             }));
         }
+    };
+
+    // Tính toán giảm giá cho trẻ em
+    const calculateChildrenDiscount = (totalAmount, numChildren) => {
+        const discountPerChild = 0.1; // 10% mỗi trẻ
+        return totalAmount * (discountPerChild * numChildren);
     };
 
     const handleSubmit = async (e) => {
@@ -143,10 +175,10 @@ function Booking() {
             validationErrors.paymentMethod = 'Chọn phương thức thanh toán là bắt buộc';
         }
 
-        setErrors(validationErrors);
-        if (Object.keys(validationErrors).length > 0) {
-            return;
-        }
+        // setErrors(validationErrors);
+        // if (Object.keys(validationErrors).length > 0) {
+        //     return;
+        // }
 
         // Parsing check-in và check-out dates
         const checkinDate = parse(formData.checkinDate, 'dd/MM/yyyy', new Date());
@@ -166,13 +198,13 @@ function Booking() {
             checkOutDate: format(checkoutDate, 'dd/MM/yyyy'),
             totalAmount: finalAmount, // Sử dụng giá cuối cùng sau khi đã giảm giá
             guest: parseInt(formData.guestCount, 10) || 0,
-            status: false,
+            status: 'Đã thanh toán',
             bookingName: formData.name,
             bookingEmail: formData.email,
             bookingPhone: formData.phoneNumber,
-            room: {
-                id: formData.id,
-            },
+            numChildren: parseInt(formData.numChildren, 10) || 0,
+
+            roomId: formData.selectedRooms, // Kiểm tra xem `selectedRooms` có phải là mảng không
         };
 
         try {
@@ -211,11 +243,18 @@ function Booking() {
     const numberOfNights = differenceInDays(checkoutDate, checkinDate);
     const totalAmount = numberOfNights * originalPrice;
 
-    const finalPrice = (totalAmount - discountAmount).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+    // Calculate children discount
+    const childrenDiscount = calculateChildrenDiscount(totalAmount, formData.numChildren);
+    const childrenDiscountPercentage = formData.numChildren * 10;
 
+    // Calculate final price (including both children and coupon discounts)
+    const finalPrice = formData.discountedPrice || (totalAmount - childrenDiscount).toFixed(2);
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(price);
+    };
     return (
         <div id="booking">
             <div className="container">
@@ -244,12 +283,12 @@ function Booking() {
                                             {errors.name && <p className="help-block text-danger">{errors.name}</p>}
                                         </div>
                                         <div className="control-group col-md-6">
-                                            <label htmlFor="guestCount">Số người</label>
+                                            <label htmlFor="guestCount">Phòng & Khách</label>
                                             <input
                                                 type="text"
                                                 className="form-control"
                                                 id="guestCount"
-                                                value={formData.guestCount}
+                                                value={`${formData.numRooms} phòng: ${formData.guestCount} người lớn, ${formData.numChildren} trẻ em/phòng`}
                                                 readOnly
                                             />
                                         </div>
@@ -349,40 +388,23 @@ function Booking() {
                     <div className="form-group">
                         <label>Tổng Tiền</label>
                         <div>
-                            {discount > 0 && (
-                                <>
-                                    <div className="price-item">
-                                        <span className="price-label">Tổng tiền ({numberOfNights} đêm):</span>
-                                        <span className="price-value">
-                                            {totalAmount.toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            })}{' '}
-                                            VNĐ
-                                        </span>
-                                    </div>
-                                    <div className="price-item">
-                                        <span className="price-label">Voucher giảm giá:</span>
-                                        <span className="price-value">
-                                            -{' '}
-                                            {discountAmount.toLocaleString(undefined, {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            })}{' '}
-                                            VNĐ
-                                        </span>
-                                    </div>
-                                    <div className="price-item final-price">
-                                        <span className="price-label">Tổng:</span>
-                                        <span className="price-value final-price">{finalPrice} VNĐ</span>
-                                    </div>
-                                </>
-                            )}
-                            {discount === 0 && (
+                            <div className="price-item">
+                                <span className="price-label">{numberOfNights} đêm:</span>
+                                <span className="price-value">
+                                    {totalAmount.toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })}{' '}
+                                    VNĐ
+                                </span>
+                            </div>
+
+                            {formData.numChildren > 0 && (
                                 <div className="price-item">
-                                    <span className="price-label">Tổng ({numberOfNights} đêm):</span>
-                                    <span className="price-value final-price">
-                                        {totalAmount.toLocaleString(undefined, {
+                                    <span className="price-label">Có {formData.numChildren} trẻ nhỏ:</span>
+                                    <span className="price-value">
+                                        -{' '}
+                                        {childrenDiscount.toLocaleString(undefined, {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })}{' '}
@@ -390,6 +412,25 @@ function Booking() {
                                     </span>
                                 </div>
                             )}
+
+                            {discount > childrenDiscount && (
+                                <div className="price-item">
+                                    <span className="price-label">Voucher giảm giá:</span>
+                                    <span className="price-value">
+                                        -{' '}
+                                        {(discount - childrenDiscount).toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}{' '}
+                                        VNĐ
+                                    </span>
+                                </div>
+                            )}
+
+                            <div className="price-item final-price">
+                                <span className="price-label">Tổng:</span>
+                                <span className="price-value final-price">{formatPrice(finalPrice)} VNĐ</span>
+                            </div>
                         </div>
                     </div>
 

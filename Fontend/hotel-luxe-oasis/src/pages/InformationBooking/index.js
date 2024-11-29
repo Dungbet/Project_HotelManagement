@@ -15,8 +15,40 @@ function InformationBooking() {
     const [currentBookingId, setCurrentBookingId] = useState(null);
     const [confirmCancel, setConfirmCancel] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [isReviewed, setIsReviewed] = useState(false);
+    const [roomReviewStatus, setRoomReviewStatus] = useState({});
 
     const navigate = useNavigate();
+
+    const checkReviewStatus = async (bookingId, roomId) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/review/exists?bookingId=${bookingId}&roomId=${roomId}`,
+            );
+            setRoomReviewStatus((prevStatus) => ({
+                ...prevStatus,
+                [`${bookingId}-${roomId}`]: response.data, // Gắn bookingId và roomId để đảm bảo duy nhất
+            }));
+        } catch (error) {
+            console.error('Error fetching review status:', error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchReviewStatuses = async () => {
+            for (const booking of bookings) {
+                if (booking.bookingStatus === 'Hoàn thành') {
+                    for (const room of booking.rooms || []) {
+                        await checkReviewStatus(booking.id, room.id); // Gọi từng phòng
+                    }
+                }
+            }
+        };
+
+        if (bookings.length > 0) {
+            fetchReviewStatuses();
+        }
+    }, [bookings]);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -85,8 +117,6 @@ function InformationBooking() {
                     if (booking.id === bookingId) {
                         return {
                             ...booking,
-                            isRated: true,
-                            rated: true,
                         };
                     }
                     return booking;
@@ -98,6 +128,11 @@ function InformationBooking() {
             setReviewError('');
             setReviewModalOpen(false);
             setSuccessMessage('Đánh giá thành công');
+            // Update the review status to true
+            setRoomReviewStatus((prevStatus) => ({
+                ...prevStatus,
+                [selectedRoomId]: true,
+            }));
         } catch (error) {
             console.error('Error submitting review:', error);
             setReviewError('Đã có lỗi xảy ra khi gửi đánh giá.');
@@ -123,12 +158,27 @@ function InformationBooking() {
         }
     };
 
-    const handleOpenReviewModal = (roomId, bookingId) => {
-        setSelectedRoomId(roomId);
-        setReviewModalOpen(true);
-        setReviewSuccess(false);
-        setReviewError('');
-        setCurrentBookingId(bookingId);
+    const handleOpenReviewModal = async (roomId, bookingId) => {
+        const token = localStorage.getItem('token');
+
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/review/exists?bookingId=${bookingId}&roomId=${roomId}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+
+            if (response.data) {
+                alert('You have already reviewed this room.');
+            } else {
+                setSelectedRoomId(roomId);
+                setReviewModalOpen(true);
+                setReviewSuccess(false);
+                setReviewError('');
+                setCurrentBookingId(bookingId);
+            }
+        } catch (error) {
+            console.error('Error checking review existence:', error);
+        }
     };
 
     const handleViewReview = (roomId) => {
@@ -183,60 +233,70 @@ function InformationBooking() {
                 </thead>
                 <tbody id="order_list">
                     {bookings.length > 0 ? (
-                        bookings.map((booking, index) => (
-                            <tr key={index}>
-                                <td>{formatDate(booking.createAt) || 'N/A'}</td>
-                                <td>{booking.bookingName || 'N/A'}</td>
-                                <td>{booking.room ? booking.room.roomNumber : 'N/A'}</td>
-                                <td>{booking.bookingPhone || 'N/A'}</td>
-                                <td>{booking.guest}</td>
-                                <td>{parseDate(booking.checkInDate)}</td>
-                                <td>{parseDate(booking.checkOutDate)}</td>
-                                <td>
-                                    {booking.totalAmount.toLocaleString('vi-VN', {
-                                        style: 'currency',
-                                        currency: 'VND',
-                                    })}
-                                </td>
-                                <td>
-                                    <span
-                                        className={
-                                            booking.bookingStatus === 'Hoàn thành' || booking.bookingStatus === 'Đã đặt'
-                                                ? 'text-success'
-                                                : 'text-danger'
-                                        }
-                                    >
-                                        {booking.bookingStatus}
-                                    </span>
-                                </td>
-                                <td>
-                                    {booking.bookingStatus === 'Hoàn thành' && !booking.rated ? (
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={() => handleOpenReviewModal(booking.room.id, booking.id)}
+                        bookings.map((booking) =>
+                            booking.rooms?.map((room, roomIndex) => (
+                                <tr key={`${booking.id}-${roomIndex}`}>
+                                    <td>{formatDate(booking.createAt) || 'N/A'}</td>
+                                    <td>{booking.bookingName || 'N/A'}</td>
+                                    <td>
+                                        {room.roomNumber} - {room.name}
+                                    </td>
+                                    <td>{booking.bookingPhone || 'N/A'}</td>
+                                    <td>{booking.guest}</td>
+                                    <td>{parseDate(booking.checkInDate)}</td>
+                                    <td>{parseDate(booking.checkOutDate)}</td>
+                                    <td>
+                                        {booking.totalAmount.toLocaleString('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND',
+                                        })}
+                                    </td>
+                                    <td>
+                                        <span
+                                            className={
+                                                booking.bookingStatus === 'Hoàn thành' ||
+                                                booking.bookingStatus === 'Đã đặt'
+                                                    ? 'text-success'
+                                                    : 'text-danger'
+                                            }
                                         >
-                                            Đánh giá
-                                        </button>
-                                    ) : booking.bookingStatus === 'Hoàn thành' && booking.rated ? (
-                                        <button
-                                            className="btn btn-success"
-                                            onClick={() => handleViewReview(booking.room.id)}
-                                        >
-                                            Xem đánh giá
-                                        </button>
-                                    ) : booking.bookingStatus === 'Đã đặt' ? (
-                                        <button className="btn btn-danger" onClick={() => setConfirmCancel(booking.id)}>
-                                            Hủy
-                                        </button>
-                                    ) : booking.bookingStatus === 'Đã hủy' ||
-                                      booking.bookingStatus === 'Yêu cầu hủy' ? (
-                                        <Link to="/rooms" className="btn btn-success">
-                                            Đặt Phòng
-                                        </Link>
-                                    ) : null}
-                                </td>
-                            </tr>
-                        ))
+                                            {booking.bookingStatus}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {booking.bookingStatus === 'Hoàn thành' ? (
+                                            roomReviewStatus[`${booking.id}-${room.id}`] ? (
+                                                <button
+                                                    className="btn btn-success"
+                                                    onClick={() => handleViewReview(room.id)}
+                                                >
+                                                    Xem đánh giá
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="btn btn-success"
+                                                    onClick={() => handleOpenReviewModal(room.id, booking.id)}
+                                                >
+                                                    Đánh giá
+                                                </button>
+                                            )
+                                        ) : booking.bookingStatus === 'Đã đặt' ? (
+                                            <button
+                                                className="btn btn-danger"
+                                                onClick={() => setConfirmCancel(booking.id)}
+                                            >
+                                                Hủy
+                                            </button>
+                                        ) : booking.bookingStatus === 'Đã hủy' ||
+                                          booking.bookingStatus === 'Yêu cầu hủy' ? (
+                                            <Link to="/rooms" className="btn btn-success">
+                                                Đặt Phòng
+                                            </Link>
+                                        ) : null}
+                                    </td>
+                                </tr>
+                            )),
+                        )
                     ) : (
                         <tr>
                             <td colSpan="10" className="text-center">

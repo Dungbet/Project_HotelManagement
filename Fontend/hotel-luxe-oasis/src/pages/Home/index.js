@@ -7,6 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import vi from 'date-fns/locale/vi';
 import { Link, useNavigate } from 'react-router-dom';
+import { Popover, InputNumber, Button } from 'antd';
 function Home() {
     const heroSliderSettings = {
         dots: true,
@@ -33,6 +34,49 @@ function Home() {
     const [error, setError] = useState('');
     const [reviews, setReviews] = useState([]);
     const navigate = useNavigate();
+    // Quản lý số lượng phòng và khách
+    const [numRooms, setNumRooms] = useState(1);
+    const [numAdults, setNumAdults] = useState(1);
+    const [numChildren, setNumChildren] = useState(0);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+    const handleReset = () => {
+        setNumRooms(1);
+        setNumAdults(1);
+        setNumChildren(0);
+    };
+    const maxOccupants = 8; // Giới hạn tối đa cho tổng số khách trong một phòng
+
+    // Hàm xử lý thay đổi số phòng
+    const handleRoomsChange = (action) => {
+        if (action === 'increase' && numRooms < 10) {
+            setNumRooms(numRooms + 1);
+        } else if (action === 'decrease' && numRooms > 1) {
+            setNumRooms(numRooms - 1);
+        }
+    };
+
+    const maxGuestsPerRoom = 8; // Số lượng khách tối đa mỗi phòng
+
+    // Hàm xử lý thay đổi số người lớn
+    const handleAdultsChange = (action) => {
+        const totalGuests = numAdults + numChildren; // Tổng số khách hiện tại
+        if (action === 'increase' && totalGuests < maxGuestsPerRoom) {
+            setNumAdults(numAdults + 1);
+        } else if (action === 'decrease' && numAdults > 1) {
+            setNumAdults(numAdults - 1);
+        }
+    };
+
+    // Hàm xử lý thay đổi số trẻ em
+    const handleChildrenChange = (action) => {
+        const totalGuests = numAdults + numChildren; // Tổng số khách hiện tại
+        if (action === 'increase' && totalGuests < maxGuestsPerRoom) {
+            setNumChildren(numChildren + 1);
+        } else if (action === 'decrease' && numChildren > 0) {
+            setNumChildren(numChildren - 1);
+        }
+    };
 
     useEffect(() => {
         axios
@@ -77,16 +121,101 @@ function Home() {
 
     const handleCheckRooms = () => {
         if (!startDate || !endDate) {
-            setError('Vui lòng chọn cả ngày đến và ngày đi.'); // Hiển thị thông báo lỗi nếu không chọn đủ ngày
+            setError('Vui lòng chọn cả ngày đến và ngày đi.');
             return;
         }
         setError(''); // Xóa thông báo lỗi nếu chọn đủ ngày
         navigate(
             `/rooms-available?checkinDate=${formatDate(startDate)}&checkoutDate=${formatDate(
                 endDate,
-            )}&sortedField=price&keyword=`,
+            )}&sortedField=price&keyword=&numAdults=${numAdults || 1}&numChildren=${numChildren || 0}&numRooms=${
+                numRooms || 1
+            }`,
         );
     };
+
+    const GuestSelectionContent = (
+        <div style={{ width: 250, padding: 10 }}>
+            <div style={{ marginBottom: 10 }}>
+                <label>Số phòng:</label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div
+                        className="adjuster guest-selector"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                        }}
+                    >
+                        <span>{numRooms} Phòng</span>
+                        <button onClick={() => handleRoomsChange('decrease')} disabled={numRooms === 1}>
+                            -
+                        </button>
+                        <button onClick={() => handleRoomsChange('increase')} disabled={numRooms === 10}>
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+                <label>Người lớn:</label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div
+                        className="adjuster guest-selector"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                        }}
+                    >
+                        <span>{numAdults} Người lớn</span>
+                        <button onClick={() => handleAdultsChange('decrease')} disabled={numAdults === 1}>
+                            -
+                        </button>
+                        <button
+                            onClick={() => handleAdultsChange('increase')}
+                            disabled={numAdults + numChildren >= maxGuestsPerRoom}
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div style={{ marginBottom: 10 }}>
+                <label>Trẻ em:</label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div
+                        className="adjuster guest-selector"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                        }}
+                    >
+                        <span>{numChildren} Trẻ em Mỗi phòng</span>
+                        <button onClick={() => handleChildrenChange('decrease')} disabled={numChildren === 0}>
+                            -
+                        </button>
+                        <button
+                            onClick={() => handleChildrenChange('increase')}
+                            disabled={numAdults + numChildren >= maxGuestsPerRoom}
+                        >
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <Button type="link" onClick={handleReset} style={{ marginTop: 10, padding: 0 }}>
+                Đặt lại các trường
+            </Button>
+        </div>
+    );
     // if (rooms.length === 0) {
     //     return (
     //         <div id="preloder">
@@ -129,7 +258,6 @@ function Home() {
                                             id="date-in"
                                             locale={vi}
                                         />
-                                        <i className="icon_calendar"></i>
                                     </div>
                                     <div className="check-date">
                                         <label htmlFor="date-out">Ngày đi:</label>
@@ -147,24 +275,16 @@ function Home() {
                                             id="date-out"
                                             locale={vi}
                                         />
-                                        <i className="icon_calendar"></i>
                                     </div>
-                                    <div class="select-option">
-                                        <label for="guest">Số người:</label>
-                                        <select id="guest">
-                                            <option value="">2 Người</option>
-                                            <option value="">3 Người</option>
-                                        </select>
+                                    <div className="select-option">
+                                        <label htmlFor="guest">Phòng & Khách:</label>
+                                        <Popover content={GuestSelectionContent} trigger="click">
+                                            <div className="guest-selector guest-info" style={{ cursor: 'pointer' }}>
+                                                {`${numRooms} phòng: ${numAdults} người lớn, ${numChildren} trẻ em/phòng`}
+                                            </div>
+                                        </Popover>
                                     </div>
-                                    <div class="select-option">
-                                        <label for="room">Số phòng:</label>
-                                        <select id="room">
-                                            <option value="">1 Phòng</option>
-                                            <option value="">2 Phòng</option>
-                                        </select>
-                                    </div>
-                                    {error && <p className="error-message">{error}</p>}{' '}
-                                    {/* Hiển thị thông báo lỗi nếu có */}
+                                    {error && <p className="error-message">{error}</p>}
                                     <button
                                         type="button"
                                         onClick={handleCheckRooms}
