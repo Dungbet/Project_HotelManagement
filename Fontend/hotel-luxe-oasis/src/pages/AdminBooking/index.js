@@ -3,16 +3,21 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
+    const [message, setMessage] = useState({ type: '', text: '' });
     const [messages, setMessages] = useState({
-        addMessageSuccess: '',
-        addMessageFail: '',
-        updateMessageSuccess: '',
-        updateMessageFail: '',
-        deleteMessageSuccess: '',
         deleteMessageFail: '',
+        deleteMessageSuccess: '',
+    });
+
+    const [dialog, setDialog] = useState({
+        open: false,
+        title: '',
+        content: '',
+        onConfirm: null,
     });
     const [endPage, setEndPage] = useState(1);
     const [page, setPage] = useState(0); // Current page
@@ -22,6 +27,13 @@ function AdminBooking() {
     useEffect(() => {
         fetchBookings();
     }, [page]);
+    useEffect(() => {
+        if (message.text) {
+            const timeout = setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+            return () => clearTimeout(timeout);
+        }
+    }, [message]);
+
     // Hàm lấy token từ localStorage
     const getToken = () => localStorage.getItem('token');
     const fetchBookings = async () => {
@@ -39,27 +51,11 @@ function AdminBooking() {
             console.error('Error fetching bookings', error);
         }
     };
-
-    const handleStatusChange = async (bookingId, newStatus) => {
-        try {
-            const token = getToken();
-            const bookingStatus = newStatus === 'Chưa thanh toán';
-            await axios.put('http://localhost:8080/booking/update-status', null, {
-                params: { bookingStatus, bookingId },
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setMessages({ ...messages, updateMessageSuccess: 'Cập nhật trạng thái thành công' });
-            fetchBookings();
-        } catch (error) {
-            setMessages({ ...messages, updateMessageFail: 'Cập nhật trạng thái thất bại' });
-            console.error('Error updating status', error);
-        }
+    const handleDialogClose = () => {
+        setDialog({ open: false, title: '', content: '', onConfirm: null });
     };
 
-    // Delete bookings
-    const deleteBooking = async (bookingId, status) => {
+    const handleDeleteBooking = async (bookingId, status) => {
         if (status === 'Đã hủy') {
             setMessages({
                 ...messages,
@@ -69,95 +65,136 @@ function AdminBooking() {
             return;
         }
 
-        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa không?');
-        if (!confirmDelete) {
+        setDialog({
+            open: true,
+            title: 'Xác nhận xóa',
+            content: 'Bạn có chắc chắn muốn xóa không?',
+            onConfirm: async () => {
+                try {
+                    const token = getToken();
+                    await axios.delete(`http://localhost:8080/admin/booking/?id=${bookingId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    setMessage({ type: 'success', text: 'Xóa đặt phòng thành công' });
+                    fetchBookings();
+                } catch (error) {
+                    setMessage({ type: 'danger', text: 'Xóa đặt phòng thất bại' });
+                    console.error('Error deleting booking', error);
+                }
+                handleDialogClose();
+            },
+        });
+    };
+
+    const handleFinishBooking = async (bookingId, bookingStatus) => {
+        if (bookingStatus === 'Chưa thanh toán') {
+            setDialog({
+                open: true,
+                title: 'Thông báo',
+                content: 'Phòng chưa thanh toán',
+            });
             return;
         }
 
-        try {
-            const token = getToken();
-            await axios.delete(`http://localhost:8080/admin/booking/?id=${bookingId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setMessages({ deleteMessageSuccess: 'Xóa đặt phòng thành công', deleteMessageFail: '' });
-            fetchBookings();
-        } catch (error) {
-            setMessages({ deleteMessageFail: 'Xóa đặt phòng thất bại', deleteMessageSuccess: '' });
-            console.error('Error deleting booking', error);
-        }
+        setDialog({
+            open: true,
+            title: 'Xác nhận hoàn thành',
+            content: 'Bạn có chắc chắn muốn hoàn thành không?',
+            onConfirm: async () => {
+                try {
+                    const token = getToken();
+                    await axios.put(
+                        'http://localhost:8080/admin/booking/finish-booking',
+                        { id: bookingId },
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                        },
+                    );
+                    setMessage({ type: 'success', text: 'Hoàn thành đặt phòng thành công' });
+                    fetchBookings();
+                } catch (error) {
+                    setMessage({ type: 'danger', text: 'Hoàn thành đặt phòng thất bại' });
+                    console.error('Error finishing booking', error);
+                }
+                handleDialogClose();
+            },
+        });
     };
 
-    const finishBooking = async (bookingId, bookingStatus) => {
-        // Check if the booking status is "Chưa thanh toán" (Unpaid)
-        if (bookingStatus === 'Chưa thanh toán') {
-            // Display a warning message or box
-            alert('Phòng chưa thanh toán');
-            return; // Stop further execution
-        }
+    // const confirmCancelBooking = async (bookingId, confirm) => {
+    //     const confirmConfirm = window.confirm('Bạn có chắc chắn muốn xác nhận không?');
+    //     if (!confirmConfirm) return;
 
-        const confirmFinish = window.confirm('Bạn có chắc chắn muốn hoàn thành không?');
-        if (!confirmFinish) return;
+    //     try {
+    //         const token = getToken();
+    //         await axios.put(
+    //             'http://localhost:8080/admin/booking/confirm-cancel',
+    //             { id: bookingId },
+    //             {
+    //                 headers: { Authorization: `Bearer ${token}` },
+    //                 params: { confirm }, // Truyền tham số confirm từ hàm
+    //             },
+    //         );
+    //         setMessages({ ...messages, updateMessageSuccess: 'Xác nhận hủy thành công' });
+    //         fetchBookings();
+    //     } catch (error) {
+    //         setMessages({ ...messages, updateMessageFail: 'Xác nhận hủy thất bại' });
+    //         console.error('Error confirming cancel booking', error);
+    //     }
+    // };
 
-        try {
-            const token = getToken();
-            await axios.put(
-                'http://localhost:8080/admin/booking/finish-booking',
-                { id: bookingId },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            setMessages({ ...messages, updateMessageSuccess: 'Hoàn thành đặt phòng thành công' });
-            fetchBookings();
-        } catch (error) {
-            setMessages({ ...messages, updateMessageFail: 'Hoàn thành đặt phòng thất bại' });
-            console.error('Error finishing booking', error);
-        }
+    const handleCancelBooking = async (bookingId, confirm) => {
+        setDialog({
+            open: true,
+            title: 'Xác nhận hủy đặt',
+            content: 'Bạn có chắc chắn muốn hủy đặt không?',
+            onConfirm: async () => {
+                try {
+                    const token = getToken();
+                    await axios.put(
+                        'http://localhost:8080/admin/booking/confirm-cancel',
+                        { id: bookingId },
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            params: { confirm },
+                        },
+                    );
+                    setMessages({ ...messages, deleteMessageSuccess: 'Xác nhận hủy đặt phòng thành công' });
+                    fetchBookings();
+                } catch (error) {
+                    setMessages({ ...messages, deleteMessageFail: 'Xác nhận hủy đặt phòng thất bại' });
+                    console.error('Error cancelling booking', error);
+                }
+                handleDialogClose();
+            },
+        });
     };
-
-    const cancelBooking = async (bookingId) => {
-        const confirmCancel = window.confirm('Bạn có chắc chắn muốn hủy không?');
-        if (!confirmCancel) return;
-
-        try {
-            const token = getToken();
-            await axios.put(
-                'http://localhost:8080/admin/booking/cancel-booking',
-                { id: bookingId },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            setMessages({ ...messages, deleteMessageSuccess: 'Hủy đặt phòng thành công' });
-            fetchBookings();
-        } catch (error) {
-            setMessages({ ...messages, deleteMessageFail: 'Hủy đặt phòng thất bại' });
-            console.error('Error cancelling booking', error);
-        }
-    };
-
-    const confirmCancelBooking = async (bookingId, confirm) => {
-        const confirmConfirm = window.confirm('Bạn có chắc chắn muốn xác nhận không?');
-        if (!confirmConfirm) return;
-
-        try {
-            const token = getToken();
-            await axios.put(
-                'http://localhost:8080/admin/booking/confirm-cancel',
-                { id: bookingId },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    params: { confirm }, // Truyền tham số confirm từ hàm
-                },
-            );
-            setMessages({ ...messages, updateMessageSuccess: 'Xác nhận hủy thành công' });
-            fetchBookings();
-        } catch (error) {
-            setMessages({ ...messages, updateMessageFail: 'Xác nhận hủy thất bại' });
-            console.error('Error confirming cancel booking', error);
-        }
+    const handleCancelBookingAdmin = async (bookingId) => {
+        setDialog({
+            open: true,
+            title: 'Xác nhận hủy',
+            content: 'Bạn có chắc chắn muốn hủy không?',
+            onConfirm: async () => {
+                try {
+                    const token = getToken();
+                    await axios.put(
+                        'http://localhost:8080/admin/booking/cancel-booking',
+                        { id: bookingId },
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                        },
+                    );
+                    setMessages({ ...messages, deleteMessageSuccess: 'Hủy đặt thành công' });
+                    fetchBookings();
+                } catch (error) {
+                    setMessages({ ...messages, deleteMessageFail: 'Hủy đặt thất bại' });
+                    console.error('Error cancelling booking', error);
+                }
+                handleDialogClose();
+            },
+        });
     };
 
     // Convert date string from "dd/MM/yyyy" to JavaScript Date object
@@ -168,6 +205,16 @@ function AdminBooking() {
 
     return (
         <div className="container-fluid pt-4 px-4">
+            <Dialog open={dialog.open} onClose={handleDialogClose}>
+                <DialogTitle>{dialog.title}</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{dialog.content}</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDialogClose}>Hủy</Button>
+                    {dialog.onConfirm && <Button onClick={dialog.onConfirm}>Xác nhận</Button>}
+                </DialogActions>
+            </Dialog>
             <div className="bg-light text-center rounded p-4">
                 <div className="d-flex align-items-center justify-content-between mb-4">
                     <h6 className="mb-0">Quản Lý Đặt Phòng</h6>
@@ -175,12 +222,8 @@ function AdminBooking() {
                         Thêm Đặt Phòng
                     </button>
                 </div>
-                <p className="text-success">{messages.addMessageSuccess}</p>
-                <p className="text-danger">{messages.addMessageFail}</p>
-                <p className="text-success">{messages.updateMessageSuccess}</p>
-                <p className="text-danger">{messages.updateMessageFail}</p>
-                <p className="text-success">{messages.deleteMessageSuccess}</p>
-                <p className="text-danger">{messages.deleteMessageFail}</p>
+                <p className={`text-${message.type === 'success' ? 'success' : 'danger'}`}>{message.text}</p>
+
                 <div className="table-responsive">
                     <table className="table text-start align-middle table-hover table-striped mb-0">
                         <thead>
@@ -252,26 +295,26 @@ function AdminBooking() {
                                     <td>
                                         {booking.bookingStatus === 'Đã đặt' && (
                                             <>
-                                                <a onClick={() => finishBooking(booking.id, booking.status)}>
+                                                <a onClick={() => handleFinishBooking(booking.id, booking.status)}>
                                                     <i className="fa-solid fa-circle-check" title="Hoàn thành"></i>
                                                 </a>
-                                                <a onClick={() => cancelBooking(booking.id)}>
+                                                <a onClick={() => handleCancelBookingAdmin(booking.id)}>
                                                     <i className="fas fa-times" title="Hủy"></i>
                                                 </a>
                                             </>
                                         )}
                                         {booking.bookingStatus === 'Yêu cầu hủy' && (
                                             <>
-                                                <a onClick={() => confirmCancelBooking(booking.id, true)}>
+                                                <a onClick={() => handleCancelBooking(booking.id, true)}>
                                                     <i className="fa-solid fa-check " title="Xác nhận hủy"></i>
                                                 </a>
-                                                <a onClick={() => confirmCancelBooking(booking.id, false)}>
+                                                <a onClick={() => handleCancelBooking(booking.id, false)}>
                                                     <i className="fas fa-times" title="Hủy yêu cầu hủy"></i>
                                                 </a>
                                             </>
                                         )}
                                         {booking.bookingStatus === 'Đã hủy' && (
-                                            <a onClick={() => deleteBooking(booking.id, booking.statusBooking)}>
+                                            <a onClick={() => handleDeleteBooking(booking.id, booking.statusBooking)}>
                                                 <i className="fa-solid fa-trash-can" title="Xóa"></i>
                                             </a>
                                         )}

@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { format, parseISO, parse } from 'date-fns';
+import SuccessDialog from './SuccessDialog';
+
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField } from '@mui/material';
 
 function InformationBooking() {
     const [bookings, setBookings] = useState([]);
@@ -17,6 +20,11 @@ function InformationBooking() {
     const [successMessage, setSuccessMessage] = useState('');
     const [isReviewed, setIsReviewed] = useState(false);
     const [roomReviewStatus, setRoomReviewStatus] = useState({});
+    const [rating, setRating] = useState(0);
+    const [reviewText, setReviewText] = useState('');
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [cancelBookingId, setCancelBookingId] = useState(null);
+    const [successDialogOpen, setSuccessDialogOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -53,7 +61,6 @@ function InformationBooking() {
     useEffect(() => {
         const fetchBookings = async () => {
             const token = localStorage.getItem('token');
-
             if (!token) {
                 navigate('/login');
                 return;
@@ -70,40 +77,20 @@ function InformationBooking() {
             }
         };
 
-        const fetchUserReviews = async () => {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            try {
-                const response = await axios.get(`http://localhost:8080/review/user-reviews?id=${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const reviews = response.data.data;
-                const reviewsMap = {};
-                reviews.forEach((review) => {
-                    reviewsMap[review.room.id] = review;
-                });
-                setUserReviews(reviewsMap);
-            } catch (err) {
-                console.error('Không thể lấy đánh giá:', err);
-            }
-        };
-
         fetchBookings();
-        fetchUserReviews();
     }, [navigate]);
 
-    const handleReviewSubmit = async (rating, reviewText, bookingId) => {
+    const handleReviewSubmit = async () => {
         const token = localStorage.getItem('token');
-
         if (!token || !selectedRoomId || !rating || !reviewText) {
             setReviewError('Vui lòng chọn sao, nhập nội dung đánh giá và đảm bảo bạn đã đăng nhập.');
             return;
         }
 
         const reviewData = {
-            rating: rating,
+            rating,
             comment: reviewText,
-            booking: { id: bookingId },
+            booking: { id: currentBookingId },
             room: { id: selectedRoomId },
         };
 
@@ -112,29 +99,18 @@ function InformationBooking() {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            setBookings((prevBookings) =>
-                prevBookings.map((booking) => {
-                    if (booking.id === bookingId) {
-                        return {
-                            ...booking,
-                        };
-                    }
-                    return booking;
-                }),
-            );
-
-            setUserReviews((prev) => ({ ...prev, [selectedRoomId]: reviewData }));
-            setReviewSuccess(true);
-            setReviewError('');
-            setReviewModalOpen(false);
-            setSuccessMessage('Đánh giá thành công');
-            // Update the review status to true
+            // Cập nhật trạng thái `roomReviewStatus` để phản ánh rằng phòng đã được đánh giá
             setRoomReviewStatus((prevStatus) => ({
                 ...prevStatus,
-                [selectedRoomId]: true,
+                [`${currentBookingId}-${selectedRoomId}`]: true,
             }));
+
+            setReviewModalOpen(false);
+            setReviewSuccess(true);
+            setReviewError('');
+            setSuccessDialogOpen(true); // Hiển thị dialog thành công
+            setSuccessMessage('Đánh giá thành công!');
         } catch (error) {
-            console.error('Error submitting review:', error);
             setReviewError('Đã có lỗi xảy ra khi gửi đánh giá.');
         }
     };
@@ -157,28 +133,14 @@ function InformationBooking() {
             return 'N/A';
         }
     };
-
-    const handleOpenReviewModal = async (roomId, bookingId) => {
-        const token = localStorage.getItem('token');
-
-        try {
-            const response = await axios.get(
-                `http://localhost:8080/review/exists?bookingId=${bookingId}&roomId=${roomId}`,
-                { headers: { Authorization: `Bearer ${token}` } },
-            );
-
-            if (response.data) {
-                alert('You have already reviewed this room.');
-            } else {
-                setSelectedRoomId(roomId);
-                setReviewModalOpen(true);
-                setReviewSuccess(false);
-                setReviewError('');
-                setCurrentBookingId(bookingId);
-            }
-        } catch (error) {
-            console.error('Error checking review existence:', error);
-        }
+    const handleOpenReviewModal = (roomId, bookingId) => {
+        setSelectedRoomId(roomId);
+        setCurrentBookingId(bookingId);
+        setRating(0); // Reset số sao
+        setReviewText(''); // Reset nội dung đánh giá
+        setReviewSuccess(false); // Ẩn trạng thái thành công
+        setReviewError(''); // Xóa lỗi
+        setReviewModalOpen(true);
     };
 
     const handleViewReview = (roomId) => {
@@ -200,22 +162,21 @@ function InformationBooking() {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            // Update bookings with the response data
             setBookings((prevBookings) => prevBookings.map((b) => (b.id === bookingId ? response.data.data : b)));
-
-            // Set success message here
+            setSuccessDialogOpen(true); // Hiển thị dialog thành công
             setSuccessMessage('Gửi yêu cầu hủy thành công!');
         } catch (error) {
             alert('Có lỗi xảy ra khi hủy đặt phòng.');
             console.error(error);
         } finally {
-            setConfirmCancel(false); // Close the confirmation modal
+            setCancelModalOpen(false);
         }
     };
 
     return (
         <div className="container">
             <h2 className="text-center my-4">Danh Sách Phòng Đã Đặt</h2>
+
             <table className="table table-bordered table-hover order-table">
                 <thead className="thead-dark">
                     <tr>
@@ -283,7 +244,10 @@ function InformationBooking() {
                                         ) : booking.bookingStatus === 'Đã đặt' ? (
                                             <button
                                                 className="btn btn-danger"
-                                                onClick={() => setConfirmCancel(booking.id)}
+                                                onClick={() => {
+                                                    setCancelBookingId(booking.id); // Set the booking ID to cancel
+                                                    setCancelModalOpen(true); // Open the cancel dialog
+                                                }}
                                             >
                                                 Hủy
                                             </button>
@@ -307,81 +271,65 @@ function InformationBooking() {
                 </tbody>
             </table>
 
-            {reviewModalOpen && (
-                <div className="custom-modal" id="review-modal">
-                    <div className="custom-review-box">
-                        <h2>Đánh giá của bạn</h2>
-                        <div className="custom-star-rating" id="star-rating">
-                            {[1, 2, 3, 4, 5].map((value) => (
-                                <span
-                                    key={value}
-                                    className={`custom-star ${
-                                        userReviews[selectedRoomId]?.rating >= value ? 'selected' : ''
-                                    }`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setUserReviews((prev) => ({
-                                            ...prev,
-                                            [selectedRoomId]: {
-                                                ...prev[selectedRoomId],
-                                                rating: value,
-                                            },
-                                        }));
-                                    }}
-                                >
-                                    ★
-                                </span>
-                            ))}
-                        </div>
-                        <textarea
-                            className="custom-textarea"
-                            id="review-text"
-                            placeholder="Nhập nội dung đánh giá của bạn..."
-                            rows="4"
-                        ></textarea>
-                        <button
-                            className="button-review"
-                            onClick={() => {
-                                const reviewText = document.getElementById('review-text').value;
-                                handleReviewSubmit(userReviews[selectedRoomId]?.rating, reviewText, currentBookingId);
-                            }}
-                            disabled={
-                                !userReviews[selectedRoomId]?.rating || !document.getElementById('review-text').value
-                            }
-                        >
-                            Gửi Đánh Giá
-                        </button>
-                        {successMessage && (
-                            <div className="custom-modal" id="success-modal">
-                                <div className="custom-review-box">
-                                    <h2>{successMessage}</h2>
-                                    <button
-                                        className="button-review"
-                                        onClick={() => setSuccessMessage('')}
-                                        style={{ backgroundColor: '#dc3545' }}
-                                    >
-                                        Đóng
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+            <Dialog open={reviewModalOpen} onClose={() => setReviewModalOpen(false)}>
+                <DialogTitle>Đánh giá của bạn</DialogTitle>
+                <DialogContent>
+                    <div>
+                        {/* Star Rating */}
+                        {[1, 2, 3, 4, 5].map((value) => (
+                            <span
+                                key={value}
+                                style={{
+                                    cursor: 'pointer',
+                                    color: rating >= value ? 'gold' : 'gray',
+                                }}
+                                onClick={() => setRating(value)}
+                            >
+                                ★
+                            </span>
+                        ))}
                     </div>
-                </div>
-            )}
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Nhập nội dung đánh giá của bạn..."
+                    />
+                    {reviewError && <p style={{ color: 'red' }}>{reviewError}</p>}
+                    {reviewSuccess && <p style={{ color: 'green' }}>{successMessage}</p>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setReviewModalOpen(false)} color="secondary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleReviewSubmit} color="primary" disabled={!rating || !reviewText}>
+                        Gửi Đánh Giá
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-            {confirmCancel && (
-                <div className="custom-modal" id="cancel-modal">
-                    <div className="custom-review-box">
-                        <h2>Bạn có chắc chắn muốn hủy không?</h2>
-                        <button className="btn btn-danger" onClick={() => handleCancelBooking(confirmCancel)}>
-                            Có
-                        </button>
-                        <button className="btn btn-secondary" onClick={() => setConfirmCancel(false)}>
-                            Không
-                        </button>
-                    </div>
-                </div>
-            )}
+            <Dialog open={cancelModalOpen} onClose={() => setCancelModalOpen(false)}>
+                <DialogTitle>Xác nhận hủy đặt phòng</DialogTitle>
+                <DialogContent>
+                    <p>Bạn có chắc chắn muốn hủy đặt phòng này?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setCancelModalOpen(false)} color="secondary">
+                        Hủy
+                    </Button>
+                    <Button onClick={() => handleCancelBooking(cancelBookingId)} color="primary">
+                        Xác nhận hủy
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <SuccessDialog
+                open={successDialogOpen}
+                message={successMessage}
+                onClose={() => setSuccessDialogOpen(false)}
+            />
         </div>
     );
 }

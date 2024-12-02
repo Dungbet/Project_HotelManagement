@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 function AdminCoupon() {
     const [coupons, setCoupons] = useState([]);
     const [editingCoupon, setEditingCoupon] = useState(null);
@@ -13,6 +18,8 @@ function AdminCoupon() {
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [couponToDelete, setCouponToDelete] = useState(null);
 
     const navigate = useNavigate();
 
@@ -114,22 +121,40 @@ function AdminCoupon() {
         });
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) {
-            try {
-                const token = getToken();
-                await axios.delete('http://localhost:8080/admin/coupon/', {
-                    params: { id },
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                fetchCoupons(); // Refresh coupons list
-            } catch (error) {
-                console.error('Error deleting coupon', error);
-            }
+    const handleDeleteClick = (id) => {
+        setCouponToDelete(id);
+        setDialogOpen(true);
+    };
+    const handleDeleteConfirm = async () => {
+        try {
+            const token = getToken();
+            await axios.delete('http://localhost:8080/admin/coupon/', {
+                params: { id: couponToDelete },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setDialogOpen(false);
+            fetchCoupons();
+        } catch (error) {
+            console.error('Error deleting category', error);
         }
     };
+
+    // const handleDelete = async (id) => {
+    //     if (window.confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) {
+    //         try {
+    //             const token = getToken();
+    //             await axios.delete('http://localhost:8080/admin/coupon/', {
+    //                 params: { id },
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             });
+    //             fetchCoupons(); // Refresh coupons list
+    //         } catch (error) {
+    //             console.error('Error deleting coupon', error);
+    //         }
+    //     }
+    // };
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -246,7 +271,7 @@ function AdminCoupon() {
                                         <a onClick={() => handleEdit(coupon)}>
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
-                                        <a onClick={() => handleDelete(coupon.id)}>
+                                        <a onClick={() => handleDeleteClick(coupon.id)}>
                                             <i className="fa-solid fa-trash-can"></i>
                                         </a>
                                     </td>
@@ -297,6 +322,27 @@ function AdminCoupon() {
                     </nav>
                 </div>
             </div>
+            <Dialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">Xác nhận xóa</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có chắc chắn muốn xóa mã giảm giá này không?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDialogOpen(false)} color="primary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+                        Xóa
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

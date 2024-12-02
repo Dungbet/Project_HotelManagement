@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { format, parse } from 'date-fns';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 function AdminReview() {
     const [reviews, setReviews] = useState([]);
@@ -13,6 +19,8 @@ function AdminReview() {
     const [page, setPage] = useState(0); // Current page
     const size = 10; // Number of reviews per page
     const navigate = useNavigate();
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [reviewToDelete, setReviewToDelete] = useState(null);
     const getToken = () => localStorage.getItem('token');
 
     useEffect(() => {
@@ -33,24 +41,45 @@ function AdminReview() {
             console.error('Error fetching reviews', error);
         }
     };
-
-    const deleteReview = async (id) => {
-        const token = getToken();
-        if (window.confirm('Bạn có đồng ý xóa đánh giá này?')) {
-            try {
-                await axios.delete(`http://localhost:8080/admin/review/delete?id=${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                setMessages({ ...messages, deleteMessageSuccess: 'Xóa đánh giá thành công' });
-                fetchReviews();
-            } catch (error) {
-                setMessages({ ...messages, deleteMessageFail: 'Xóa đánh giá thất bại' });
-                console.error('Error deleting review', error);
-            }
+    const handleDeleteClick = (id) => {
+        setReviewToDelete(id);
+        setDialogOpen(true);
+    };
+    const handleDeleteConfirm = async () => {
+        try {
+            const token = getToken();
+            await axios.delete('http://localhost:8080/admin/review/delete', {
+                params: { id: reviewToDelete },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setDialogOpen(false);
+            setReviewToDelete(null); // Xóa trạng thái phòng cần xóa
+            fetchReviews(); // Lấy lại danh sách phòng
+            setMessages({ ...messages, deleteMessageSuccess: 'Xóa review thành công' });
+        } catch (error) {
+            setDialogOpen(false);
+            setMessages({ ...messages, deleteMessageFail: 'Xóa review thất bại' });
+            console.error('Error deleting review', error);
         }
     };
+
+    // const deleteReview = async (id) => {
+    //     const token = getToken();
+    //     if (window.confirm('Bạn có đồng ý xóa đánh giá này?')) {
+    //         try {
+    //             await axios.delete(`http://localhost:8080/admin/review/delete?id=${id}`, {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             });
+    //             setMessages({ ...messages, deleteMessageSuccess: 'Xóa đánh giá thành công' });
+    //             fetchReviews();
+    //         } catch (error) {
+    //             setMessages({ ...messages, deleteMessageFail: 'Xóa đánh giá thất bại' });
+    //             console.error('Error deleting review', error);
+    //         }
+    //     }
+    // };
 
     const renderStars = (rating) => {
         return Array.from({ length: 5 }, (_, index) => (
@@ -111,7 +140,7 @@ function AdminReview() {
                                             <td>{renderStars(review.rating)}</td>
                                             <td>{review.comment}</td>
                                             <td>
-                                                <a onClick={() => deleteReview(review.id)}>
+                                                <a onClick={() => handleDeleteClick(review.id)}>
                                                     <i className="fa-solid fa-trash-can"></i>
                                                 </a>
                                             </td>
@@ -127,7 +156,7 @@ function AdminReview() {
                                         <td>{renderStars(review.rating)}</td>
                                         <td>{review.comment}</td>
                                         <td>
-                                            <a onClick={() => deleteReview(review.id)}>
+                                            <a onClick={() => delete review.id}>
                                                 <i className="fa-solid fa-trash-can"></i>
                                             </a>
                                         </td>
@@ -165,6 +194,27 @@ function AdminReview() {
                     </div>
                 </div>
             </div>
+            <Dialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">Xác nhận xóa</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có chắc chắn muốn xóa review này không?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDialogOpen(false)} color="primary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+                        Xóa
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

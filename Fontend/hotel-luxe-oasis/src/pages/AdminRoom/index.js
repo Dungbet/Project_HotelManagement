@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 function AdminRoom() {
     const [rooms, setRooms] = useState([]);
@@ -17,6 +23,9 @@ function AdminRoom() {
     const [endPage, setEndPage] = useState(1);
     const [page, setPage] = useState(0); // Current page
     const size = 10; // Number of rooms per page
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [roomToDelete, setRoomToDelete] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -68,37 +77,25 @@ function AdminRoom() {
             console.error('Error fetching hotels', error);
         }
     };
-    const deleteRoom = async (id) => {
-        if (window.confirm('Bạn có đồng ý xóa phòng này?')) {
-            try {
-                const token = getToken();
-                await axios.delete(`http://localhost:8080/admin/room/?id=${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                // Reset all messages before adding success message
-                setMessages({
-                    addMessageSuccess: '',
-                    addMessageFail: '',
-                    updateMessageSuccess: '',
-                    updateMessageFail: '',
-                    deleteMessageSuccess: 'Xóa phòng thành công',
-                    deleteMessageFail: '',
-                });
-                fetchRooms();
-            } catch (error) {
-                // Reset all messages before adding failure message
-                setMessages({
-                    addMessageSuccess: '',
-                    addMessageFail: '',
-                    updateMessageSuccess: '',
-                    updateMessageFail: '',
-                    deleteMessageSuccess: '',
-                    deleteMessageFail: 'Xóa phòng thất bại',
-                });
-                console.error('Error deleting room', error);
-            }
+    const handleDeleteClick = (id) => {
+        setRoomToDelete(id);
+        setDialogOpen(true);
+    };
+    const handleDeleteConfirm = async () => {
+        try {
+            const token = getToken();
+            await axios.delete('http://localhost:8080/admin/room/', {
+                params: { id: roomToDelete },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setDialogOpen(false);
+            setRoomToDelete(null); // Xóa trạng thái phòng cần xóa
+            fetchRooms(); // Lấy lại danh sách phòng
+            setMessages({ ...messages, deleteMessageSuccess: 'Xóa phòng thành công' });
+        } catch (error) {
+            setDialogOpen(false);
+            setMessages({ ...messages, deleteMessageFail: 'Xóa phòng thất bại' });
+            console.error('Error deleting room', error);
         }
     };
 
@@ -230,7 +227,7 @@ function AdminRoom() {
                                         <Link to={`/admin/edit-room/${room.id}`}>
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </Link>
-                                        <a onClick={() => deleteRoom(room.id)}>
+                                        <a onClick={() => handleDeleteClick(room.id)}>
                                             <i className="fa-solid fa-trash-can"></i>
                                         </a>
                                     </td>
@@ -269,6 +266,27 @@ function AdminRoom() {
                     </div>
                 </div>
             </div>
+            <Dialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">Xác nhận xóa</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có chắc chắn muốn xóa phòng này không?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDialogOpen(false)} color="primary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+                        Xóa
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
