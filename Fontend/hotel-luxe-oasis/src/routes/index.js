@@ -78,5 +78,38 @@ const adminRoutes = [
     { path: '/admin/login', component: AdminLogin, layout: null },
     { path: '/admin/review', component: AdminReview },
 ];
+const employeeRoutes = [
+    { path: '/employee/booking', component: AdminBooking },
+    { path: '/employee/add-booking', component: AddBooking },
+    { path: '/employee/edit-booking', component: EditBooking },
+    { path: '/employee/change-password', component: AdminChangePassword },
+    { path: '/employee/contact', component: AdminContact },
+    { path: '/employee/payment', component: AdminPayment },
+    { path: '/employee/add-payment', component: AddPayment },
+    { path: '/employee/edit-payment', component: EditPayment },
+    { path: '/admin/login', component: AdminLogin, layout: null },
+    { path: '/employee/review', component: AdminReview },
+];
+const managerRoutes = [
+    { path: '/manager/booking', component: AdminBooking },
+    { path: '/manager/add-booking', component: AddBooking },
+    { path: '/manager/edit-booking', component: EditBooking },
+    { path: '/manager/category', component: AdminCategory },
+    { path: '/manager/change-password', component: AdminChangePassword },
+    { path: '/manager', component: AdminDashboard },
+    { path: '/manager/room', component: AdminRoom },
+    { path: '/manager/add-room', component: AddRoom },
+    { path: '/manager/edit-room/:id', component: EditRoom },
 
-export { adminRoutes, publicRoutes, privateRoutes };
+    { path: '/manager/contact', component: AdminContact },
+
+    { path: '/manager/payment', component: AdminPayment },
+    { path: '/manager/add-payment', component: AddPayment },
+    { path: '/manager/edit-payment', component: EditPayment },
+
+    { path: '/admin/login', component: AdminLogin, layout: null },
+    { path: '/manager/review', component: AdminReview },
+    { path: '/manager/user', component: AdminUser },
+    { path: '/manager/add-user', component: AddUser },
+];
+export { managerRoutes, employeeRoutes, adminRoutes, publicRoutes, privateRoutes };

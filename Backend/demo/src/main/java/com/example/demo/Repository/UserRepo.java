@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface UserRepo extends JpaRepository<Users, Integer>{
 
 
@@ -28,5 +30,20 @@ public interface UserRepo extends JpaRepository<Users, Integer>{
 
     boolean existsByEmail (String email);
     boolean existsByUsername (String username);
+    @Query(" SELECT COUNT (c) FROM Users c")
+    long countTotalUser();
+
+    @Query("SELECT COUNT(c) FROM Users c WHERE DATE(c.createAt) = CURRENT_DATE")
+    long countNewCustomersToday();
+
+    @Query(value = "SELECT COUNT(*) FROM users c WHERE DATE(c.create_at) = CURRENT_DATE - INTERVAL 1 DAY", nativeQuery = true)
+    long countNewCustomersYesterday();
+
+    @Query("SELECT DATE(c.createAt) as createDate, COUNT(c) as totalCustomers " +
+            "FROM Users c " +
+            "GROUP BY DATE(c.createAt) " +
+            "ORDER BY DATE(c.createAt)")
+    List<Object[]> countUserByDay();
+
 
 }

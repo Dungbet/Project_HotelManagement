@@ -59,7 +59,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(
                         requests -> requests
-                                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+//                                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                                .requestMatchers("/admin/booking/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER","ROLE_EMPLOYEE")
+                                .requestMatchers("/admin/payment/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER","ROLE_EMPLOYEE")
+                                .requestMatchers("/admin/contact/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER","ROLE_EMPLOYEE")
+                                .requestMatchers("/admin/review/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER","ROLE_EMPLOYEE")
+                                .requestMatchers("/admin/room/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER")
+                                .requestMatchers("/admin/coupon/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER")
+                                .requestMatchers("/admin/user/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER")
+                                .requestMatchers("/admin/role/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER")
+//                                .requestMatchers("/auth/me/**").hasAnyAuthority("ROLE_ADMIN","ROLE_MANAGER","ROLE_EMPLOYEE")
                                 .requestMatchers("/booking/**").authenticated()
                                 .requestMatchers("/role/**").permitAll()
                                 .requestMatchers("/auth/**").permitAll()

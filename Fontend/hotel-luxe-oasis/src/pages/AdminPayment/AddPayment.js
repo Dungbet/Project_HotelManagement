@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function AddPayment() {
     const [bookings, setBookings] = useState([]);
@@ -10,9 +11,23 @@ function AddPayment() {
         bookingId: '', // ID của booking
         status: 'Đã thanh toán',
     });
-
+    const [role, setRole] = useState(null);
     const navigate = useNavigate();
     const getToken = () => localStorage.getItem('token');
+
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -40,6 +55,7 @@ function AddPayment() {
         };
 
         fetchBookings();
+        decodeToken();
     }, []);
 
     const handleChange = (e) => {
@@ -87,7 +103,16 @@ function AddPayment() {
 
             console.log('Payment added successfully:', response.data);
 
-            navigate('/admin/payment');
+            // Điều hướng đến trang người dùng dựa trên vai trò
+            if (role === 'admin') {
+                navigate('/admin/payment');
+            } else if (role === 'manager') {
+                navigate('/manager/payment');
+            } else if (role === 'employee') {
+                navigate('/employee/payment');
+            } else {
+                navigate('/login'); // Default fallback
+            }
         } catch (error) {
             console.error('Error adding payment:', error);
         }
@@ -149,11 +174,22 @@ function AddPayment() {
                         </select>
                     </div>
 
-                    <Link to="/admin/payment" className="btn btn-secondary">
+                    <Link
+                        to={
+                            role === 'admin'
+                                ? '/admin/payment'
+                                : role === 'manager'
+                                ? '/manager/payment'
+                                : role === 'employee'
+                                ? '/employee/payment'
+                                : '/login'
+                        }
+                        className="btn btn-secondary"
+                    >
                         Trở lại
                     </Link>
                     <button type="submit" className="btn btn-primary">
-                        Thêm
+                        Thê.m
                     </button>
                 </form>
             </div>

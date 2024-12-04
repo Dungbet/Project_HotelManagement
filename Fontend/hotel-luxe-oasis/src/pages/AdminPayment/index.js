@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function AdminPayment() {
     const [payments, setPayments] = useState([]);
@@ -14,10 +15,26 @@ function AdminPayment() {
     const [page, setPage] = useState(0); // Current page
     const size = 10; // Number of payments per page
     const navigate = useNavigate();
+    const [role, setRole] = useState(null);
+
     const getToken = () => localStorage.getItem('token');
+
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
 
     useEffect(() => {
         fetchPayments();
+        decodeToken();
     }, [page]);
 
     const fetchPayments = async () => {
@@ -58,9 +75,19 @@ function AdminPayment() {
             <div className="bg-light text-center rounded p-4">
                 <div className="d-flex align-items-center justify-content-between mb-4">
                     <h6 className="mb-0">Quản Lý Giao Dịch</h6>
-                    <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-payment')}>
-                        Thêm Giao Dịch
-                    </button>
+                    {role === 'admin' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-payment')}>
+                            Thêm Giao Dịch
+                        </button>
+                    ) : role === 'manager' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-payment')}>
+                            Thêm Giao Dịch
+                        </button>
+                    ) : role === 'employee' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/employee/add-payment')}>
+                            Thêm Giao Dịch
+                        </button>
+                    ) : null}
                 </div>
                 <p className="text-success">{messages.addMessageSuccess}</p>
                 <p className="text-danger">{messages.addMessageFail}</p>

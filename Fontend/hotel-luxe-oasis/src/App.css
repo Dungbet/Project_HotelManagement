@@ -3473,3 +3473,17 @@ select {
     height: 20px;
     margin: 0;
 }
+
+/* .room-empty {
+    margin-top: 15px;
+} */
+
+.chart-container {
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center; /* Centers vertically */
+    width: 100%; /* Ensures the container takes up available width */
+    height: 400px; /* Adjust this as needed for your chart's size */
+    max-width: 600px; /* Optional: Set a maximum width for the chart */
+    margin: 0 auto; /* Centers the container itself if needed */
+}

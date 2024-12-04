@@ -2,17 +2,13 @@ package com.example.demo.Controller;
 
 import com.example.demo.DTO.*;
 import com.example.demo.Service.BookingService;
-
 import com.example.demo.Service.Jobscheduler;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,6 +25,20 @@ public class AdminBookingController {
 
     @Autowired
     Jobscheduler jobscheduler;
+
+    @GetMapping("/count-room-booked")
+    public ResponseDTO<Long> countBooked (){
+        return ResponseDTO.<Long>builder().status(200).data(bookingService.countBookedRooms()).msg("ok").build();
+    }
+
+    @GetMapping("/count-all-room")
+    public ResponseDTO<Long> countAllRoom(){
+        return ResponseDTO.<Long>builder().status(200).data(bookingService.countAllRooms()).msg("ok").build();
+    }
+    @GetMapping("/count-room-empty")
+    public ResponseDTO<Long> countRoomEmpty (){
+        return ResponseDTO.<Long>builder().status(200).data(bookingService.countTotalRoomEmpty()).msg("ok").build();
+    }
 
     @PostMapping("/create")
     public ResponseDTO<BookingDTO> createBooking(

@@ -7,7 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+import { jwtDecode } from 'jwt-decode';
 function AdminUser() {
     const [users, setUsers] = useState([]);
     const [messages, setMessages] = useState({
@@ -25,10 +25,26 @@ function AdminUser() {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
+    const [role, setRole] = useState(null);
     const navigate = useNavigate();
     const getToken = () => localStorage.getItem('token');
 
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
+
     useEffect(() => {
+        decodeToken();
         fetchUsers();
         fetchRoles();
     }, [page]);
@@ -41,7 +57,14 @@ function AdminUser() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setUsers(response.data.data.data);
+            let fetchedUsers = response.data.data.data;
+            if (role === 'manager') {
+                // Loại bỏ người dùng có quyền "Admin" hoặc "Manager"
+                fetchedUsers = fetchedUsers.filter(
+                    (user) => user.role.name !== 'ROLE_ADMIN' && user.role.name !== 'ROLE_MANAGER',
+                );
+            }
+            setUsers(fetchedUsers);
             setEndPage(response.data.data.totalPages);
         } catch (error) {
             console.error('Error fetching users', error);
@@ -55,9 +78,15 @@ function AdminUser() {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
-            }); // Adjust this to your actual endpoint
-            // Ensure the roles data is an array
-            setRoles(response.data.data);
+            });
+            let fetchedRoles = response.data.data;
+            if (role === 'manager') {
+                // Chỉ giữ lại "Employee" và "User" khi role là "manager"
+                fetchedRoles = fetchedRoles.filter(
+                    (role) => role.name === 'ROLE_EMPLOYEE' || role.name === 'ROLE_USER',
+                );
+            }
+            setRoles(fetchedRoles);
         } catch (error) {
             console.error('Error fetching roles', error);
         }
@@ -143,9 +172,16 @@ function AdminUser() {
             <div className="bg-light text-center rounded p-4">
                 <div className="d-flex align-items-center justify-content-between mb-4">
                     <h6 className="mb-0">Quản Lý Người Dùng</h6>
-                    <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-user')}>
-                        Thêm Người Dùng
-                    </button>
+
+                    {role === 'manager' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-user')}>
+                            Thêm Người Dùng
+                        </button>
+                    ) : (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-user')}>
+                            Thêm Người Dùng
+                        </button>
+                    )}
                 </div>
                 <p className="text-success">{messages.addMessageSuccess}</p>
                 <p className="text-danger">{messages.addMessageFail}</p>
@@ -190,14 +226,14 @@ function AdminUser() {
                                     <td>
                                         <select
                                             className="form-select"
-                                            aria-label="Default select example"
+                                            aria-label="Select role"
                                             value={user.role ? user.role.id : ''}
                                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                         >
                                             {Array.isArray(roles) &&
                                                 roles.map((role) => (
                                                     <option key={role.id} value={role.id}>
-                                                        {role.name === 'ROLE_ADMIN' ? 'ADMIN' : 'USER'}
+                                                        {role.name.replace('ROLE_', '')}
                                                     </option>
                                                 ))}
                                         </select>

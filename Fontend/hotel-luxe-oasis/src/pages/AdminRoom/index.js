@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -25,10 +27,26 @@ function AdminRoom() {
     const size = 10; // Number of rooms per page
     const [dialogOpen, setDialogOpen] = useState(false);
     const [roomToDelete, setRoomToDelete] = useState(null);
+    const [role, setRole] = useState(null);
 
     const navigate = useNavigate();
 
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
+
     useEffect(() => {
+        decodeToken();
         fetchRooms();
         fetchCategories();
         fetchHotels();
@@ -160,9 +178,15 @@ function AdminRoom() {
                         </select>
                     </div>
 
-                    <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-room')}>
-                        Thêm Phòng
-                    </button>
+                    {role === 'manager' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-room')}>
+                            Thêm Phòng
+                        </button>
+                    ) : (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-room')}>
+                            Thêm Phòng
+                        </button>
+                    )}
                 </div>
                 <p className="text-success">{messages.addMessageSuccess}</p>
                 <p className="text-danger">{messages.addMessageFail}</p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { jwtDecode } from 'jwt-decode';
 function AddUser() {
     const [roles, setRoles] = useState([]);
     const [formData, setFormData] = useState({
@@ -20,10 +20,24 @@ function AddUser() {
     const [errorUsername, setErrorUsername] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false); // New state for loading
+    const [role, setRole] = useState(null);
 
     const getToken = () => localStorage.getItem('token');
     const navigate = useNavigate();
 
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
     useEffect(() => {
         const fetchRoles = async () => {
             try {
@@ -44,6 +58,7 @@ function AddUser() {
         };
 
         fetchRoles();
+        decodeToken();
     }, []);
 
     const handleChange = (e) => {
@@ -56,8 +71,24 @@ function AddUser() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); // Set loading to true when starting the request
+        setLoading(true); // Set loading to true khi bắt đầu request
 
+        // Kiểm tra các trường dữ liệu trước khi gửi
+        if (
+            !formData.name ||
+            !formData.username ||
+            !formData.password ||
+            !formData.phoneNumber ||
+            !formData.email ||
+            !formData.address ||
+            !formData.roleId
+        ) {
+            setError('Vui lòng điền đầy đủ thông tin!');
+            setLoading(false);
+            return;
+        }
+
+        // Nếu tất cả các trường hợp đã được nhập đủ, tiếp tục gửi yêu cầu
         try {
             const data = new FormData();
             data.append('name', formData.name);
@@ -81,15 +112,24 @@ function AddUser() {
                 },
             });
 
-            // Check response for error messages
+            // Kiểm tra phản hồi có thông báo lỗi không
             const responseData = response.data;
             if (responseData.msg) {
                 if (responseData.msg.includes('Email đã tồn tại')) {
                     setErrorEmail('Email đã tồn tại');
-                } else if (responseData.msg.includes('Tên đăng nhập đã tồn tại')) {
-                    setErrorUsername('Tên đăng nhập đã tồn tại');
+                    setErrorUsername(''); // Clear lỗi tên tài khoản
+                } else if (responseData.msg.includes('Tên tài khoản đã tồn tại')) {
+                    setErrorUsername('Tên tài khoản đã tồn tại');
+                    setErrorEmail(''); // Clear lỗi email
                 } else {
-                    navigate('/admin/user');
+                    // Điều hướng đến trang người dùng dựa trên vai trò
+                    if (role === 'admin') {
+                        navigate('/admin/user');
+                    } else if (role === 'manager') {
+                        navigate('/manager/user');
+                    } else {
+                        navigate('/login'); // Default fallback
+                    }
                 }
                 setLoading(false);
                 return;
@@ -100,7 +140,7 @@ function AddUser() {
             console.error('Error adding user:', error);
             setError('Có lỗi xảy ra.');
         } finally {
-            setLoading(false); // Set loading to false after the request completes
+            setLoading(false); // Set loading to false sau khi request hoàn tất
         }
     };
 
@@ -120,7 +160,6 @@ function AddUser() {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            required
                         />
                     </div>
                     <div className="mb-3">
@@ -134,7 +173,6 @@ function AddUser() {
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
-                            required
                         />
                         {errorUsername && <div className="text-danger">{errorUsername}</div>}
                     </div>
@@ -149,7 +187,6 @@ function AddUser() {
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
-                            required
                         />
                     </div>
                     <div className="mb-3">
@@ -216,14 +253,21 @@ function AddUser() {
                             name="roleId"
                             value={formData.roleId}
                             onChange={handleChange}
-                            required
                         >
                             <option value="">Chọn quyền</option>
-                            {roles.map((role) => (
-                                <option key={role.id} value={role.id}>
-                                    {role.name}
-                                </option>
-                            ))}
+                            {roles
+                                .filter((role) => {
+                                    // Chỉ hiển thị User và Employee nếu người dùng không phải Admin
+                                    if (role !== 'admin') {
+                                        return role.name === 'ROLE_USER' || role.name === 'ROLE_EMPLOYEE';
+                                    }
+                                    return role.name !== 'Admin'; // Admin không được thêm Admin
+                                })
+                                .map((role) => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.name}
+                                    </option>
+                                ))}
                         </select>
                     </div>
 
@@ -235,7 +279,10 @@ function AddUser() {
                     </div>
 
                     {error && <div className="alert alert-danger">{error}</div>}
-                    <Link to="/admin/user" className="btn btn-secondary">
+                    <Link
+                        to={role === 'admin' ? '/admin/user' : role === 'manager' ? '/manager/user' : '/login'}
+                        className="btn btn-secondary"
+                    >
                         Trở lại
                     </Link>
                     <button type="submit" className="btn btn-primary" disabled={loading}>

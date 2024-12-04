@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogContentText } from '@mui/material';
 
 function ChatIcon() {
     const [isChatBoxOpen, setIsChatBoxOpen] = useState(false);
@@ -11,6 +12,18 @@ function ChatIcon() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const chatBoxRef = useRef(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState('');
+
+    const showDialog = (message) => {
+        setDialogMessage(message);
+        setIsDialogOpen(true);
+    };
+
+    const closeDialog = () => {
+        setIsDialogOpen(false);
+        navigate('/login'); // Chuyển hướng sau khi đóng dialog
+    };
 
     useEffect(() => {
         const fetchUsername = async () => {
@@ -91,11 +104,9 @@ function ChatIcon() {
     }, [username]);
 
     // Function to toggle chat box visibility
-    // Function to toggle chat box visibility
     const toggleChatBox = () => {
         if (!username) {
-            alert('Bạn cần đăng nhập để gửi tin nhắn.');
-            navigate('/login');
+            showDialog('Bạn cần đăng nhập để gửi tin nhắn.');
         } else {
             setIsChatBoxOpen((prevState) => !prevState);
         }
@@ -104,7 +115,7 @@ function ChatIcon() {
     // Function to handle sending messages
     const handleSendMessage = async () => {
         if (!username) {
-            alert('Bạn cần đăng nhập để gửi tin nhắn.');
+            showDialog('Bạn cần đăng nhập để gửi tin nhắn.');
             navigate('/login');
             return;
         }
@@ -133,10 +144,10 @@ function ChatIcon() {
                     setNewMessage('');
                     setError('');
                 } catch (e) {
-                    setError('Không thể gửi tin nhắn.');
+                    showDialog('Không thể gửi tin nhắn.');
                 }
             } else {
-                setError('Chưa kết nối được với admin. Vui lòng thử lại sau.');
+                showDialog('Chưa kết nối được với admin. Vui lòng thử lại sau.');
             }
         }
     };
@@ -197,6 +208,17 @@ function ChatIcon() {
                     </button>
                 </div>
             </div>
+            <Dialog open={isDialogOpen} onClose={closeDialog}>
+                <DialogTitle>Thông báo</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>{dialogMessage}</DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDialog} color="primary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

@@ -2,8 +2,12 @@ import { Fragment } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '~/routes';
 import { adminRoutes } from '~/routes';
+import { employeeRoutes } from '~/routes';
+import { managerRoutes } from '~/routes';
 import { DefaultLayout } from '~/components/Layout';
 import { DefaultLayoutAdmin } from '~/components/Layout';
+import { DefaultLayoutManager } from '~/components/Layout';
+import { DefaultLayoutEmployee } from '~/components/Layout';
 import './App.css';
 // index.js hoặc App.js
 
@@ -31,6 +35,36 @@ function App() {
                     })}
                     {adminRoutes.map((route, index) => {
                         const Layout = route.layout === null ? Fragment : DefaultLayoutAdmin;
+                        const Page = route.component;
+                        return (
+                            <Route
+                                key={index}
+                                path={route.path}
+                                element={
+                                    <Layout>
+                                        <Page />
+                                    </Layout>
+                                }
+                            />
+                        );
+                    })}
+                    {managerRoutes.map((route, index) => {
+                        const Layout = route.layout === null ? Fragment : DefaultLayoutManager;
+                        const Page = route.component;
+                        return (
+                            <Route
+                                key={index}
+                                path={route.path}
+                                element={
+                                    <Layout>
+                                        <Page />
+                                    </Layout>
+                                }
+                            />
+                        );
+                    })}
+                    {employeeRoutes.map((route, index) => {
+                        const Layout = route.layout === null ? Fragment : DefaultLayoutEmployee;
                         const Page = route.component;
                         return (
                             <Route

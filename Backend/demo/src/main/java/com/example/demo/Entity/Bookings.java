@@ -21,7 +21,7 @@ public class Bookings extends TimeAuditable {
 	private double totalAmount;
 	private int guest;
 	private int numChildren;
-	private String status;
+	private String status; //
 	private String bookingStatus;
 
 

@@ -34,11 +34,17 @@ function AdminLogin() {
 
                 const userData = userResponse.data;
 
-                if (userData.role.name === 'ROLE_ADMIN') {
-                    navigate('/admin/'); // Redirect to admin page
+                // Kiểm tra vai trò và điều hướng tới trang tương ứng
+                const role = userData.role.name;
+                if (role === 'ROLE_ADMIN') {
+                    navigate('/admin/'); // Điều hướng tới trang admin
+                } else if (role === 'ROLE_MANAGER') {
+                    navigate('/manager/'); // Điều hướng tới trang manager
+                } else if (role === 'ROLE_EMPLOYEE') {
+                    navigate('/employee/booking'); // Điều hướng tới trang employee
                 } else {
-                    localStorage.removeItem('token'); // Xóa token nếu không phải admin
-                    setStatuslogin('Bạn không có quyền truy cập');
+                    localStorage.removeItem('token'); // Xóa token nếu vai trò không hợp lệ
+                    setStatuslogin('Vai trò không hợp lệ');
                 }
             } else if (status === 401) {
                 // Đăng nhập thất bại

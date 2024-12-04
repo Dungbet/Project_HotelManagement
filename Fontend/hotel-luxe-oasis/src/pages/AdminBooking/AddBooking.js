@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parse, differenceInDays } from 'date-fns';
 import vi from 'date-fns/locale/vi';
+import { jwtDecode } from 'jwt-decode';
 
 function AddBooking() {
     const [rooms, setRooms] = useState([]);
@@ -20,14 +21,31 @@ function AddBooking() {
         discountedPrice: 0,
         guestCount: '',
         status: 'Chưa thanh toán',
+        numChildren: 0,
     });
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [errors, setErrors] = useState({});
+    const [cusess, setCuscess] = useState({});
     const [discount, setDiscount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [role, setRole] = useState(null);
+
     const navigate = useNavigate();
 
     const getToken = () => localStorage.getItem('token');
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -58,6 +76,7 @@ function AddBooking() {
         };
 
         fetchUserInfo();
+        decodeToken();
     }, [navigate]);
 
     const fetchAvailableRooms = async (startDate, endDate) => {
@@ -128,13 +147,15 @@ function AddBooking() {
             }));
         }
     };
-
     const handleApplyCoupon = async () => {
+        // Xóa thông báo cũ trước khi cập nhật thông báo mới
+        setCuscess({});
+        setErrors({});
         if (!formData.couponCode.trim()) {
             setDiscount(0);
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: formData.totalAmount,
+                discountedPrice: prevData.totalAmount, // Giữ nguyên giá ban đầu
             }));
             return;
         }
@@ -145,27 +166,80 @@ function AddBooking() {
                 const coupon = response.data.data;
                 const originalPrice = parseFloat(formData.totalAmount);
                 const discountAmount = (coupon.discountPercentage / 100) * originalPrice;
+                let discountedPrice = originalPrice - discountAmount;
+
+                // Giảm thêm 10% cho mỗi trẻ em
+                if (formData.numChildren > 0) {
+                    const childrenDiscount = (10 / 100) * discountedPrice * formData.childrenCount;
+                    discountedPrice -= childrenDiscount;
+                }
+
                 setDiscount(discountAmount);
-                const discountedPrice = originalPrice - discountAmount;
                 setFormData((prevData) => ({
                     ...prevData,
                     discountedPrice: discountedPrice,
                 }));
+                setCuscess({ couponCode: 'Áp dụng mã thành công!' });
             } else {
+                // Mã giảm giá sai, giữ nguyên giá hiện tại
                 setErrors({ couponCode: 'Mã giảm giá sai hoặc đã hết hạn!' });
                 setDiscount(0);
+
+                // Tính lại giá sau giảm giá với số trẻ em nếu có
+                const originalPrice = parseFloat(formData.totalAmount);
+                let discountedPrice = originalPrice;
+
+                if (formData.numChildren > 0) {
+                    const childrenDiscount = (10 / 100) * discountedPrice * formData.numChildren;
+                    discountedPrice -= childrenDiscount;
+                }
+
                 setFormData((prevData) => ({
                     ...prevData,
-                    discountedPrice: formData.totalAmount,
+                    discountedPrice: discountedPrice, // Giữ lại giá sau giảm giá (nếu có trẻ em)
                 }));
             }
         } catch (error) {
             console.error('Error applying coupon:', error);
             setErrors({ couponCode: 'Mã giảm giá sai hoặc đã hết hạn!' });
             setDiscount(0);
+
+            // Tính lại giá sau giảm giá với số trẻ em nếu có
+            const originalPrice = parseFloat(formData.totalAmount);
+            let discountedPrice = originalPrice;
+
+            if (formData.numChildren > 0) {
+                const childrenDiscount = (10 / 100) * discountedPrice * formData.numChildren;
+                discountedPrice -= childrenDiscount;
+            }
+
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: formData.totalAmount,
+                discountedPrice: discountedPrice, // Giữ lại giá sau giảm giá (nếu có trẻ em)
+            }));
+        }
+    };
+
+    const handleChildrenCountChange = (e) => {
+        const numChildren = e.target.value;
+        setFormData((prevState) => ({
+            ...prevState,
+            numChildren: numChildren,
+        }));
+
+        if (selectedRoom) {
+            const originalPrice = parseFloat(formData.totalAmount);
+            let discountedPrice = originalPrice - discount; // Giảm giá từ mã giảm giá đã áp dụng
+
+            // Giảm thêm 10% cho mỗi trẻ em
+            if (numChildren > 0) {
+                const childrenDiscount = (10 / 100) * discountedPrice * numChildren;
+                discountedPrice -= childrenDiscount;
+            }
+
+            setFormData((prevData) => ({
+                ...prevData,
+                discountedPrice: discountedPrice,
             }));
         }
     };
@@ -174,15 +248,16 @@ function AddBooking() {
         e.preventDefault();
 
         console.log('Form Data:', formData); // Log the form data to ensure it's correct
-
+        // Cập nhật số khách = số người lớn + số trẻ em
+        const totalGuests = parseInt(formData.guestCount, 10) + parseInt(formData.numChildren, 10);
         // Validate form data
         const validationErrors = {};
         if (!formData.guestCount) validationErrors.guestCount = 'Số khách là bắt buộc';
         if (!formData.startDate) validationErrors.startDate = 'Ngày đến là bắt buộc';
         if (!formData.endDate) validationErrors.endDate = 'Ngày đi là bắt buộc';
         if (!formData.roomId) validationErrors.roomId = 'Chọn phòng là bắt buộc';
-        else if (selectedRoom && formData.guestCount > selectedRoom.capacity)
-            validationErrors.guestCount = `Số khách không được vượt quá ${selectedRoom.capacity}`;
+        else if (selectedRoom && totalGuests > selectedRoom.capacity)
+            validationErrors.guestCount = `Tổng số khách (người lớn + trẻ em) không được vượt quá ${selectedRoom.capacity}`;
         if (!formData.name) validationErrors.name = 'Tên là bắt buộc';
         if (!formData.phoneNumber) validationErrors.phoneNumber = 'Số điện thoại là bắt buộc';
         if (!formData.email) validationErrors.email = 'Email là bắt buộc';
@@ -232,7 +307,15 @@ function AddBooking() {
 
             console.log('API Response:', response); // Log the API response for debugging
 
-            navigate('/admin/booking'); // Redirect to the booking page
+            if (role === 'admin') {
+                navigate('/admin/booking');
+            } else if (role === 'manager') {
+                navigate('/manager/booking');
+            } else if (role === 'employee') {
+                navigate('/employee/booking');
+            } else {
+                navigate('/login'); // Default fallback
+            }
         } catch (error) {
             console.error('Error creating booking:', error);
         }
@@ -294,7 +377,7 @@ function AddBooking() {
                     </div>
                     {selectedRoom && (
                         <div className="mb-3">
-                            <label className="form-label">Số khách:</label>
+                            <label className="form-label">Số người lớn:</label>
                             <input
                                 type="number"
                                 name="guestCount"
@@ -305,6 +388,21 @@ function AddBooking() {
                                 max={selectedRoom.capacity}
                             />
                             {errors.guestCount && <div className="text-danger">{errors.guestCount}</div>}
+                        </div>
+                    )}
+                    {selectedRoom && (
+                        <div className="mb-3">
+                            <label className="form-label">Số lượng trẻ em:</label>
+                            <input
+                                type="number"
+                                name="childrenCount"
+                                value={formData.numChildren}
+                                onChange={handleChildrenCountChange}
+                                className="form-control"
+                                min="0"
+                                max={selectedRoom.capacity}
+                            />
+                            {errors.numChildren && <div className="text-danger">{errors.numChildren}</div>}
                         </div>
                     )}
                     <div className="mb-3">
@@ -322,6 +420,10 @@ function AddBooking() {
                         <button type="button" onClick={handleApplyCoupon} className="btn btn-primary mt-2">
                             Áp dụng
                         </button>
+                        {/* Hiển thị thông báo thành công khi có coupon và không có lỗi */}
+                        {cusess.couponCode && <div className="text-success">{cusess.couponCode}</div>}
+
+                        {/* Hiển thị thông báo lỗi khi có lỗi và không có coupon hợp lệ */}
                         {errors.couponCode && <div className="text-danger">{errors.couponCode}</div>}
                     </div>
                     <div className="mb-3">
@@ -390,6 +492,20 @@ function AddBooking() {
                         />
                         {errors.email && <div className="text-danger">{errors.email}</div>}
                     </div>
+                    <Link
+                        to={
+                            role === 'admin'
+                                ? '/admin/booking'
+                                : role === 'manager'
+                                ? '/manager/booking'
+                                : role === 'employee'
+                                ? '/employee/booking'
+                                : '/login'
+                        }
+                        className="btn btn-secondary"
+                    >
+                        Trở lại
+                    </Link>
                     <button type="submit" className="btn btn-primary">
                         Đặt phòng
                     </button>

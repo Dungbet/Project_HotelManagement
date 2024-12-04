@@ -45,6 +45,14 @@ public interface UserService {
     UsersDTO findByEmail(String email);
     boolean existsUsername(String username);
     void changePassword(String username, String oldPassword, String newPassword);
+    long countTotalCustomers();
+    double growthUser();
+
+    long countNewCustomersToday();
+//    long countNewCustomersYesterday();
+List<Object[]> countUserByDay();
+
+
 
 
 }
@@ -71,6 +79,29 @@ class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
     }
+
+    @Override
+    public long countTotalCustomers() {
+        return userRepo.countTotalUser();
+    }
+
+    @Override
+    public double growthUser() {
+        long newUser = userRepo.countNewCustomersToday();
+        long yesterdayUser = userRepo.countNewCustomersYesterday();
+        return ((newUser - yesterdayUser)/yesterdayUser)*100;
+    }
+
+    @Override
+    public long countNewCustomersToday() {
+        return userRepo.countNewCustomersToday();
+    }
+
+    @Override
+    public  List<Object[]> countUserByDay() {
+        return userRepo.countUserByDay();
+    }
+
 
     public UsersDTO convert(Users users){
         if (users == null) {
@@ -164,7 +195,6 @@ class UserServiceImpl implements UserService, UserDetailsService {
             userRepo.save(users);
         }
     }
-
 
     @Override
     public boolean existsByEmail(String email) {

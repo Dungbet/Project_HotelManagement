@@ -40,6 +40,28 @@ public class AdminRoomController {
                 .data(roomService.findAvailableRoomsAdmin(checkinDate, checkoutDate))
                 .build();
     }
+    @GetMapping("/booked-rooms")
+    public ResponseDTO<PageDTO<List<RoomsDTO>>> bookedRoom(@RequestParam int page, @RequestParam int size) {
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return ResponseDTO.<PageDTO<List<RoomsDTO>>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findBookedRooms(searchDTO))
+                .build();
+    }@GetMapping("/empty-rooms")
+    public ResponseDTO<PageDTO<List<RoomsDTO>>> emptyRoom(@RequestParam int page, @RequestParam int size) {
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return ResponseDTO.<PageDTO<List<RoomsDTO>>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findEmptyRooms(searchDTO))
+                .build();
+    }
+
 
         @PostMapping("/create")
     public ResponseDTO<RoomsDTO> create(@ModelAttribute RoomsDTO roomsDTO) throws IllegalStateException, IOException {

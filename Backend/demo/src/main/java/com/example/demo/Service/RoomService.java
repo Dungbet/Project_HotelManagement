@@ -26,6 +26,8 @@ public interface RoomService {
     List<RoomsDTO> getAll();
     List<RoomsDTO> getRoomsByRandom();
     PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date checkinDate, Date  checkoutDate,int totalGuest);
+    PageDTO<List<RoomsDTO>> findBookedRooms(SearchDTO searchDTO);
+    PageDTO<List<RoomsDTO>> findEmptyRooms(SearchDTO searchDTO);
     List<RoomsDTO> findAvailableRoomsAdmin(Date checkinDate, Date  checkoutDate);
     PageDTO<List<RoomsDTO>> sortByPrice (SearchDTO searchDTO);
     PageDTO<List<RoomsDTO>> sortByCapacity(SearchDTO searchDTO);
@@ -114,6 +116,46 @@ class RoomServiceImpl implements RoomService {
                 .data(page.get().map(r -> convertToDTO(r)).collect(Collectors.toList()))
                 .build();
     }
+
+    @Override
+    public PageDTO<List<RoomsDTO>> findBookedRooms(SearchDTO searchDTO) {
+        if (searchDTO.getCurrentPage() == null) {
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null) {
+            searchDTO.setSize(6);
+        }
+
+        Date now = new Date();
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Rooms> page = roomRepo.findBookedRooms(pageRequest, now, now);
+
+        return PageDTO.<List<RoomsDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(r -> convertToDTO(r)).collect(Collectors.toList()))
+                .build();
+    }
+    @Override
+    public PageDTO<List<RoomsDTO>> findEmptyRooms(SearchDTO searchDTO) {
+        if (searchDTO.getCurrentPage() == null) {
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null) {
+            searchDTO.setSize(6);
+        }
+
+        Date now = new Date();
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Rooms> page = roomRepo.findEmptyRooms(pageRequest, now, now);
+
+        return PageDTO.<List<RoomsDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(r -> convertToDTO(r)).collect(Collectors.toList()))
+                .build();
+    }
+
     @Override
     public List<RoomsDTO> findAvailableRoomsAdmin( Date  checkinDate, Date  checkoutDate) {
         return roomRepo.findAvailableRoomsAdmin(checkinDate,checkoutDate).stream().map(r -> convertToDTO(r)).collect(Collectors.toList());

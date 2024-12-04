@@ -37,6 +37,10 @@ public interface   BookingService {
     void requestCancel (BookingDTO bookingDTO);
     public void AdminCancel(BookingDTO bookingDTO);
     void finishBooking (BookingDTO bookingDTO);
+    long countAllRooms();
+    long countBookedRooms();
+    long countTotalRoomEmpty();
+
 
 
 
@@ -197,6 +201,30 @@ class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Booking không ở trạng thái đã đặt");
         }
     }
+
+    @Override
+    public long countAllRooms() {
+        return roomRepo.countAllRooms();
+    }
+
+    @Override
+    public long countBookedRooms() {
+        long total = countAllRooms();
+        long booked = countTotalRoomEmpty();
+        System.out.println(total - booked);
+        return total - booked;
+
+
+
+    }
+
+    @Override
+    public long countTotalRoomEmpty() {
+        Date now = new Date();
+        return roomRepo.countAvailableRoomsAdmin(now,now);
+
+    }
+
 
     @Override
     public void confirmCancel(BookingDTO bookingDTO, boolean confirm) {

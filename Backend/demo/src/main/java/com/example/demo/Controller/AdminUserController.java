@@ -35,12 +35,43 @@ public class AdminUserController {
         return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.getAll(searchDTO)).build();
     }
 
+    @GetMapping("/get-all-user")
+    public ResponseDTO<Long> getAllUser(){
+        return ResponseDTO.<Long>builder().status(200).msg("ok").data(userService.countTotalCustomers()).build();
+    }
+    @GetMapping("/get-growth-user")
+    public ResponseDTO<Double> getGrowthUser(){
+        return ResponseDTO.<Double>builder().status(200).msg("ok").data(userService.growthUser()).build();
+    }
+
+    @GetMapping("/get-new-user")
+    public ResponseDTO<Long> getNewUser(){
+        return ResponseDTO.<Long>builder().status(200).msg("ok").data(userService.countNewCustomersToday()).build();
+    }
+    @GetMapping("/count-user-day")
+    public ResponseDTO< List<Object[]>> countUserByDay(){
+        return ResponseDTO.< List<Object[]>>builder().status(200).msg("ok").data(userService.countUserByDay()).build();
+    }
+//    @GetMapping("get-yesterday-user")
+//    public ResponseDTO<Long> getYesterdayUser(){
+//        return ResponseDTO.<Long>builder().status(200).msg("ok").data(userService.countNewCustomersYesterday()).build();
+//    }
+
+
+
     @GetMapping("/search")
     public ResponseDTO<UsersDTO> getById(@RequestParam int id){
         return ResponseDTO.<UsersDTO>builder().status(200).msg("ok").data(userService.getById(id)).build();
     }
     @PostMapping("/create")
     public ResponseDTO<UsersDTO> create(@ModelAttribute UsersDTO usersDTO) throws IllegalStateException, IOException {
+
+        if(userService.existsUsername(usersDTO.getUsername())){
+            return ResponseDTO.<UsersDTO>builder().status(400).msg("Tên tài khoản đã tồn tại").build();
+        }
+        if(userService.existsByEmail(usersDTO.getEmail())){
+            return ResponseDTO.<UsersDTO>builder().status(400).msg("Email đã tồn tại").build();
+        }
         if (usersDTO.getFile() != null && !usersDTO.getFile().isEmpty()) {
             // Lưu vào cloudinary
             Map r = this.cloudinary.uploader().upload(usersDTO.getFile().getBytes(),

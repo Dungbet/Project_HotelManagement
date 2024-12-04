@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
+import { jwtDecode } from 'jwt-decode';
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
@@ -22,9 +23,24 @@ function AdminBooking() {
     const [endPage, setEndPage] = useState(1);
     const [page, setPage] = useState(0); // Current page
     const size = 10; // Number of bookings per page
+    const [role, setRole] = useState(null);
+
     const navigate = useNavigate();
 
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
     useEffect(() => {
+        decodeToken();
         fetchBookings();
     }, [page]);
     useEffect(() => {
@@ -218,9 +234,20 @@ function AdminBooking() {
             <div className="bg-light text-center rounded p-4">
                 <div className="d-flex align-items-center justify-content-between mb-4">
                     <h6 className="mb-0">Quản Lý Đặt Phòng</h6>
-                    <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-booking')}>
-                        Thêm Đặt Phòng
-                    </button>
+
+                    {role === 'admin' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-booking')}>
+                            Thêm Đặt Phòng
+                        </button>
+                    ) : role === 'manager' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-booking')}>
+                            Thêm Đặt Phòng
+                        </button>
+                    ) : role === 'employee' ? (
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/employee/add-booking')}>
+                            Thêm Đặt Phòng
+                        </button>
+                    ) : null}
                 </div>
                 <p className={`text-${message.type === 'success' ? 'success' : 'danger'}`}>{message.text}</p>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bar, Line } from 'react-chartjs-2';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -10,12 +10,16 @@ import {
     Legend,
     LineElement,
     PointElement,
+    ArcElement,
 } from 'chart.js';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, addDays, isBefore } from 'date-fns';
+// Import RoomList
+import RoomList from './RoomList';
+import UserChart from './UserChart';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
 function AdminDashboard() {
     const [startDate, setStartDate] = useState(new Date());
@@ -26,9 +30,21 @@ function AdminDashboard() {
     });
     const [todayOrderCount, setTodayOrderCount] = useState(0);
     const [todayRevenue, setTodayRevenue] = useState(0);
+    const [roomStats, setRoomStats] = useState({
+        totalRooms: 0,
+        bookedRooms: 0,
+        emptyRooms: 0,
+    });
+    const [userStats, setUserStats] = useState({
+        totalUser: 0,
+        userNew: 0,
+        growth: 0,
+    });
 
     useEffect(() => {
         fetchTodayStatistics();
+        fetchRoomStatistics();
+        fetchUserStatistics();
     }, []);
 
     const getToken = () => localStorage.getItem('token');
@@ -63,6 +79,61 @@ function AdminDashboard() {
             updateSummary(result.data);
         } catch (error) {
             console.error('Error fetching chart data:', error);
+        }
+    };
+    const fetchRoomStatistics = async () => {
+        try {
+            const token = getToken();
+
+            const totalRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-all-room', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const bookedRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-room-booked', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const emptyRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-room-empty', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const totalRooms = await totalRoomsResponse.json();
+            const bookedRooms = await bookedRoomsResponse.json();
+            const emptyRooms = await emptyRoomsResponse.json();
+
+            setRoomStats({
+                totalRooms: totalRooms.data,
+                bookedRooms: bookedRooms.data,
+                emptyRooms: emptyRooms.data,
+            });
+        } catch (error) {
+            console.error('Error fetching room statistics:', error);
+        }
+    };
+
+    const fetchUserStatistics = async () => {
+        try {
+            const token = getToken();
+
+            const totalUserRes = await fetch('http://localhost:8080/admin/user/get-all-user', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const userNewRes = await fetch('http://localhost:8080/admin/user/get-new-user', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const growthRes = await fetch('http://localhost:8080/admin/user/get-growth-user', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const totalUser = await totalUserRes.json();
+            const userNew = await userNewRes.json();
+            const growth = await growthRes.json();
+
+            setUserStats({
+                totalUser: totalUser.data,
+                userNew: userNew.data,
+                growth: growth.data,
+            });
+        } catch (error) {
+            console.error('Error fetching room statistics:', error);
         }
     };
 
@@ -150,6 +221,19 @@ function AdminDashboard() {
 
     return (
         <div className="container-fluid pt-4">
+            <h3
+                style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: '20px',
+                    textAlign: 'center',
+                    padding: '10px',
+                    borderBottom: '2px solid #007bff',
+                }}
+            >
+                Thống kê doanh thu
+            </h3>
             <div className="row g-4">
                 <div className="col-sm-6 col-xl-6">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
@@ -201,6 +285,141 @@ function AdminDashboard() {
                             <div>
                                 <Bar data={chartData} />
                                 {/* <Line data={chartData} /> */}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3
+                style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: '20px',
+                    textAlign: 'center',
+                    padding: '10px',
+                    borderBottom: '2px solid #007bff',
+                }}
+            >
+                Thống kê phòng
+            </h3>
+            <div className="room-empty row g-4">
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-bed fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Tổng số phòng</p>
+                            <h3 className="mb-0 text-center">{roomStats.totalRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-check-circle fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Số phòng đã đặt</p>
+                            <h3 className="mb-0 text-center">{roomStats.bookedRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-door-open fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Số phòng trống</p>
+                            <h3 className="mb-0 text-center">{roomStats.emptyRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="container-fluid pt-4 px-4">
+                <div className="row g-4">
+                    <div className="col-12">
+                        <div className="bg-light text-center rounded p-4">
+                            <h3>Thống kê phòng hôm nay</h3>
+                            <div className="chart-container">
+                                <Pie
+                                    data={{
+                                        labels: ['Đã đặt', 'Trống'],
+                                        datasets: [
+                                            {
+                                                data: [roomStats.bookedRooms, roomStats.emptyRooms],
+                                                backgroundColor: ['#007bff', '#ff6600'],
+                                                borderWidth: 1,
+                                            },
+                                        ],
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Thống kê phòng hôm nay',
+                                        },
+                                        maintainAspectRatio: false,
+                                    }}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-light text-center rounded p-4">
+                        {/* <h3>Danh sách phòng</h3> */}
+                        {/* Thêm RoomList tại đây */}
+                        <RoomList />
+                    </div>
+                </div>
+            </div>
+
+            <h3
+                style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: '20px',
+                    textAlign: 'center',
+                    padding: '10px',
+                    borderBottom: '2px solid #007bff',
+                }}
+            >
+                Thống kê người dùng
+            </h3>
+            <div className="room-empty row g-4">
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-user-plus fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Khách hàng mới</p>
+                            <h3 className="mb-0 text-center">{userStats.userNew}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-arrow-up fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Tỷ lệ tăng trưởng</p>
+                            <h3 className="mb-0 text-center">{userStats.growth}%</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-users fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Tổng khách hàng</p>
+                            <h3 className="mb-0 text-center">{userStats.totalUser}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="container-fluid pt-4 px-4">
+                    <div className="row g-4">
+                        <div className="col-12">
+                            <div className="bg-light text-center rounded p-4">
+                                <h3>Thống kê người dùng</h3>
+                                {/* Thêm UserChart vào đây */}
+                                <UserChart userStats={userStats} />
                             </div>
                         </div>
                     </div>

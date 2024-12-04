@@ -43,4 +43,12 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("SELECT b FROM Bookings b JOIN FETCH b.rooms WHERE b.id = :bookingId")
     Bookings findByIdWithRooms(@Param("bookingId") int bookingId);
 
+
+
+
+    // check đếm phòng đã booking
+
+
+
+
 }

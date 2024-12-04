@@ -53,6 +53,11 @@ public class ApplicationInitConfig {
             } else {
                 log.info("Người dùng 'admin' đã tồn tại.");
             }
+            // Tạo người dùng "manager"
+            createUserIfNotExist("manager", "dung", "ROLE_MANAGER");
+
+            // Tạo người dùng "employee"
+            createUserIfNotExist("employee", "dung", "ROLE_EMPLOYEE");
 
             // Kiểm tra và tạo hotel mặc định
             String defaultHotelName = "Luxe Oasis";
@@ -69,5 +74,31 @@ public class ApplicationInitConfig {
                 log.info("Hotel '{}' đã tồn tại.", defaultHotelName);
             }
         };
+    }
+
+    // Phương thức tạo người dùng nếu chưa tồn tại
+    private void createUserIfNotExist(String username, String password, String roleName) {
+        Users user = userRepo.findByUsername(username);
+        if (user == null) {
+            user = new Users();
+            user.setUsername(username);
+            user.setPassword(new BCryptPasswordEncoder().encode(password));
+            user.setEnable(true);
+
+            // Tạo và gán vai trò cho người dùng
+            Roles role = roleRepo.findByName(roleName);
+            if (role == null) {
+                // Tạo vai trò mới nếu chưa tồn tại
+                role = new Roles();
+                role.setName(roleName);
+                roleRepo.save(role);
+            }
+            user.setRole(role);
+
+            userRepo.save(user);
+            log.info("Người dùng '{}' đã được tạo với mật khẩu mặc định: {}. Vui lòng thay đổi mật khẩu.", username, password);
+        } else {
+            log.info("Người dùng '{}' đã tồn tại.", username);
+        }
     }
 }
