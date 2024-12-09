@@ -14,6 +14,7 @@ import InformationBooking from '~/pages/InformationBooking';
 import PersionalInformation from '~/pages/PersionalInformation';
 import EditInformation from '~/pages/PersionalInformation/EditInformation';
 import ChangePassword from '~/pages/ChangePassword';
+
 // Layout Admin
 import AdminBooking from '~/pages/AdminBooking';
 import AddBooking from '~/pages/AdminBooking/AddBooking';

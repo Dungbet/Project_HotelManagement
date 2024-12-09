@@ -21,8 +21,11 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Query("SELECT r FROM Rooms r WHERE r.capacity >= :totalGuest AND r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
     Page<Rooms> findAvailableRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate, int totalGuest);
 
-    @Query("SELECT r FROM Rooms r WHERE r.id IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    @Query("SELECT r FROM Rooms r " +
+            "JOIN FETCH r.bookings b " +
+            "WHERE b.checkInDate < :checkoutDate AND b.checkOutDate > :checkinDate")
     Page<Rooms> findBookedRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
+
     @Query("SELECT r FROM Rooms r WHERE  r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
     Page<Rooms> findEmptyRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
 

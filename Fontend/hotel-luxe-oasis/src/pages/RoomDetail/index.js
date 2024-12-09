@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import vi from 'date-fns/locale/vi';
 import { format, parseISO, parse } from 'date-fns';
-
+import RoomDetailGallery from './RoomDetailGallery';
 function RoomDetail() {
     const { id } = useParams();
     const location = useLocation();
@@ -24,6 +24,10 @@ function RoomDetail() {
             .get(`http://localhost:8080/room/search?id=${id}`)
             .then((response) => {
                 setRoom(response.data.data);
+                const roomData = response.data.data;
+                // Lấy danh sách ảnh từ roomImages
+                const images = roomData.roomImages.map((image) => image.imageUrl);
+                setRoom({ ...roomData, gallery: images }); // Thêm 'gallery' chứa danh sách ảnh
             })
             .catch((error) => {
                 console.error('Có lỗi xảy ra khi gọi API', error);
@@ -181,6 +185,8 @@ function RoomDetail() {
     const discountedPrice = room.discountedPrice.toFixed(1);
     const formattedPrice = room.price.toLocaleString('vi-VN');
     const formattedDiscountedPrice = discountedPrice.toLocaleString('vi-VN');
+    // Dữ liệu ảnh (bao gồm ảnh chính và gallery)
+    const images = [room.roomImg, ...(room.gallery || [])];
 
     return (
         <div>
@@ -208,7 +214,9 @@ function RoomDetail() {
                     <div className="row">
                         <div className="col-lg-8">
                             <div className="room-details-item">
-                                <img src={room.roomImg} alt="" />
+                                <RoomDetailGallery images={room.gallery || []} />
+
+                                {/* <img src={room.roomImg} alt="" /> */}
                                 {room.discount > 0 && <div className="discount-tag">Giảm giá {room.discount}%</div>}
                                 <div className="rd-text">
                                     <div className="rd-title">

@@ -84,16 +84,7 @@ function Header() {
                                 <div className="tn-right">
                                     <div className="top-social">
                                         <Link to="#">
-                                            <i className="fa fa-facebook"></i>
-                                        </Link>
-                                        <Link to="#">
-                                            <i className="fa fa-twitter"></i>
-                                        </Link>
-                                        <Link to="#">
-                                            <i className="fa fa-tripadvisor"></i>
-                                        </Link>
-                                        <Link to="#">
-                                            <i className="fa fa-instagram"></i>
+                                            <i class="fas fa-bed"></i>
                                         </Link>
                                     </div>
                                     <Link to="/rooms" className="bk-btn">

@@ -1,11 +1,7 @@
 package com.example.demo.Controller;
 
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import com.example.demo.DTO.PageDTO;
-import com.example.demo.DTO.ResponseDTO;
-import com.example.demo.DTO.RoomsDTO;
-import com.example.demo.DTO.SearchDTO;
+import com.example.demo.DTO.*;
 import com.example.demo.Service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/room")
@@ -40,6 +35,25 @@ public class AdminRoomController {
                 .data(roomService.findAvailableRoomsAdmin(checkinDate, checkoutDate))
                 .build();
     }
+    @GetMapping("/most-rooms")
+    public ResponseDTO<List<MostBookedRoomsDTO>> findMostBookedRooms( @RequestParam("startDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date startDate,
+                                                                      @RequestParam("endDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  endDate) {
+
+        return ResponseDTO.<List<MostBookedRoomsDTO>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findMostBookedRooms(startDate, endDate))
+                .build();
+    }
+    @GetMapping("/min-rooms")
+    public ResponseDTO<List<MostBookedRoomsDTO>> findMinBookedRooms() {
+
+        return ResponseDTO.<List<MostBookedRoomsDTO>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findMinBookedRooms())
+                .build();
+    }
     @GetMapping("/booked-rooms")
     public ResponseDTO<PageDTO<List<RoomsDTO>>> bookedRoom(@RequestParam int page, @RequestParam int size) {
         SearchDTO searchDTO = new SearchDTO();
@@ -63,40 +77,36 @@ public class AdminRoomController {
     }
 
 
-        @PostMapping("/create")
-    public ResponseDTO<RoomsDTO> create(@ModelAttribute RoomsDTO roomsDTO) throws IllegalStateException, IOException {
-        Map r = this.cloudinary.uploader().upload(roomsDTO.getFile().getBytes(),
-                ObjectUtils.asMap("resource_type", "auto", "folder", CLOUDINARY_FOLDER));
-        String img = (String)r.get("secure_url");
-        String publicId = (String)r.get("public_id");
-        roomsDTO.setRoomImg(img);
-        roomsDTO.setRoomImgPublicId(publicId);
+    @PostMapping("/create")
+    public ResponseDTO<RoomsDTO> create(@ModelAttribute RoomsDTO roomsDTO) throws IOException {
         roomService.create(roomsDTO);
-        return ResponseDTO.<RoomsDTO>builder().status(200).msg("ok").build();
-    }
-        @PutMapping("/update/{id}")
-    public ResponseDTO<RoomsDTO> update (@PathVariable int id,@ModelAttribute RoomsDTO roomsDTO)throws IllegalStateException, IOException{
-        RoomsDTO existingRoom = roomService.getByid(id);
-        if (existingRoom != null && roomsDTO.getFile() != null && !roomsDTO.getFile().isEmpty()) {
-            // Xóa ảnh cũ
-            String oldPublicId = existingRoom.getRoomImgPublicId();
-            if (oldPublicId != null) {
-                cloudinary.uploader().destroy(oldPublicId, ObjectUtils.emptyMap());
-            }
 
-            // Upload ảnh mới
-            Map r = this.cloudinary.uploader().upload(roomsDTO.getFile().getBytes(),
-                    ObjectUtils.asMap("resource_type", "auto", "folder", CLOUDINARY_FOLDER));
-            String img = (String)r.get("secure_url");
-            String newPublicId = (String)r.get("public_id");
-            roomsDTO.setRoomImg(img);
-            roomsDTO.setRoomImgPublicId(newPublicId);
-        }
+        return ResponseDTO.<RoomsDTO>builder().status(200).msg("Room created successfully") .build();
+    }
+
+
+
+    @PutMapping("/update/{id}")
+    public ResponseDTO<RoomsDTO> update(
+            @PathVariable int id,
+            @ModelAttribute RoomsDTO roomsDTO) throws IOException {
+        // Xác thực và set ID vào DTO
+        roomsDTO.setId(id);
+
+        // Gọi service update
         roomService.update(roomsDTO);
-        return ResponseDTO.<RoomsDTO>builder().status(200).msg("ok").build();
+
+        return ResponseDTO.<RoomsDTO>builder()
+                .status(200)
+                .msg("Room updated successfully")
+                .build();
     }
 
-        @GetMapping("/search")
+
+
+
+
+    @GetMapping("/search")
     public ResponseDTO<RoomsDTO> getById(@RequestParam int id){
         return ResponseDTO.<RoomsDTO>builder().status(200).msg("ok").data(roomService.getByid(id)).build();
     }

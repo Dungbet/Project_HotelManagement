@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 function AddRoom() {
     const [hotels, setHotels] = useState([]);
@@ -21,8 +22,11 @@ function AddRoom() {
         file: null,
         discount: '',
         discountedPrice: '',
+        additionalFiles: [],
     });
     const [previewImage, setPreviewImage] = useState(''); // Thêm state để lưu URL ảnh xem trước
+    const [previewImages, setPreviewImages] = useState([]); // Xem trước danh sách ảnh
+    const [role, setRole] = useState(null);
 
     const navigate = useNavigate();
     // Hàm lấy token từ localStorage
@@ -42,7 +46,10 @@ function AddRoom() {
         if (!formData.view.trim()) newErrors.view = 'View không được để trống.';
         if (!formData.hotelId) newErrors.hotelId = 'Hãy chọn khách sạn.';
         if (!formData.categoryId) newErrors.categoryId = 'Hãy chọn loại phòng.';
-        if (!formData.file) newErrors.file = 'Hãy chọn một ảnh phòng.';
+        if (!formData.file) newErrors.file = 'Hãy chọn một ảnh thumnail.';
+        if (!formData.additionalFiles || formData.additionalFiles.length === 0) {
+            newErrors.additionalFiles = 'Hãy chọn ít nhất một ảnh phòng.';
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -82,10 +89,25 @@ function AddRoom() {
 
         fetchHotels();
         fetchCategories();
+        decodeToken();
     }, []);
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+
+                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
+
         setFormData((prevState) => {
             const updatedData = { ...prevState, [name]: type === 'file' ? files[0] : value };
 
@@ -110,6 +132,7 @@ function AddRoom() {
         if (!validateForm()) {
             return;
         }
+        console.log('Submitting form with data:', formData); // Thêm log ở đây
 
         const data = new FormData();
         data.append('name', formData.name);
@@ -129,6 +152,12 @@ function AddRoom() {
         if (formData.file) {
             data.append('file', formData.file);
         }
+        // Thêm phần xử lý additionalFiles
+        if (formData.additionalFiles && formData.additionalFiles.length > 0) {
+            formData.additionalFiles.forEach((file, index) => {
+                data.append(`additionalFiles`, file);
+            });
+        }
         data.append('discount', formData.discount);
         data.append('discountedPrice', formData.discountedPrice);
 
@@ -141,10 +170,40 @@ function AddRoom() {
                 },
             });
             console.log('Room added successfully:', response.data);
-            navigate('/admin/room');
+
+            if (role === 'admin') {
+                navigate('/admin/room');
+            } else if (role === 'manager') {
+                navigate('/manager/room');
+            } else {
+                navigate('/login'); // Default fallback
+            }
         } catch (error) {
             console.error('Error adding room:', error);
         }
+    };
+    const handleAdditionalFiles = (e) => {
+        const files = Array.from(e.target.files).filter((file) => file instanceof File);
+
+        // Thêm các tệp mới vào mảng ảnh xem trước
+        setPreviewImages((prev) => [...prev, ...files.map((file) => URL.createObjectURL(file))]);
+
+        // Cập nhật formData với các tệp ảnh mới
+        setFormData((prevState) => ({
+            ...prevState,
+            additionalFiles: [...prevState.additionalFiles, ...files],
+        }));
+    };
+
+    const handleRemoveFile = (index) => {
+        setPreviewImages((prev) => {
+            URL.revokeObjectURL(prev[index]); // Xóa URL đã tạo
+            return prev.filter((_, i) => i !== index);
+        });
+        setFormData((prev) => ({
+            ...prev,
+            additionalFiles: prev.additionalFiles.filter((_, i) => i !== index),
+        }));
     };
 
     return (
@@ -360,6 +419,47 @@ function AddRoom() {
                         )}
                         {errors.file && <div className="invalid-feedback">{errors.file}</div>}
                     </div>
+                    <div className="mb-3">
+                        <label htmlFor="additionalFiles" className="form-label">
+                            Ảnh thêm
+                        </label>
+                        <input
+                            type="file"
+                            className="form-control"
+                            id="additionalFiles"
+                            name="additionalFiles"
+                            onChange={handleAdditionalFiles}
+                            accept="image/*"
+                            multiple
+                        />
+                        {errors.additionalFiles && <div className="invalid-feedback">{errors.additionalFiles}</div>}
+                        <div className="mt-2">
+                            {previewImages.length > 0 && (
+                                <div className="preview-images">
+                                    {previewImages.map((image, index) => (
+                                        <div key={index} className="preview-image">
+                                            <img
+                                                src={image}
+                                                alt={`Preview ${index}`}
+                                                className="img-thumbnail"
+                                                style={{ maxWidth: '100px', maxHeight: '100px' }}
+                                            />
+
+                                            <button type="button" onClick={() => handleRemoveFile(index)}>
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    {/* {previewImages && (
+                        <div className="mt-2">
+                            <img src={previewImages} alt="Preview" style={{ maxWidth: '100px', maxHeight: '100px' }} />
+                        </div>
+                    )} */}
+                    {errors.file && <div className="invalid-feedback">{errors.file}</div>}
                     <button type="submit" className="btn btn-primary">
                         Thêm phòng
                     </button>

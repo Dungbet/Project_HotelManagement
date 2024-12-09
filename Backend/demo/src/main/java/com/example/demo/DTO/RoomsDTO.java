@@ -2,9 +2,12 @@ package com.example.demo.DTO;
 
 import com.example.demo.Entity.Hotels;
 import com.example.demo.Entity.RoomCategories;
+import com.example.demo.Entity.RoomImage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 public class RoomsDTO {
@@ -23,8 +26,14 @@ public class RoomsDTO {
 	private double discountedPrice;
 	private RoomCategories category;
 	private String roomImgPublicId;
-
+	// Danh sách booking cho phòng này
+	private List<BookingDTO> bookings;
 
 	@JsonIgnore
 	private MultipartFile file;
+
+	private List<MultipartFile> additionalFiles; // Các file ảnh bổ sung
+
+
+	private List<RoomImage> roomImages; // Danh sách URL ảnh bổ sung
 }

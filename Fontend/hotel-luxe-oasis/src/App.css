@@ -3418,59 +3418,62 @@ select {
     background-color: #c5b29f;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* shadow-lg */
     border-top: 1px solid #e1a86e; /* border-t */
-    padding: 16px; /* p-4 */
+    padding: 8px 16px; /* giảm padding để làm nhỏ lại */
     z-index: 1000; /* Ensures the footer stays on top */
-    margin-left: 100px;
-    margin-right: 100px;
-    margin-bottom: 20px;
+    margin-left: 100px; /* giảm margin để làm nhỏ lại */
+    margin-right: 100px; /* giảm margin để làm nhỏ lại */
+    border-top-left-radius: 12px; /* bo góc trên bên trái */
+    border-top-right-radius: 12px; /* bo góc trên bên phải */
 }
 
-/* footer-container */
 .footer-container {
-    max-width: 1140px; /* max-w-7xl */
-    margin: 0 auto; /* mx-auto */
+    max-width: 960px; /* giảm max-width để footer gọn gàng hơn */
+    margin: 0 auto; /* căn giữa */
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
-/* footer-content */
 .footer-content {
     display: flex;
     align-items: center;
+    font-size: 14px; /* giảm kích thước font chữ */
 }
 
-/* footer-text */
 .footer-text {
     font-weight: 500; /* font-medium */
+    color: #333; /* màu sắc văn bản rõ ràng hơn */
 }
 
-/* separator */
 .separator {
-    margin: 0 16px; /* mx-4 */
+    margin: 0 8px; /* giảm margin giữa các phần tử */
+    color: #333;
 }
 
-/* total-price */
 .total-price {
     font-weight: bold; /* font-bold */
+    color: #333; /* màu sắc rõ ràng hơn */
 }
 
-/* book-now-button */
 .book-now-button {
     background-color: #fb923c; /* bg-orange-500 */
     color: white;
-    padding: 12px 32px; /* px-8 py-3 */
-    border-radius: 8px; /* rounded-lg */
+    padding: 8px 24px; /* giảm padding */
+    border-radius: 8px; /* bo tròn góc */
     font-weight: 500; /* font-medium */
+    font-size: 14px; /* giảm kích thước chữ */
     transition: background-color 0.3s;
+    border: none;
 }
 
 .book-now-button:hover {
     background-color: #ea580c; /* hover:bg-orange-600 */
 }
+
 .room-item .form-check-input {
-    width: 20px;
-    height: 20px;
+    width: 16px; /* giảm kích thước checkbox */
+    height: 16px;
     margin: 0;
 }
 
@@ -3486,4 +3489,76 @@ select {
     height: 400px; /* Adjust this as needed for your chart's size */
     max-width: 600px; /* Optional: Set a maximum width for the chart */
     margin: 0 auto; /* Centers the container itself if needed */
+}
+
+/* Ghi đè vị trí sticky */
+.sticky-top {
+    position: static !important; /* Loại bỏ sticky */
+}
+
+/* Tùy chỉnh container của thumbnails */
+.custom-galleria .p-galleria-thumbnail-wrapper {
+    display: flex;
+    justify-content: space-evenly; /* Đặt khoảng cách đều giữa các ảnh */
+    align-items: center;
+    gap: 10px; /* Khoảng cách tùy chỉnh giữa các ảnh */
+}
+
+/* Tùy chỉnh thêm nếu cần */
+.custom-galleria .p-galleria-thumbnail-item {
+    padding: 5px; /* Đệm giữa các ảnh */
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+
+.custom-galleria .p-galleria-thumbnail-item:hover {
+    transform: scale(1.1); /* Hiệu ứng hover */
+}
+/* Ẩn mũi tên điều hướng của thumbnails */
+.custom-galleria .p-galleria-thumbnail-prev,
+.custom-galleria .p-galleria-thumbnail-next {
+    display: none !important;
+}
+
+.center-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    min-height: 300px; /* Đảm bảo chiều cao tối thiểu */
+}
+
+/* css cho lọc phòng đặt nhiều */
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-item {
+    flex: 1;
+}
+
+.date-picker {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.filter-button {
+    margin-left: 10px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.filter-button:hover {
+    background-color: #0056b3;
 }

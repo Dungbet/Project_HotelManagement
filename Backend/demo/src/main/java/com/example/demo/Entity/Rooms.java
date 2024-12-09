@@ -2,6 +2,7 @@ package com.example.demo.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,6 +28,11 @@ public class Rooms {
 	private int capacity;
 	private String view;
 	private String roomImgPublicId;
+
+	@OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<RoomImage> roomImages; // Danh sách các ảnh bổ sung
+
 
 	@ManyToOne
 	@JoinColumn(name="hotel_id")

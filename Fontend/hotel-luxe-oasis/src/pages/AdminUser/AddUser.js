@@ -257,11 +257,12 @@ function AddUser() {
                             <option value="">Chọn quyền</option>
                             {roles
                                 .filter((role) => {
-                                    // Chỉ hiển thị User và Employee nếu người dùng không phải Admin
-                                    if (role !== 'admin') {
-                                        return role.name === 'ROLE_USER' || role.name === 'ROLE_EMPLOYEE';
+                                    // Nếu người dùng là Admin, cho phép hiển thị tất cả quyền, bao gồm ROLE_MANAGER
+                                    if (roles === 'ROLE_ADMIN') {
+                                        return true;
                                     }
-                                    return role.name !== 'Admin'; // Admin không được thêm Admin
+                                    // Nếu không phải Admin, chỉ hiển thị ROLE_USER và ROLE_EMPLOYEE
+                                    return role.name === 'ROLE_USER' || role.name === 'ROLE_EMPLOYEE';
                                 })
                                 .map((role) => (
                                     <option key={role.id} value={role.id}>
@@ -270,6 +271,27 @@ function AddUser() {
                                 ))}
                         </select>
                     </div>
+
+                    {/* <div className="mb-3">
+                        <label htmlFor="roleId" className="form-label">
+                            Quyền
+                        </label>
+                        <select
+                            className="form-control"
+                            id="roleId"
+                            name="roleId"
+                            value={formData.roleId}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Chọn quyền</option>
+                            {roles.map((role) => (
+                                <option key={role.id} value={role.id}>
+                                    {role.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div> */}
 
                     <div className="mb-3">
                         <label htmlFor="file" className="form-label">

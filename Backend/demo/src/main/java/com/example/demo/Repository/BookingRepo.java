@@ -1,7 +1,10 @@
 package com.example.demo.Repository;
 
 import com.example.demo.DTO.CountBookingsFromDateDTO;
+import com.example.demo.DTO.MostBookedRoomsDTO;
 import com.example.demo.Entity.Bookings;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -43,7 +46,25 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("SELECT b FROM Bookings b JOIN FETCH b.rooms WHERE b.id = :bookingId")
     Bookings findByIdWithRooms(@Param("bookingId") int bookingId);
 
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+            "FROM Bookings b " +
+            "JOIN b.rooms r " +
+            "WHERE b.bookingStatus = 'Hoàn thành' " +
+            "AND b.createAt BETWEEN :startDate AND :endDate " +
+            "GROUP BY r.id, r.name, r.roomImg, r.roomNumber, r.price " +
+            "ORDER BY COUNT(r.id) DESC")
+    Page<MostBookedRoomsDTO> findMostBookedRooms(@Param("startDate") Date startDate,
+                                                            @Param("endDate") Date endDate,
+                                                            Pageable pageable);
 
+
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+            "FROM Bookings b " +
+            "JOIN b.rooms r " +
+            "WHERE b.bookingStatus = 'Hoàn thành' " +
+            "GROUP BY r.id, r.name " +
+            "ORDER BY COUNT(r.id) ASC")
+    Page<MostBookedRoomsDTO> findMinBookedRooms(Pageable pageable);
 
 
     // check đếm phòng đã booking

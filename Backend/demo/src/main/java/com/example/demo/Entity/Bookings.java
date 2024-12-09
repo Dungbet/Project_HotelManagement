@@ -41,6 +41,7 @@ public class Bookings extends TimeAuditable {
 	@JsonManagedReference("booking-reviews")
 	private List<Reviews> reviews;
 
+
 	// Booking-specific information
 	private String bookingName;
 	private String bookingEmail;

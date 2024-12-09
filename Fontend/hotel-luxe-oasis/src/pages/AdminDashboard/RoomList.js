@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import BookingDetailsModal from './DetailBoooking.js';
 
 const RoomList = () => {
     const [rooms, setRooms] = useState([]);
@@ -10,6 +11,8 @@ const RoomList = () => {
     const [endPage, setEndPage] = useState(1); // Tổng số trang
     const [filter, setFilter] = useState('booked'); // Lọc: 'booked' hoặc 'empty'
     const [role, setRole] = useState(null);
+    const [selectedBookingId, setSelectedBookingId] = useState(null); // ID đặt phòng được chọn
+    const [isRoomDetailsModalVisible, setIsRoomDetailsModalVisible] = useState(false);
 
     const navigate = useNavigate(); // Khởi tạo useNavigate
     const getToken = () => localStorage.getItem('token');
@@ -54,9 +57,9 @@ const RoomList = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            const { data, totalPages } = response.data.data; // Chỉnh lại đường dẫn JSON
-            setRooms(data); // Cập nhật danh sách phòng
-            setEndPage(totalPages); // Cập nhật tổng số trang
+            const { data, totalPages } = response.data.data;
+            setRooms(data);
+            setEndPage(totalPages);
         } catch (error) {
             console.error('Error fetching rooms:', error);
         }
@@ -73,6 +76,11 @@ const RoomList = () => {
         } else {
             navigate('/login');
         }
+    };
+    // Hiển thị modal chi tiết phòng
+    const handleViewDetails = (bookingId) => {
+        setSelectedBookingId(bookingId);
+        setIsRoomDetailsModalVisible(true);
     };
 
     return (
@@ -134,11 +142,21 @@ const RoomList = () => {
                                     <td>{room.category ? room.category.name : 'Không xác định'}</td>
                                     <td>{room.capacity}</td>
                                     <td>
-                                        {/* Thêm nút "Đặt ngay" nếu phòng trống */}
-                                        {filter === 'empty' && (
+                                        {filter === 'empty' ? (
                                             <button onClick={() => handleBookNow(room.id)} className="btn btn-primary">
                                                 Đặt ngay
                                             </button>
+                                        ) : room.bookings && room.bookings.length > 0 ? (
+                                            room.bookings.map((booking) => (
+                                                <i
+                                                    key={booking.id}
+                                                    className="fa-solid fa-eye"
+                                                    style={{ cursor: 'pointer', marginRight: '10px' }}
+                                                    onClick={() => handleViewDetails(booking.id)}
+                                                ></i>
+                                            ))
+                                        ) : (
+                                            <span>Không có đặt phòng</span> // Fallback nếu không có booking
                                         )}
                                     </td>
                                 </tr>
@@ -181,6 +199,14 @@ const RoomList = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal */}
+            {isRoomDetailsModalVisible && (
+                <BookingDetailsModal
+                    isVisible={isRoomDetailsModalVisible}
+                    bookingId={selectedBookingId}
+                    onClose={() => setIsRoomDetailsModalVisible(false)}
+                />
+            )}
         </div>
     );
 };

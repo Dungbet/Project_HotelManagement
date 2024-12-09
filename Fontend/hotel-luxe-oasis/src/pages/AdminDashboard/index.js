@@ -18,6 +18,7 @@ import { format, addDays, isBefore } from 'date-fns';
 // Import RoomList
 import RoomList from './RoomList';
 import UserChart from './UserChart';
+import MostRooms from './MostRooms';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
@@ -424,6 +425,22 @@ function AdminDashboard() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="room-empty row g-4">
+                <h3
+                    style={{
+                        fontSize: '24px',
+                        fontWeight: 'bold',
+                        color: '#333',
+                        marginBottom: '20px',
+                        textAlign: 'center',
+                        padding: '10px',
+                        borderBottom: '2px solid #007bff',
+                    }}
+                >
+                    Phòng được đặt nhiều
+                </h3>
+                <MostRooms />
             </div>
         </div>
     );
