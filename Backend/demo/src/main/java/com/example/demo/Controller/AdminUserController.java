@@ -34,6 +34,14 @@ public class AdminUserController {
         searchDTO.setSize(size);
         return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.getAll(searchDTO)).build();
     }
+    @GetMapping("/get-employee")
+    public ResponseDTO<PageDTO<List<UsersDTO>>> getEmployee(@RequestParam int page, @RequestParam int size, @RequestParam int managerId){
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.findEmployeesByManagerIdPaging(searchDTO,managerId)).build();
+    }
+
 
     @GetMapping("/get-all-user")
     public ResponseDTO<Long> getAllUser(){
@@ -58,6 +66,10 @@ public class AdminUserController {
 //    }
 
 
+    @GetMapping("/search-user-by-manager")
+    public ResponseDTO<List<UsersDTO>> findEmployeesByManagerId(@RequestParam int managerId){
+        return ResponseDTO.<List<UsersDTO>>builder().status(200).msg("ok").data(userService.findEmployeesByManagerId(managerId)).build();
+    }
 
     @GetMapping("/search")
     public ResponseDTO<UsersDTO> getById(@RequestParam int id){
@@ -83,6 +95,32 @@ public class AdminUserController {
         }
         // Nếu không có file, chỉ cần tạo user với các thông tin khác
         UsersDTO createdUser = userService.create(usersDTO);
+        return ResponseDTO.<UsersDTO>builder()
+                .status(200)
+                .msg("ok")
+                .data(createdUser)
+                .build();
+    }
+    @PostMapping("/create-employee")
+    public ResponseDTO<UsersDTO> createEmployee(@RequestParam int managerId, @ModelAttribute UsersDTO employeeDTO) throws IllegalStateException, IOException {
+
+        if(userService.existsUsername(employeeDTO.getUsername())){
+            return ResponseDTO.<UsersDTO>builder().status(400).msg("Tên tài khoản đã tồn tại").build();
+        }
+        if(userService.existsByEmail(employeeDTO.getEmail())){
+            return ResponseDTO.<UsersDTO>builder().status(400).msg("Email đã tồn tại").build();
+        }
+        if (employeeDTO.getFile() != null && !employeeDTO.getFile().isEmpty()) {
+            // Lưu vào cloudinary
+            Map r = this.cloudinary.uploader().upload(employeeDTO.getFile().getBytes(),
+                    ObjectUtils.asMap("resource_type", "auto", "folder", CLOUDINARY_FOLDER));
+            String img = (String) r.get("secure_url");
+            String publicId = (String) r.get("public_id");
+            employeeDTO.setAvatar(img);
+            employeeDTO.setAvatarPublicId(publicId); // Lưu public_id của ảnh vào database
+        }
+        // Nếu không có file, chỉ cần tạo user với các thông tin khác
+        UsersDTO createdUser = userService.createEmployee(managerId, employeeDTO);
         return ResponseDTO.<UsersDTO>builder()
                 .status(200)
                 .msg("ok")

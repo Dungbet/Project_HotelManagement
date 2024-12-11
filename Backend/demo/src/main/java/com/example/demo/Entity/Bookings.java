@@ -46,4 +46,8 @@ public class Bookings extends TimeAuditable {
 	private String bookingName;
 	private String bookingEmail;
 	private String bookingPhone;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "employee_id")
+	private Users employee; // Nhân viên xử lý đơn đặt phòng
+
 }

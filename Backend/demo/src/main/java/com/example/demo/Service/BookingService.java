@@ -9,6 +9,7 @@ import com.example.demo.Repository.RoomRepo;
 import com.example.demo.Repository.UserRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.query.Param;
@@ -40,7 +41,9 @@ public interface   BookingService {
     long countAllRooms();
     long countBookedRooms();
     long countTotalRoomEmpty();
+    public void assignEmployeeToBooking(int bookingId, int employeeId);
 
+    PageDTO<List<BookingDTO>> searchBookingsByEmployee(SearchDTO searchDTO, int employeeId);
 
 
 
@@ -48,7 +51,9 @@ public interface   BookingService {
 @Service
 class BookingServiceImpl implements BookingService {
 
+
     @Autowired
+            @Lazy
     JwtTokenService jwtTokenService;
     @Autowired
     BookingRepo bookingRepo;
@@ -58,6 +63,36 @@ class BookingServiceImpl implements BookingService {
 
     @Autowired
     UserRepo userRepo;
+
+    public void assignEmployeeToBooking(int bookingId, int employeeId) {
+        // Tìm nhân viên theo ID
+        Users employee = userRepo.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+
+        // Cập nhật nhân viên vào booking
+        bookingRepo.updateEmployee(bookingId, employee);
+    }
+
+    @Override
+    public PageDTO<List<BookingDTO>> searchBookingsByEmployee(SearchDTO searchDTO, int employeeId) {
+        if (searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if(searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Bookings> page = bookingRepo.searchBookingsByEmployee(pageRequest, employeeId);
+
+        // Tạo đối tượng PageDTO để chứa kết quả phân trang
+        PageDTO<List<BookingDTO>> pageDTO = new PageDTO<>();
+        pageDTO.setTotalPages(page.getTotalPages());
+        pageDTO.setTotalElements(page.getTotalElements());
+
+        List<BookingDTO> bookingDTOS = page.get().map(u -> convertToDTO(u)).collect(Collectors.toList());
+        pageDTO.setData(bookingDTOS);
+        return  pageDTO;
+    }
 
     public BookingDTO convertToDTO(Bookings bookings){
         return new ModelMapper().map(bookings, BookingDTO.class);

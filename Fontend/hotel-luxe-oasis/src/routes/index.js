@@ -34,6 +34,8 @@ import AdminCoupon from '~/pages/AdminCoupon';
 import AdminLogin from '~/pages/AdminLogin';
 import AdminChangePassword from '~/pages/AdminChangePassword';
 import AdminReview from '~/pages/AdminReview';
+import AdminManager from '~/pages/AdminManager';
+import AdminEmployee from '~/pages/AdminEmployee';
 
 // Khong can login
 const publicRoutes = [
@@ -78,6 +80,8 @@ const adminRoutes = [
     { path: '/admin/coupon', component: AdminCoupon },
     { path: '/admin/login', component: AdminLogin, layout: null },
     { path: '/admin/review', component: AdminReview },
+    { path: '/admin/manager', component: AdminManager },
+    { path: '/admin/employee', component: AdminEmployee },
 ];
 const employeeRoutes = [
     { path: '/employee/booking', component: AdminBooking },
@@ -112,5 +116,6 @@ const managerRoutes = [
     { path: '/manager/review', component: AdminReview },
     { path: '/manager/user', component: AdminUser },
     { path: '/manager/add-user', component: AddUser },
+    { path: '/manager/employee', component: AdminEmployee },
 ];
 export { managerRoutes, employeeRoutes, adminRoutes, publicRoutes, privateRoutes };

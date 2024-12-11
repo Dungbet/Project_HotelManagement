@@ -1,8 +1,11 @@
 package com.example.demo.aop;
 
 
+import com.example.demo.DTO.UsersDTO;
+import com.example.demo.Repository.UserRepo;
 import com.example.demo.Service.BlacklistTokenService;
 import com.example.demo.Service.JwtTokenService;
+import com.example.demo.Service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +36,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     BlacklistTokenService blacklistTokenService;
+
+    @Autowired
+    @Lazy
+    UserService userService;
 
     // Đọc token xác minh xem còn hiệu lực hay không
     // Đọc token ra (Đọc header-key)
@@ -66,8 +73,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
                 // Refresh token nếu gần hết hạn
                 if (jwtTokenService.isTokenNearExpiration(token)) {
-                    String newAccessToken = jwtTokenService.createToken(username);
-                    String newRefreshToken = jwtTokenService.createRefreshToken(username);
+                    // Lấy userId từ service, ví dụ như userService
+                    UsersDTO user = userService.findByUsername(username);
+                    int userId = user.getId();  // Giả sử có phương thức để lấy userId
+
+                    String newAccessToken = jwtTokenService.createToken(username, userId);
+                    String newRefreshToken = jwtTokenService.createRefreshToken(username, userId);
                     response.setHeader("Authorization", "Bearer " + newAccessToken);
                     response.setHeader("Refresh-Token", "Bearer " + newRefreshToken);
                 }

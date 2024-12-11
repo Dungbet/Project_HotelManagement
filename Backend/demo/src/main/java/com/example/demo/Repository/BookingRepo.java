@@ -3,6 +3,7 @@ package com.example.demo.Repository;
 import com.example.demo.DTO.CountBookingsFromDateDTO;
 import com.example.demo.DTO.MostBookedRoomsDTO;
 import com.example.demo.Entity.Bookings;
+import com.example.demo.Entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,6 +32,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(DATE(b.createAt), COUNT(b.id), SUM(b.totalAmount)) " +
             "FROM Bookings b " +
             "WHERE b.createAt BETWEEN :startDate AND :endDate " +
+            "AND b.bookingStatus <> 'Đã hủy' "+
             "GROUP BY DATE(b.createAt) " +
             "ORDER BY DATE(b.createAt)")
     List<CountBookingsFromDateDTO> countBookingsFromDate(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
@@ -38,8 +40,10 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
 
     @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(CURRENT_DATE, COUNT(b), SUM(b.totalAmount)) " +
             "FROM Bookings b " +
-            "WHERE DATE(b.createAt) = CURRENT_DATE")
+            "WHERE DATE(b.createAt) = CURRENT_DATE " +
+            "AND b.bookingStatus <> 'Đã hủy'")
     CountBookingsFromDateDTO statisticsDay();
+
 
     @Query("SELECT b FROM Bookings b WHERE b.user.id = :userId")
     List<Bookings> getBookingsByUserId (@Param("userId") int userId);
@@ -66,10 +70,51 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
             "ORDER BY COUNT(r.id) ASC")
     Page<MostBookedRoomsDTO> findMinBookedRooms(Pageable pageable);
 
+    @Query(value = "SELECT AVG(TIMESTAMPDIFF(MINUTE, b.create_at , b.update_at)) " +
+            "FROM Bookings b " +
+            "WHERE b.employee_id = :employeeId "+
+            "AND b.create_at BETWEEN :startDate AND :endDate " +
+            "AND b.booking_status = 'Hoàn thành'",
+            nativeQuery = true)
+    Double averageProcessingTime(@Param("employeeId") int employeeId,@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    @Query("SELECT COUNT(b) FROM Bookings b " +
+            "WHERE b.employee.id = :employeeId " +
+            "AND b.createAt BETWEEN :startDate AND :endDate " +
+            "AND b.bookingStatus IN ('Đã đặt', 'Hoàn thành')")
+    int countSuccessfulBookings(@Param("employeeId") int employeeId,
+                                @Param("startDate") Date startDate,
+                                @Param("endDate") Date endDate);
 
-    // check đếm phòng đã booking
+    @Query("SELECT COUNT(b) FROM Bookings b " +
+            "WHERE b.employee.id = :employeeId " +
+            "AND b.createAt BETWEEN :startDate AND :endDate")
+    int countTotalBookings(@Param("employeeId") int employeeId,
+                           @Param("startDate") Date startDate,
+                           @Param("endDate") Date endDate);
 
+    @Query("SELECT COUNT(b) FROM Bookings b WHERE b.employee.id = :employeeId " +
+            "AND b.createAt BETWEEN :startDate AND :endDate " +
+            "AND b.bookingStatus = 'Đã hủy'")
+    int countCanceledBookings(@Param("employeeId") int employeeId,
+                              @Param("startDate") Date startDate,
+                              @Param("endDate") Date endDate);
 
+    @Query("SELECT SUM(b.totalAmount) " +
+            "FROM Bookings b " +
+            "WHERE b.employee.id = :employeeId " +
+            "AND b.createAt BETWEEN :startDate AND :endDate " +
+            "AND b.bookingStatus <> 'Đã hủy'")
+    Double revenue(@Param("employeeId") int employeeId,
+                   @Param("startDate") Date startDate,
+                   @Param("endDate") Date endDate);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Bookings b SET b.employee = :employee WHERE b.id = :bookingId")
+    void updateEmployee(@Param("bookingId") int bookingId, @Param("employee") Users employee);
+
+    // lấy ra các booking mà employee đăng nhập phụ trách
+    @Query("SELECT b FROM Bookings b WHERE b.employee.id =:employeeId")
+    Page<Bookings> searchBookingsByEmployee (Pageable pageable, @Param("employeeId") int employeeId);
 
 }

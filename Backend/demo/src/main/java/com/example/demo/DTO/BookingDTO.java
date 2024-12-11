@@ -37,4 +37,6 @@ public class BookingDTO {
 	private Date createAt;
 	private Date updateAt;
 
+	private int employeeId;
+
 }

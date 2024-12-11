@@ -1,16 +1,16 @@
 package com.example.demo.Service;
 
-import com.example.demo.DTO.PageDTO;
-import com.example.demo.DTO.SearchDTO;
-import com.example.demo.DTO.ServicesDTO;
-import com.example.demo.DTO.UsersDTO;
+import com.example.demo.DTO.*;
+import com.example.demo.Entity.Coupon;
 import com.example.demo.Entity.Roles;
 import com.example.demo.Entity.Users;
+import com.example.demo.Repository.RoleRepo;
 import com.example.demo.Repository.UserRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,8 +49,14 @@ public interface UserService {
     double growthUser();
 
     long countNewCustomersToday();
+
+    PageDTO<List<UsersDTO>> findEmployeesByManagerIdPaging ( SearchDTO searchDTO,int managerId);
 //    long countNewCustomersYesterday();
 List<Object[]> countUserByDay();
+
+    UsersDTO createEmployee (int managerId, UsersDTO employeeDTO);
+    List<UsersDTO> findEmployeesByManagerId (int managerId);
+
 
 
 
@@ -60,6 +66,9 @@ List<Object[]> countUserByDay();
 class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private RoleRepo roleRepo;
 
 
     @Autowired
@@ -98,8 +107,54 @@ class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public PageDTO<List<UsersDTO>> findEmployeesByManagerIdPaging(SearchDTO searchDTO, int managerId) {
+        if(searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Users> page = userRepo.findEmployeesByManagerIdPaging(pageRequest, managerId);
+
+        return PageDTO.<List<UsersDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
+                .build();
+    }
+
+    @Override
     public  List<Object[]> countUserByDay() {
         return userRepo.countUserByDay();
+    }
+
+    @Override
+    public UsersDTO createEmployee(int managerId, UsersDTO employeeDTO) {
+        Users newEmployee = new ModelMapper().map(employeeDTO, Users.class);
+        Users manager = userRepo.findById(managerId).orElse(null);
+        if(manager == null ){
+            throw new IllegalArgumentException("Manager không tồn tại");
+        }
+        // Tạo mới employee
+        newEmployee.setManager(manager); // Gán manager cho employee
+        // Tạo và gán vai trò cho người dùng
+        Roles adminRole = roleRepo.findByName("ROLE_EMPLOYEE");
+        if (adminRole == null) {
+            // Tạo vai trò mới nếu chưa tồn tại
+            adminRole = new Roles();
+            adminRole.setName("ROLE_EMPLOYEE");
+            roleRepo.save(adminRole);
+        }
+        newEmployee.setRole(adminRole);
+        Users createManager = userRepo.save(newEmployee);
+        return convert(createManager);
+
+    }
+
+    @Override
+    public List<UsersDTO> findEmployeesByManagerId(int managerId) {
+        return userRepo.findEmployeesByManagerId(managerId).stream().map(u -> convert(u)).collect(Collectors.toList());
     }
 
 

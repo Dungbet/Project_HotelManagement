@@ -111,6 +111,12 @@ function Sidebar() {
                     >
                         <i className="fa-solid fa-user me-2"></i>Người dùng
                     </Link>
+                    <Link
+                        to="/manager/employee"
+                        className={`nav-item nav-link ${location.pathname === '/manager/employee' ? 'active' : ''}`}
+                    >
+                        <i className="fa-solid fa-people-roof"></i>Nhân viên
+                    </Link>
                     {/* Uncomment the following line and add necessary logic for loginInfo */}
                     {/* <Link to="/user/1" className="nav-item nav-link"><i className="fa fa-th me-2"></i>User</Link> */}
                 </div>

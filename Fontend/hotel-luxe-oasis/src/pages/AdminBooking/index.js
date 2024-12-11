@@ -24,6 +24,7 @@ function AdminBooking() {
     const [page, setPage] = useState(0); // Current page
     const size = 10; // Number of bookings per page
     const [role, setRole] = useState(null);
+    const [employees, setEmployees] = useState([]);
 
     const navigate = useNavigate();
 
@@ -32,8 +33,12 @@ function AdminBooking() {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
+                console.log('Full decoded token:', decoded); // In toàn bộ payload
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                // Kiểm tra chính xác key lưu role
+                setRole(decoded.sub); // Thử với key khác nếu cần
+
+                return decoded.userId;
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -41,8 +46,61 @@ function AdminBooking() {
     };
     useEffect(() => {
         decodeToken();
-        fetchBookings();
+        // fetchBookings();
+        fetchEmployees();
     }, [page]);
+
+    useEffect(() => {
+        if (role === null) return; // Skip if role is not determined yet
+        fetchBookings();
+    }, [role]);
+
+    // Fetch employees by manager ID
+    const fetchEmployees = async () => {
+        try {
+            const token = getToken();
+            const managerId = decodeToken(); // Get managerId from decoded token
+
+            if (!managerId) {
+                console.error('No manager ID found');
+                return;
+            }
+
+            const response = await axios.get(
+                `http://localhost:8080/admin/user/search-user-by-manager?managerId=${managerId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            );
+            setEmployees(response.data.data);
+        } catch (error) {
+            console.error('Error fetching employees', error);
+        }
+    };
+
+    // Function to assign employee to booking
+    const handleAssignEmployee = async (bookingId, employeeId) => {
+        try {
+            const token = getToken();
+            await axios.put('http://localhost:8080/admin/booking/update-employee', null, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    bookingId: bookingId,
+                    employeeId: employeeId,
+                },
+            });
+            setMessage({ type: 'success', text: 'Phân công nhân viên thành công' });
+            fetchBookings(); // Refresh bookings after assignment
+        } catch (error) {
+            console.error('Error assigning employee', error);
+            setMessage({ type: 'danger', text: 'Phân công nhân viên thất bại' });
+        }
+    };
+
     useEffect(() => {
         if (message.text) {
             const timeout = setTimeout(() => setMessage({ type: '', text: '' }), 5000);
@@ -56,17 +114,28 @@ function AdminBooking() {
         try {
             const token = getToken();
 
-            const response = await axios.get(`http://localhost:8080/admin/booking/?page=${page}&size=${size}`, {
+            let url;
+            if (role === 'employee') {
+                console.log('da dang nhạp employee');
+                const employeeId = decodeToken(); // Lấy employeeId từ token
+                url = `http://localhost:8080/admin/booking/search-booking-by-employee?page=${page}&size=${size}&employeeId=${employeeId}`;
+            } else {
+                url = `http://localhost:8080/admin/booking/?page=${page}&size=${size}`;
+            }
+
+            const response = await axios.get(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
             setBookings(response.data.data.data);
             setEndPage(response.data.data.totalPages);
         } catch (error) {
             console.error('Error fetching bookings', error);
         }
     };
+
     const handleDialogClose = () => {
         setDialog({ open: false, title: '', content: '', onConfirm: null });
     };
@@ -262,7 +331,9 @@ function AdminBooking() {
                                 <th scope="col">Check-out</th>
                                 <th scope="col">Tổng Tiền</th>
                                 <th scope="col">Thanh Toán</th>
+
                                 <th scope="col">Trạng Thái</th>
+                                {role === 'manager' && <th scope="col">Phụ Trách</th>}
                                 <th scope="col">Hành Động</th>
                             </tr>
                         </thead>
@@ -319,6 +390,27 @@ function AdminBooking() {
                                             {booking.bookingStatus}
                                         </span>
                                     </td>
+                                    {role === 'manager' && (
+                                        <td>
+                                            <select
+                                                className="form-select"
+                                                value={
+                                                    booking.employee
+                                                        ? booking.employee.id
+                                                        : employees.find((emp) => emp.id === booking.employeeId)?.id ||
+                                                          ''
+                                                }
+                                                onChange={(e) => handleAssignEmployee(booking.id, e.target.value)}
+                                            >
+                                                <option value="">Chọn nhân viên</option>
+                                                {employees.map((employee) => (
+                                                    <option key={employee.id} value={employee.id}>
+                                                        {employee.username}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                    )}
                                     <td>
                                         {booking.bookingStatus === 'Đã đặt' && (
                                             <>

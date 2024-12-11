@@ -26,8 +26,9 @@ public class JwtTokenService {
     private BlacklistTokenService blacklistTokenService;
 
 
-    public String createToken(String username){
+    public String createToken(String username, int userId){
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("userId", userId);
         Date now = new Date();
         Date exp = new Date(now.getTime() + validity*60*1000);
         return Jwts.builder().setClaims(claims)
@@ -36,8 +37,9 @@ public class JwtTokenService {
                 .signWith( SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
-    public String createRefreshToken(String username) {
+    public String createRefreshToken(String username, int userId) {
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("userId", userId);
         Date now = new Date();
         Date exp = new Date(now.getTime() + refreshTokenValidity * 60 * 1000);
         return Jwts.builder().setClaims(claims)

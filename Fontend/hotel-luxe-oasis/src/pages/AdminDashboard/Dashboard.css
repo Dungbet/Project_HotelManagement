@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    justify-content: space-between; /* Để căn đều các phần tử */
+    gap: 1rem; /* Khoảng cách giữa các phần tử */
+    flex-wrap: wrap; /* Đảm bảo chúng xuống dòng khi không đủ không gian */
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    flex: 1; /* Chia đều không gian cho mỗi mục */
+    gap: 0.5rem; /* Khoảng cách giữa biểu tượng và văn bản */
+}
+
+.item p {
+    margin: 0;
+}
+.flex {
+    display: flex;
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+
+.justify-between {
+    justify-content: space-between; /* Căn đều hai bên */
+}

@@ -26,6 +26,14 @@ public class AdminBookingController {
     @Autowired
     Jobscheduler jobscheduler;
 
+
+    @PutMapping("/update-employee")
+    public ResponseDTO<BookingDTO> update(@RequestParam int bookingId,@RequestParam int employeeId) {
+        bookingService.assignEmployeeToBooking(bookingId,employeeId);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").build();
+    }
+
+
     @GetMapping("/count-room-booked")
     public ResponseDTO<Long> countBooked (){
         return ResponseDTO.<Long>builder().status(200).data(bookingService.countBookedRooms()).msg("ok").build();
@@ -77,6 +85,14 @@ public class AdminBookingController {
         searchDTO.setCurrentPage(page);
         searchDTO.setSize(size);
         PageDTO<List<BookingDTO>> listPageDTO = bookingService.getAllBooking(searchDTO);
+        return ResponseDTO.<PageDTO<List<BookingDTO>>>builder().status(200).data(listPageDTO).msg("ok").build();
+    }
+    @GetMapping("/search-booking-by-employee")
+    public ResponseDTO<PageDTO<List<BookingDTO>>> searchBookingsByEmployee(@RequestParam int page, @RequestParam int size, @RequestParam int employeeId) {
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        PageDTO<List<BookingDTO>> listPageDTO = bookingService.searchBookingsByEmployee(searchDTO, employeeId);
         return ResponseDTO.<PageDTO<List<BookingDTO>>>builder().status(200).data(listPageDTO).msg("ok").build();
     }
 

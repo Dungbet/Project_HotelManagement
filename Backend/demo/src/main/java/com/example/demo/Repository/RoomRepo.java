@@ -53,4 +53,6 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Query("SELECT count(r) FROM Rooms r")
     long countAllRooms();
 
+
+
 }

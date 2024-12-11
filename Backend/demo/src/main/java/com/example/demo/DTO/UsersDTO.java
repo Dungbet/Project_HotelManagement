@@ -22,7 +22,10 @@ public class UsersDTO {
 	private String avatarPublicId;
 	private RolesDTO role;
 	private boolean enable;
+	private int managerId;
 
 	@JsonIgnore
 	private MultipartFile file;
+	private List<Integer> handledBookingIds; // Danh sách ID các booking đã xử lý
+
 }

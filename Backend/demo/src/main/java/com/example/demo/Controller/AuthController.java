@@ -10,6 +10,7 @@ import com.example.demo.Service.JwtTokenService;
 import com.example.demo.Service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,10 +69,17 @@ public class AuthController {
         // Loại bỏ "Bearer " khỏi token
         String token = bearerToken.startsWith("Bearer ") ? bearerToken.substring(7) : bearerToken;
 
+        // Kiểm tra tính hợp lệ của token
         if (jwtTokenService.isValidToken(token)) {
             String username = jwtTokenService.getUserName(token);
-            String newAccessToken = jwtTokenService.createToken(username);
-            String newRefreshToken = jwtTokenService.createRefreshToken(username);
+
+            // Lấy thông tin người dùng từ database hoặc service để lấy userId
+            UsersDTO user = userService.findByUsername(username);
+            int userId = user.getId(); // Giả sử rằng bạn đã có phương thức để lấy userId từ username
+
+            // Tạo lại access token và refresh token với userId
+            String newAccessToken = jwtTokenService.createToken(username, userId);
+            String newRefreshToken = jwtTokenService.createRefreshToken(username, userId);
 
             // Xây dựng phản hồi
             return ResponseEntity.ok()
@@ -79,9 +87,10 @@ public class AuthController {
                     .body(newAccessToken);
         }
 
-        // Xây dựng phản hồi khi token không hợp lệ
+        // Nếu token không hợp lệ
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
     }
+
 
 
     @PostMapping("/login")
@@ -90,10 +99,14 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(usersDTO.getUsername(), usersDTO.getPassword())
             );
+            // Lấy thông tin người dùng từ username
+            UsersDTO user = userService.findByUsername(usersDTO.getUsername());
+            int userId = user.getId(); // Giả sử UsersDTO có trường id
+
             // Generate token after successful authentication
             return ResponseDTO.<String>builder()
                     .status(200)
-                    .data(jwtTokenService.createToken(usersDTO.getUsername()))
+                    .data(jwtTokenService.createToken(usersDTO.getUsername(), userId))
                     .build();
         } catch (AuthenticationException e) {
             // Handle authentication exceptions

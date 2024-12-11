@@ -1,6 +1,8 @@
 package com.example.demo.Repository;
 
 import com.example.demo.Entity.Users;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +23,8 @@ public interface UserRepo extends JpaRepository<Users, Integer>{
     @Transactional
     @Query("UPDATE Users u SET u.enable = :userEnable WHERE u.id = :userId")
     void UpdateEnable(@Param("userEnable") boolean userEnable, @Param("userId") Integer userId);
+
+
 
     //    @Query("SELECT u FROM Users u WHERE u.username = :username")
     Users findByUsername(String username);
@@ -45,5 +49,18 @@ public interface UserRepo extends JpaRepository<Users, Integer>{
             "ORDER BY DATE(c.createAt)")
     List<Object[]> countUserByDay();
 
+    @Query("SELECT u FROM Users u WHERE u.manager.id = :managerId")
+    List<Users> findEmployeesByManagerId(@Param("managerId") int managerId);
+
+    @Query("SELECT u FROM Users u WHERE u.manager.id = :managerId")
+    Page<Users> findEmployeesByManagerIdPaging(Pageable pageable,@Param("managerId") int managerId);
+
+    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_USER\"")
+    Page<Users> searchUser (Pageable pageable);
+    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_MANAGER\"")
+    Page<Users> searchManager (Pageable pageable);
+
+    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_MANAGER\"")
+    Page<Users> searchAdmin (Pageable pageable);
 
 }

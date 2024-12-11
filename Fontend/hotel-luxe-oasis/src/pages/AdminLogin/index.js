@@ -41,7 +41,7 @@ function AdminLogin() {
                 } else if (role === 'ROLE_MANAGER') {
                     navigate('/manager/'); // Điều hướng tới trang manager
                 } else if (role === 'ROLE_EMPLOYEE') {
-                    navigate('/employee/booking'); // Điều hướng tới trang employee
+                    navigate('/employee/payment'); // Điều hướng tới trang employee
                 } else {
                     localStorage.removeItem('token'); // Xóa token nếu vai trò không hợp lệ
                     setStatuslogin('Vai trò không hợp lệ');
