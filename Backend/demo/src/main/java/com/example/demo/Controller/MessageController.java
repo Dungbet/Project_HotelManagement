@@ -19,7 +19,7 @@ public class MessageController {
         return messageService.getMessagesByReceiver(username);
     }
 
-    @PostMapping("/mark-as-read/{id}")
+    @PostMapping("/mark-as-read/{id}")  
     public void markMessageAsRead(@PathVariable("id") int id) {
         messageService.markAsRead(id);
     }

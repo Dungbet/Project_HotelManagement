@@ -21,8 +21,11 @@ public interface PaymentService {
     PageDTO<List<PaymentsDTO>> getAllPayment(SearchDTO searchDTO);
     PaymentsDTO getById(int id);
     void create(PaymentsDTO paymentsDTO);
-    void update(PaymentsDTO paymentsDTO);
+//    void update(PaymentsDTO paymentsDTO);
     void delete(int id);
+    PageDTO<List<PaymentsDTO>>getPaymentsByEmployeeId(SearchDTO searchDTO, int employeeId);
+
+
 }
 @Service
 class PaymentServiceImpl implements PaymentService {
@@ -34,17 +37,17 @@ class PaymentServiceImpl implements PaymentService {
 
     private ModelMapper modelMapper = new ModelMapper();
 
-    @Override
-    public void update(PaymentsDTO paymentsDTO) {
-        Payments payment = paymentRepo.findById(paymentsDTO.getId()).orElse(null);
-        if (payment != null) {
-            payment.setPaymentDate(paymentsDTO.getPaymentDate());
-            payment.setAmount(paymentsDTO.getAmount());
-            payment.setPaymentMethod(paymentsDTO.getPaymentMethod());
-            payment.setBooking(paymentsDTO.getBooking());
-            paymentRepo.save(payment);
-        }
-    }
+//    @Override
+//    public void update(PaymentsDTO paymentsDTO) {
+//        Payments payment = paymentRepo.findById(paymentsDTO.getId()).orElse(null);
+//        if (payment != null) {
+//            payment.setPaymentDate(paymentsDTO.getPaymentDate());
+//            payment.setAmount(paymentsDTO.getAmount());
+//            payment.setPaymentMethod(paymentsDTO.getPaymentMethod());
+//            payment.setBooking(paymentsDTO.getBooking());
+//            paymentRepo.save(payment);
+//        }
+//    }
 
     public PaymentsDTO convertToDTO(Payments payments){
         return new ModelMapper().map(payments, PaymentsDTO.class);
@@ -96,5 +99,26 @@ class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void delete(int id) {
+    }
+
+    @Override
+    public PageDTO<List<PaymentsDTO>> getPaymentsByEmployeeId(SearchDTO searchDTO, int employeeId) {
+        if (searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Payments> page = paymentRepo.getPaymentsByEmployeeId(pageRequest, employeeId);
+
+        PageDTO<List<PaymentsDTO>> pageDTO = new PageDTO<>();
+        pageDTO.setTotalPages(page.getTotalPages());
+        pageDTO.setTotalElements(page.getTotalElements());
+
+        List<PaymentsDTO> paymentsDTOS = page.get().map(p -> convertToDTO(p)).collect(Collectors.toList());
+        pageDTO.setData(paymentsDTOS);
+        return pageDTO;
     }
 }

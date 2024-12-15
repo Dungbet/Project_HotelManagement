@@ -26,9 +26,11 @@ public class JwtTokenService {
     private BlacklistTokenService blacklistTokenService;
 
 
-    public String createToken(String username, int userId){
+    public String createToken(String username, int userId, String role){
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("userId", userId);
+        String roleWithoutPrefix = role.startsWith("ROLE_") ? role.substring(5) : role;
+        claims.put("role", roleWithoutPrefix.toLowerCase());
         Date now = new Date();
         Date exp = new Date(now.getTime() + validity*60*1000);
         return Jwts.builder().setClaims(claims)
@@ -37,9 +39,11 @@ public class JwtTokenService {
                 .signWith( SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
-    public String createRefreshToken(String username, int userId) {
+    public String createRefreshToken(String username, int userId,String role) {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("userId", userId);
+        String roleWithoutPrefix = role.startsWith("ROLE_") ? role.substring(5) : role;
+        claims.put("role", roleWithoutPrefix.toLowerCase());
         Date now = new Date();
         Date exp = new Date(now.getTime() + refreshTokenValidity * 60 * 1000);
         return Jwts.builder().setClaims(claims)

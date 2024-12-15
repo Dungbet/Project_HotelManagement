@@ -40,7 +40,7 @@ function AddBooking() {
             try {
                 const decoded = jwtDecode(token);
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
             } catch (error) {
                 console.error('Invalid token', error);
             }

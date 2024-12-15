@@ -25,7 +25,8 @@ function AdminPayment() {
             try {
                 const decoded = jwtDecode(token);
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
+                return decoded.userId;
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -37,14 +38,31 @@ function AdminPayment() {
         decodeToken();
     }, [page]);
 
+    useEffect(() => {
+        if (role === null) return; // Skip if role is not determined yet
+        fetchPayments();
+    }, [role]);
+
     const fetchPayments = async () => {
         try {
             const token = getToken();
-            const response = await axios.get(`http://localhost:8080/admin/payment/?page=${page}&size=${size}`, {
+
+            let url;
+            if (role === 'employee') {
+                console.log('da dang nhạp employee');
+                const employeeId = decodeToken(); // Lấy employeeId từ token
+                url = `http://localhost:8080/admin/payment/?page=${page}&size=${size}&employeeId=${employeeId}`;
+            } else {
+                console.log('da dang nhạp manager');
+                url = `http://localhost:8080/admin/payment/?page=${page}&size=${size}`;
+            }
+
+            const response = await axios.get(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
+
             setPayments(response.data.data.data);
             setEndPage(response.data.data.totalPages);
         } catch (error) {

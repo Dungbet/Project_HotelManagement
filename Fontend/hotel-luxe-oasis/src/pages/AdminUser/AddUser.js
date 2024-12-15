@@ -12,7 +12,7 @@ function AddUser() {
         email: '',
         address: '',
         gender: 'true',
-        roleId: '', // ID của role
+        roleId: '4', // ID của role
         enable: true,
         file: null,
     });
@@ -32,7 +32,7 @@ function AddUser() {
             try {
                 const decoded = jwtDecode(token);
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -80,8 +80,7 @@ function AddUser() {
             !formData.password ||
             !formData.phoneNumber ||
             !formData.email ||
-            !formData.address ||
-            !formData.roleId
+            !formData.address
         ) {
             setError('Vui lòng điền đầy đủ thông tin!');
             setLoading(false);
@@ -98,7 +97,7 @@ function AddUser() {
             data.append('email', formData.email);
             data.append('address', formData.address);
             data.append('gender', formData.gender);
-            data.append('role.id', formData.roleId); // Gửi roleId như một tham số
+            data.append('role.id', formData.roleId);
             data.append('enable', formData.enable); // Gửi trạng thái kích hoạt
             if (formData.file) {
                 data.append('file', formData.file);
@@ -241,34 +240,6 @@ function AddUser() {
                         >
                             <option value="true">Nam</option>
                             <option value="false">Nữ</option>
-                        </select>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="roleId" className="form-label">
-                            Quyền
-                        </label>
-                        <select
-                            className="form-control"
-                            id="roleId"
-                            name="roleId"
-                            value={formData.roleId}
-                            onChange={handleChange}
-                        >
-                            <option value="">Chọn quyền</option>
-                            {roles
-                                .filter((role) => {
-                                    // Nếu người dùng là Admin, cho phép hiển thị tất cả quyền, bao gồm ROLE_MANAGER
-                                    if (roles === 'ROLE_ADMIN') {
-                                        return true;
-                                    }
-                                    // Nếu không phải Admin, chỉ hiển thị ROLE_USER và ROLE_EMPLOYEE
-                                    return role.name === 'ROLE_USER' || role.name === 'ROLE_EMPLOYEE';
-                                })
-                                .map((role) => (
-                                    <option key={role.id} value={role.id}>
-                                        {role.name}
-                                    </option>
-                                ))}
                         </select>
                     </div>
 

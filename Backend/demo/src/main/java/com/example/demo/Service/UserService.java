@@ -56,6 +56,9 @@ List<Object[]> countUserByDay();
 
     UsersDTO createEmployee (int managerId, UsersDTO employeeDTO);
     List<UsersDTO> findEmployeesByManagerId (int managerId);
+    PageDTO<List<UsersDTO>> searchUser(SearchDTO searchDTO);
+    PageDTO<List<UsersDTO>> searchEmployee(SearchDTO searchDTO);
+    PageDTO<List<UsersDTO>> searchManager(SearchDTO searchDTO);
 
 
 
@@ -73,6 +76,7 @@ class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
 
     @Override
     public void changePassword(String username, String oldPassword, String newPassword) {
@@ -136,6 +140,7 @@ class UserServiceImpl implements UserService, UserDetailsService {
         if(manager == null ){
             throw new IllegalArgumentException("Manager không tồn tại");
         }
+        newEmployee.setPassword(passwordEncoder.encode(newEmployee.getPassword()));
         // Tạo mới employee
         newEmployee.setManager(manager); // Gán manager cho employee
         // Tạo và gán vai trò cho người dùng
@@ -157,6 +162,60 @@ class UserServiceImpl implements UserService, UserDetailsService {
         return userRepo.findEmployeesByManagerId(managerId).stream().map(u -> convert(u)).collect(Collectors.toList());
     }
 
+    @Override
+    public PageDTO<List<UsersDTO>> searchUser(SearchDTO searchDTO) {
+        if(searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Users> page = userRepo.searchUser(pageRequest);
+
+        return PageDTO.<List<UsersDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
+                .build();
+    }
+
+    @Override
+    public PageDTO<List<UsersDTO>> searchEmployee(SearchDTO searchDTO) {
+        if(searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Users> page = userRepo.searchEmployee(pageRequest);
+
+        return PageDTO.<List<UsersDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
+                .build();
+    }
+
+    @Override
+    public PageDTO<List<UsersDTO>> searchManager(SearchDTO searchDTO) {
+        if(searchDTO.getCurrentPage() == null){
+            searchDTO.setCurrentPage(0);
+        }
+        if (searchDTO.getSize() == null){
+            searchDTO.setSize(10);
+        }
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        Page<Users> page = userRepo.searchManager(pageRequest);
+
+        return PageDTO.<List<UsersDTO>>builder()
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
+                .build();
+    }
+
 
     public UsersDTO convert(Users users){
         if (users == null) {
@@ -169,7 +228,7 @@ class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UsersDTO create(UsersDTO usersDTO) {
         Users users = new ModelMapper().map(usersDTO, Users.class);
-        users.setPassword(new BCryptPasswordEncoder().encode(users.getPassword()));
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
         Users savedUser = userRepo.save(users);
         return convert(savedUser);
     }
@@ -228,6 +287,8 @@ class UserServiceImpl implements UserService, UserDetailsService {
                 .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
                 .build();
     }
+
+
 
     @Override
     public UsersDTO getById(int id) {

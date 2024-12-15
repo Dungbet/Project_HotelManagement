@@ -61,6 +61,12 @@ function Sidebar() {
                 </div>
                 <div className="navbar-nav w-100">
                     <Link
+                        to="/employee"
+                        className={`nav-item nav-link ${location.pathname === '/employee' ? 'active' : ''}`}
+                    >
+                        <i className="fa-solid fa-chart-simple me-2"></i>Thống kê
+                    </Link>
+                    <Link
                         to="/employee/booking"
                         className={`nav-item nav-link ${location.pathname === '/employee/booking' ? 'active' : ''}`}
                     >

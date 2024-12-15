@@ -32,6 +32,13 @@ public class AdminPaymentController {
         searchDTO.setSize(size);
         return ResponseDTO.<PageDTO<List<PaymentsDTO>>>builder().status(200).msg("ok").data(paymentService.getAllPayment(searchDTO)).build();
     }
+    @GetMapping("/get-all-payment-employee")
+    public ResponseDTO<PageDTO<List<PaymentsDTO>>> getPaymentsByEmployeeId(@RequestParam int page, @RequestParam int size, @RequestParam("employeeId") int employeeId){
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return ResponseDTO.<PageDTO<List<PaymentsDTO>>>builder().status(200).msg("ok").data(paymentService.getPaymentsByEmployeeId(searchDTO, employeeId)).build();
+    }
 
     @DeleteMapping("/")
     public ResponseDTO<Void> delete(@RequestParam int id){

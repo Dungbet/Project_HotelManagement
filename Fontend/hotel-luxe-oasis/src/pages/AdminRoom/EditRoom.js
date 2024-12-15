@@ -19,10 +19,14 @@ function EditRoom() {
         currentImageUrl: '',
         discount: '',
         discountedPrice: '',
+        additionalFiles: [],
     });
     const [hotels, setHotels] = useState([]);
     const [categories, setCategories] = useState([]);
     const [currentImage, setCurrentImage] = useState('');
+    const [previewImage, setPreviewImage] = useState(''); // Thêm state để lưu URL ảnh xem trước
+    const [previewImages, setPreviewImages] = useState([]); // Xem trước danh sách ảnh
+    const [additionalImages, setAdditionalImages] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -55,10 +59,13 @@ function EditRoom() {
                     categoryId: room.category ? room.category.id : '',
                     file: null,
                     currentImageUrl: room.roomImg,
+                    additionalImageUrls: room.roomImages?.map((img) => img.imageUrl) || [],
                     discount: room.discount || '',
                     discountedPrice: room.discountedPrice || '',
                 });
-
+                setAdditionalImages(
+                    room.roomImages?.map((img) => img.imageUrl) || [], // Chỉ lấy danh sách imageUrl
+                );
                 setCurrentImage(room.roomImg || 'default-image-url');
             }
         } catch (error) {
@@ -106,14 +113,53 @@ function EditRoom() {
     };
 
     const handleFileChange = (e) => {
-        setFormData((prevFormData) => {
-            const [file] = e.target.files;
-            return {
+        const [file] = e.target.files;
+        if (file) {
+            const previewUrl = URL.createObjectURL(file);
+            setFormData((prevFormData) => ({
                 ...prevFormData,
-                file,
-                currentImage: file ? URL.createObjectURL(file) : prevFormData.currentImage,
-            };
-        });
+                file, // Lưu file
+            }));
+            setCurrentImage(previewUrl); // Cập nhật ảnh xem trước
+        }
+    };
+
+    const handleRemoveFile = (index) => {
+        // Kiểm tra xem index có thuộc additionalImages hay previewImages
+        if (index < additionalImages.length) {
+            // Nếu là ảnh từ additionalImages
+            setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
+        } else {
+            // Nếu là ảnh từ previewImages
+            const adjustedIndex = index - additionalImages.length;
+
+            // Xóa URL preview
+            setPreviewImages((prev) => prev.filter((_, i) => i !== adjustedIndex));
+
+            // Xóa file tương ứng trong additionalFiles
+            setFormData((prev) => {
+                const updatedFiles = [...(prev.additionalFiles || [])].filter((_, i) => i !== adjustedIndex);
+                return {
+                    ...prev,
+                    additionalFiles: updatedFiles,
+                };
+            });
+        }
+    };
+
+    const handleAdditionalFiles = (e) => {
+        const files = Array.from(e.target.files).filter((file) => file instanceof File);
+
+        // Thêm các tệp mới vào mảng ảnh xem trước
+        const newPreviewImages = files.map((file) => URL.createObjectURL(file));
+
+        setPreviewImages((prev) => [...prev, ...newPreviewImages]);
+
+        // Cập nhật formData với các tệp ảnh mới
+        setFormData((prevState) => ({
+            ...prevState,
+            additionalFiles: [...(prevState.additionalFiles || []), ...files], // Đảm bảo additionalFiles luôn là mảng
+        }));
     };
 
     const handleSubmit = async (e) => {
@@ -141,6 +187,11 @@ function EditRoom() {
         }
         data.append('discount', formData.discount);
         data.append('discountedPrice', formData.discountedPrice);
+        if (formData.additionalFiles && formData.additionalFiles.length > 0) {
+            formData.additionalFiles.forEach((file) => {
+                data.append('additionalFiles', file);
+            });
+        }
 
         try {
             const token = getToken();
@@ -297,6 +348,30 @@ function EditRoom() {
                     </div>
                     <input type="file" className="form-control" onChange={handleFileChange} />
                 </div>
+                <div className="form-group">
+                    <label>Additional Images</label>
+                    <input type="file" multiple className="form-control" onChange={handleAdditionalFiles} />
+                    <div className="image-previews">
+                        {[...additionalImages, ...previewImages].map((image, index) => (
+                            <div key={index} className="image-preview">
+                                <img
+                                    src={image}
+                                    alt={`Preview ${index}`}
+                                    className="img-thumbnail"
+                                    style={{ width: '200px', height: '200px', objectFit: 'cover' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={() => handleRemoveFile(index)}
+                                >
+                                    Xóa
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <button type="submit" className="btn btn-primary">
                     Save
                 </button>

@@ -216,7 +216,8 @@ function InformationBooking() {
                                         <span
                                             className={
                                                 booking.bookingStatus === 'Hoàn thành' ||
-                                                booking.bookingStatus === 'Đã đặt'
+                                                booking.bookingStatus === 'Chờ xác nhận' ||
+                                                booking.bookingStatus === 'Đã xác nhận'
                                                     ? 'text-success'
                                                     : 'text-danger'
                                             }
@@ -241,7 +242,8 @@ function InformationBooking() {
                                                     Đánh giá
                                                 </button>
                                             )
-                                        ) : booking.bookingStatus === 'Đã đặt' ? (
+                                        ) : booking.bookingStatus === 'Chờ xác nhận' ||
+                                          booking.bookingStatus === 'Đã xác nhận' ? (
                                             <button
                                                 className="btn btn-danger"
                                                 onClick={() => {

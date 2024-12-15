@@ -43,6 +43,10 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
             "WHERE DATE(b.createAt) = CURRENT_DATE " +
             "AND b.bookingStatus <> 'Đã hủy'")
     CountBookingsFromDateDTO statisticsDay();
+    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(CURRENT_DATE, COUNT(b), SUM(b.totalAmount)) " +
+            "FROM Bookings b " +
+            "WHERE b.bookingStatus <> 'Đã hủy'")
+    CountBookingsFromDateDTO countAllBookings();
 
 
     @Query("SELECT b FROM Bookings b WHERE b.user.id = :userId")
@@ -61,6 +65,15 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
                                                             @Param("endDate") Date endDate,
                                                             Pageable pageable);
 
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+            "FROM Bookings b " +
+            "JOIN b.rooms r " +
+            "WHERE b.bookingStatus = 'Hoàn thành' " +
+            "GROUP BY r.id, r.name, r.roomImg, r.roomNumber, r.price " +
+            "ORDER BY COUNT(r.id) DESC")
+    Page<MostBookedRoomsDTO> findAllMostBookedRooms(Pageable pageable);
+
+
 
     @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
             "FROM Bookings b " +
@@ -70,17 +83,33 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
             "ORDER BY COUNT(r.id) ASC")
     Page<MostBookedRoomsDTO> findMinBookedRooms(Pageable pageable);
 
-    @Query(value = "SELECT AVG(TIMESTAMPDIFF(MINUTE, b.create_at , b.update_at)) " +
-            "FROM Bookings b " +
-            "WHERE b.employee_id = :employeeId "+
-            "AND b.create_at BETWEEN :startDate AND :endDate " +
-            "AND b.booking_status = 'Hoàn thành'",
+//    @Query(value = "SELECT AVG(TIMESTAMPDIFF(MINUTE, b.create_at , b.update_at)) " +
+//            "FROM Bookings b " +
+//            "WHERE b.employee_id = :employeeId "+
+//            "AND b.create_at BETWEEN :startDate AND :endDate " +
+//            "AND b.booking_status = 'Đã xác nhận'",
+//            nativeQuery = true)
+//    Double averageProcessingTime(@Param("employeeId") int employeeId,@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+    @Query(value = "SELECT AVG(TIMESTAMPDIFF(MINUTE, b.create_at, h.updated_at)) " +
+            "FROM bookings b " +
+            "JOIN booking_status_history h ON b.id = h.booking_id " +
+            "WHERE b.employee_id = :employeeId " +
+            "AND b.create_at IS NOT NULL " +
+            "AND h.updated_at IS NOT NULL " +
+            "AND h.status = 'Đã xác nhận' " +
+            "AND b.create_at BETWEEN :startDate AND :endDate",
             nativeQuery = true)
-    Double averageProcessingTime(@Param("employeeId") int employeeId,@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    Double averageProcessingTime(@Param("employeeId") int employeeId,
+                                 @Param("startDate") Date startDate,
+                                 @Param("endDate") Date endDate);
+
+
+
     @Query("SELECT COUNT(b) FROM Bookings b " +
             "WHERE b.employee.id = :employeeId " +
             "AND b.createAt BETWEEN :startDate AND :endDate " +
-            "AND b.bookingStatus IN ('Đã đặt', 'Hoàn thành')")
+            "AND b.bookingStatus IN ('Đã xác nhận', 'Hoàn thành')")
     int countSuccessfulBookings(@Param("employeeId") int employeeId,
                                 @Param("startDate") Date startDate,
                                 @Param("endDate") Date endDate);

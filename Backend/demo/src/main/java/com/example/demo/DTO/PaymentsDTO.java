@@ -12,5 +12,5 @@ public class PaymentsDTO {
 	private Date paymentDate;
 	private int amount;
 	private String paymentMethod;
-	private Bookings booking;
+	private BookingDTO booking;
 }

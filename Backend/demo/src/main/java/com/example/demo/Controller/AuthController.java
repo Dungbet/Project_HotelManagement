@@ -76,10 +76,10 @@ public class AuthController {
             // Lấy thông tin người dùng từ database hoặc service để lấy userId
             UsersDTO user = userService.findByUsername(username);
             int userId = user.getId(); // Giả sử rằng bạn đã có phương thức để lấy userId từ username
-
+            String role = user.getRole().getName(); // Giả sử UsersDTO có trường role
             // Tạo lại access token và refresh token với userId
-            String newAccessToken = jwtTokenService.createToken(username, userId);
-            String newRefreshToken = jwtTokenService.createRefreshToken(username, userId);
+            String newAccessToken = jwtTokenService.createToken(username, userId,role);
+            String newRefreshToken = jwtTokenService.createRefreshToken(username, userId, role);
 
             // Xây dựng phản hồi
             return ResponseEntity.ok()
@@ -102,11 +102,11 @@ public class AuthController {
             // Lấy thông tin người dùng từ username
             UsersDTO user = userService.findByUsername(usersDTO.getUsername());
             int userId = user.getId(); // Giả sử UsersDTO có trường id
-
+            String role = user.getRole().getName();
             // Generate token after successful authentication
             return ResponseDTO.<String>builder()
                     .status(200)
-                    .data(jwtTokenService.createToken(usersDTO.getUsername(), userId))
+                    .data(jwtTokenService.createToken(usersDTO.getUsername(), userId,role))
                     .build();
         } catch (AuthenticationException e) {
             // Handle authentication exceptions

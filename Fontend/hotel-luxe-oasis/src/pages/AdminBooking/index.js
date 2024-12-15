@@ -36,7 +36,7 @@ function AdminBooking() {
                 console.log('Full decoded token:', decoded); // In toàn bộ payload
 
                 // Kiểm tra chính xác key lưu role
-                setRole(decoded.sub); // Thử với key khác nếu cần
+                setRole(decoded.role); // Thử với key khác nếu cần
 
                 return decoded.userId;
             } catch (error) {
@@ -120,6 +120,7 @@ function AdminBooking() {
                 const employeeId = decodeToken(); // Lấy employeeId từ token
                 url = `http://localhost:8080/admin/booking/search-booking-by-employee?page=${page}&size=${size}&employeeId=${employeeId}`;
             } else {
+                console.log('da dang nhạp manager');
                 url = `http://localhost:8080/admin/booking/?page=${page}&size=${size}`;
             }
 
@@ -256,6 +257,33 @@ function AdminBooking() {
             },
         });
     };
+    const handleConfirm = async (bookingId) => {
+        setDialog({
+            open: true,
+            title: 'Xác nhận đặt phòng',
+            content: 'Bạn có chắc chắn xác nhận đặt phòng không?',
+            onConfirm: async () => {
+                try {
+                    const token = getToken();
+                    console.log(token);
+
+                    await axios.put(
+                        `http://localhost:8080/admin/booking/confirm-booking-employee?bookingId=${bookingId}`,
+                        {}, // Empty object as second argument
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                        },
+                    );
+                    setMessages({ ...messages, deleteMessageSuccess: 'Xác nhận đặt phòng thành công' });
+                    fetchBookings();
+                } catch (error) {
+                    setMessages({ ...messages, deleteMessageFail: 'Xác nhận đặt phòng thất bại' });
+                    console.error('Error cancelling booking', error);
+                }
+                handleDialogClose();
+            },
+        });
+    };
     const handleCancelBookingAdmin = async (bookingId) => {
         setDialog({
             open: true,
@@ -382,7 +410,9 @@ function AdminBooking() {
                                                     ? 'text-danger'
                                                     : booking.bookingStatus === 'Yêu cầu hủy'
                                                     ? 'text-danger'
-                                                    : booking.bookingStatus === 'Đã đặt'
+                                                    : booking.bookingStatus === 'Chờ xác nhận'
+                                                    ? 'text-success'
+                                                    : booking.bookingStatus === 'Đã xác nhận'
                                                     ? 'text-success'
                                                     : ''
                                             }
@@ -412,7 +442,17 @@ function AdminBooking() {
                                         </td>
                                     )}
                                     <td>
-                                        {booking.bookingStatus === 'Đã đặt' && (
+                                        {booking.bookingStatus === 'Chờ xác nhận' && (
+                                            <>
+                                                <a onClick={() => handleConfirm(booking.id)}>
+                                                    <i className="fa-solid fa-circle-check" title="Xác nhận"></i>
+                                                </a>
+                                                <a onClick={() => handleCancelBookingAdmin(booking.id)}>
+                                                    <i className="fas fa-times" title="Hủy"></i>
+                                                </a>
+                                            </>
+                                        )}
+                                        {booking.bookingStatus === 'Đã xác nhận' && (
                                             <>
                                                 <a onClick={() => handleFinishBooking(booking.id, booking.status)}>
                                                     <i className="fa-solid fa-circle-check" title="Hoàn thành"></i>

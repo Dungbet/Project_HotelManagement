@@ -45,6 +45,7 @@ public interface RoomService {
     List<RoomsDTO> findAvailableRooms(int numberOfGuests);
     List<MostBookedRoomsDTO> findMostBookedRooms( Date startDate, Date endDate);
     List<MostBookedRoomsDTO> findMinBookedRooms();
+    List<MostBookedRoomsDTO> findAllMostBookedRooms();
 }
 @Service
 class RoomServiceImpl implements RoomService {
@@ -355,9 +356,9 @@ public RoomsDTO convertToDTO(Rooms room){
         room.setHotels(roomsDTO.getHotels());
         room.setCategory(roomsDTO.getCategory());
 
-        // 1. Cập nhật thumbnail
+        // Cập nhật thumbnail
         if (roomsDTO.getFile() != null && !roomsDTO.getFile().isEmpty()) {
-            // Xóa thumbnail cũ
+            // Xóa thumbnail cũ nếu tồn tại
             if (room.getRoomImgPublicId() != null) {
                 cloudinary.uploader().destroy(room.getRoomImgPublicId(), ObjectUtils.emptyMap());
             }
@@ -366,8 +367,10 @@ public RoomsDTO convertToDTO(Rooms room){
                     ObjectUtils.asMap("resource_type", "auto", "folder", CLOUDINARY_FOLDER));
             String img = (String)r.get("secure_url");
             String newPublicId = (String)r.get("public_id");
-            roomsDTO.setRoomImg(img);
-            roomsDTO.setRoomImgPublicId(newPublicId);
+
+            // Cập nhật lại thông tin thumbnail
+            room.setRoomImg(img);
+            room.setRoomImgPublicId(newPublicId);
         }
 
         // 2. Cập nhật danh sách ảnh bổ sung
@@ -421,6 +424,13 @@ public RoomsDTO convertToDTO(Rooms room){
         Pageable pageable = PageRequest.of(0, 10); // Lấy 10 kết quả đầu tiên
        return bookingRepo.findMostBookedRooms(startDate, endDate, pageable).stream().collect(Collectors.toList());
     }
+    @Override
+    public List<MostBookedRoomsDTO> findAllMostBookedRooms() {
+
+        Pageable pageable = PageRequest.of(0, 10); // Lấy 10 kết quả đầu tiên
+        return bookingRepo.findAllMostBookedRooms(pageable).stream().collect(Collectors.toList());
+    }
+
 
     @Override
     public List<MostBookedRoomsDTO> findMinBookedRooms() {

@@ -19,6 +19,31 @@ const MostRooms = () => {
     const handleEndDateChange = (date) => {
         setEndDate(date);
     };
+    // Hàm gọi API mặc định (không lọc)
+    const fetchDefaultRooms = () => {
+        const token = getToken();
+        const url = 'http://localhost:8080/admin/room/get-all-most-rooms';
+
+        fetch(url, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (data.status === 200) {
+                    setRooms(data.data);
+                } else {
+                    console.error('Failed to fetch rooms:', data.msg);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            });
+    };
 
     const handleFilter = () => {
         if (!startDate || !endDate) {
@@ -52,7 +77,9 @@ const MostRooms = () => {
                 console.error('Error fetching data:', error);
             });
     };
-
+    useEffect(() => {
+        fetchDefaultRooms();
+    }, []);
     return (
         <div>
             <div className="p-4">

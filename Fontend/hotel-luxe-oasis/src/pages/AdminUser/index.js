@@ -36,7 +36,7 @@ function AdminUser() {
             try {
                 const decoded = jwtDecode(token);
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -52,11 +52,14 @@ function AdminUser() {
     const fetchUsers = async () => {
         try {
             const token = getToken();
-            const response = await axios.get(`http://localhost:8080/admin/user/?page=${page}&size=${size}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const response = await axios.get(
+                `http://localhost:8080/admin/user/get-all-role-user?page=${page}&size=${size}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            });
+            );
             let fetchedUsers = response.data.data.data;
             if (role === 'manager') {
                 // Loại bỏ người dùng có quyền "Admin" hoặc "Manager"
@@ -231,11 +234,13 @@ function AdminUser() {
                                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                         >
                                             {Array.isArray(roles) &&
-                                                roles.map((role) => (
-                                                    <option key={role.id} value={role.id}>
-                                                        {role.name.replace('ROLE_', '')}
-                                                    </option>
-                                                ))}
+                                                roles
+                                                    .filter((role) => role.name !== 'ROLE_ADMIN') // Loại bỏ quyền admin
+                                                    .map((role) => (
+                                                        <option key={role.id} value={role.id}>
+                                                            {role.name.replace('ROLE_', '')}
+                                                        </option>
+                                                    ))}
                                         </select>
                                     </td>
 

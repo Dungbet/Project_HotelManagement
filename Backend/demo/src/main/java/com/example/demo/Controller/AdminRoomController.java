@@ -45,6 +45,15 @@ public class AdminRoomController {
                 .data(roomService.findMostBookedRooms(startDate, endDate))
                 .build();
     }
+    @GetMapping("/get-all-most-rooms")
+    public ResponseDTO<List<MostBookedRoomsDTO>> findAllMostBookedRooms( ) {
+
+        return ResponseDTO.<List<MostBookedRoomsDTO>>builder()
+                .status(200)
+                .msg("ok")
+                .data(roomService.findAllMostBookedRooms())
+                .build();
+    }
     @GetMapping("/min-rooms")
     public ResponseDTO<List<MostBookedRoomsDTO>> findMinBookedRooms() {
 

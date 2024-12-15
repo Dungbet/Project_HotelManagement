@@ -101,6 +101,11 @@ public class AdminBookingController {
         bookingService.updateStatus(status, bookingId);
         return ResponseDTO.<Void>builder().status(200).msg("ok").build();
     }
+    @PutMapping("/confirm-booking-employee")
+    public ResponseDTO<Void> confirmBooking(@RequestParam("bookingId") Integer bookingId) {
+        bookingService.confirmBooking(bookingId);
+        return ResponseDTO.<Void>builder().status(200).msg("ok").build();
+    }
 
 
     @GetMapping("/statistics-day")

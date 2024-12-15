@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Star, Clock, CheckCircle, CreditCard } from 'lucide-react';
+import { Trophy, Star, Clock, CheckCircle, CreditCard, XCircle } from 'lucide-react';
 import axios from 'axios';
 import { Button } from 'primereact/button';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Dashboard.css';
 const EmployeePerformanceDashboard = () => {
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
+    const [startDate, setStartDate] = useState(() => {
+        const today = new Date();
+        return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    });
+
+    const [endDate, setEndDate] = useState(() => {
+        const today = new Date();
+        const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+        return tomorrow;
+    });
     const [employees, setEmployees] = useState([]);
     const [performanceData, setPerformanceData] = useState({});
     const [loading, setLoading] = useState(false);
@@ -87,6 +95,7 @@ const EmployeePerformanceDashboard = () => {
                             onChange={handleStartDateChange}
                             dateFormat="dd/MM/yyyy"
                             className="date-picker"
+                            maxDate={new Date()}
                         />
                     </div>
                     <div className="filter-item">
@@ -98,7 +107,8 @@ const EmployeePerformanceDashboard = () => {
                             onChange={handleEndDateChange}
                             dateFormat="dd/MM/yyyy"
                             className="date-picker"
-                            maxDate={new Date()}
+                            minDate={startDate}
+                            maxDate={new Date(startDate.getTime() + 24 * 60 * 60 * 1000)}
                         />
                     </div>
                     <div className="filter-item">
@@ -127,13 +137,17 @@ const EmployeePerformanceDashboard = () => {
                                     <h3 className="text-xl font-semibold">{employee.name || employee.username}</h3>
                                     <p className="text-gray-600">Mã nhân viên: {employee.id}</p>
                                 </div>
-                                {index === 0 && <Trophy className="text-yellow-500" size={40} />}
+                                {/* {index === 0 && <Trophy className="text-yellow-500" size={40} />} */}
                             </div>
 
                             {performanceData[employee.id] ? (
-                                <div className="container mb-4">
-                                    <div className="item">
-                                        <CheckCircle className="text-green-500" size={20} />
+                                <div className="epd-container mb-4">
+                                    <div className="epd-item">
+                                        <CheckCircle
+                                            style={{ color: 'rgb(34 197 94)' }}
+                                            className="text-green-500"
+                                            size={20}
+                                        />
                                         <div>
                                             <p className="font-medium">Tỷ lệ thành công</p>
                                             <p className="font-bold">
@@ -142,8 +156,12 @@ const EmployeePerformanceDashboard = () => {
                                         </div>
                                     </div>
 
-                                    <div className="item">
-                                        <Clock className="text-blue-500" size={20} />
+                                    <div className="epd-item">
+                                        <Clock
+                                            className="text-blue-500"
+                                            size={20}
+                                            style={{ color: 'rgb(59 130 246)' }}
+                                        />
                                         <div>
                                             <p className="font-medium">Thời gian XL TB</p>
                                             <p className="font-bold">
@@ -152,8 +170,12 @@ const EmployeePerformanceDashboard = () => {
                                         </div>
                                     </div>
 
-                                    <div className="item">
-                                        <CreditCard className="text-purple-500" size={20} />
+                                    <div className="epd-item">
+                                        <CreditCard
+                                            className="text-purple-500 "
+                                            style={{ color: 'rgb(168 85 247)' }}
+                                            size={20}
+                                        />
                                         <div>
                                             <p className="font-medium">Doanh thu</p>
                                             <p className="font-bold">
@@ -167,11 +189,21 @@ const EmployeePerformanceDashboard = () => {
                             )}
                             <div className="mt-4 flex justify-between">
                                 <div className="flex items-center">
-                                    <Star className="inline-block mr-2 text-orange-500" size={20} />
+                                    <Star
+                                        className="inline-block mr-2 text-orange-500"
+                                        size={20}
+                                        style={{ color: 'rgb(249 115 22)' }}
+                                    />
                                     <span>Tổng booking: {performanceData[employee.id]?.totalHandled || 0}</span>
                                 </div>
                                 <div className="flex items-center">
-                                    <span className="text-red-500">
+                                    <XCircle
+                                        className="inline-block mr-2 text-red-500"
+                                        size={20}
+                                        style={{ color: 'rgb(239 68 68)' }}
+                                    />
+
+                                    <span className="text-red-500" style={{ color: 'rgb(239 68 68)' }}>
                                         Đã hủy: {performanceData[employee.id]?.totalCanceled || 0}
                                     </span>
                                 </div>

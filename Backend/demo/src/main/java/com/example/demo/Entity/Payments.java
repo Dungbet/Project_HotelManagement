@@ -2,6 +2,7 @@ package com.example.demo.Entity;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,7 @@ public class Payments {
 	
 	@ManyToOne
 	@JoinColumn(name="booking_id")
+	@JsonIgnore
 	private Bookings booking;
 	
 	

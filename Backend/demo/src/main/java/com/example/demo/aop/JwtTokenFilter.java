@@ -76,9 +76,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     // Lấy userId từ service, ví dụ như userService
                     UsersDTO user = userService.findByUsername(username);
                     int userId = user.getId();  // Giả sử có phương thức để lấy userId
+                    String role = user.getRole().getName();
 
-                    String newAccessToken = jwtTokenService.createToken(username, userId);
-                    String newRefreshToken = jwtTokenService.createRefreshToken(username, userId);
+                    String newAccessToken = jwtTokenService.createToken(username, userId,role);
+                    String newRefreshToken = jwtTokenService.createRefreshToken(username, userId,role);
                     response.setHeader("Authorization", "Bearer " + newAccessToken);
                     response.setHeader("Refresh-Token", "Bearer " + newRefreshToken);
                 }

@@ -36,6 +36,9 @@ import AdminChangePassword from '~/pages/AdminChangePassword';
 import AdminReview from '~/pages/AdminReview';
 import AdminManager from '~/pages/AdminManager';
 import AdminEmployee from '~/pages/AdminEmployee';
+import AddEmployee from '~/pages/AdminEmployee/AddEmployee';
+import AddManager from '~/pages/AdminManager/AddManager';
+import EmployeeDashboard from '~/pages/AdminDashboard/EmployeeDashboard';
 
 // Khong can login
 const publicRoutes = [
@@ -82,8 +85,11 @@ const adminRoutes = [
     { path: '/admin/review', component: AdminReview },
     { path: '/admin/manager', component: AdminManager },
     { path: '/admin/employee', component: AdminEmployee },
+    { path: '/admin/add-employee', component: AddEmployee },
+    { path: '/admin/add-manager', component: AddManager },
 ];
 const employeeRoutes = [
+    { path: '/employee', component: EmployeeDashboard },
     { path: '/employee/booking', component: AdminBooking },
     { path: '/employee/add-booking', component: AddBooking },
     { path: '/employee/edit-booking', component: EditBooking },
@@ -117,5 +123,6 @@ const managerRoutes = [
     { path: '/manager/user', component: AdminUser },
     { path: '/manager/add-user', component: AddUser },
     { path: '/manager/employee', component: AdminEmployee },
+    { path: '/manager/add-employee', component: AddEmployee },
 ];
 export { managerRoutes, employeeRoutes, adminRoutes, publicRoutes, privateRoutes };

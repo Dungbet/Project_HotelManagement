@@ -36,7 +36,7 @@ function AdminUser() {
             try {
                 const decoded = jwtDecode(token);
 
-                setRole(decoded.sub); // Lấy giá trị 'sub' từ payload
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -52,11 +52,14 @@ function AdminUser() {
     const fetchUsers = async () => {
         try {
             const token = getToken();
-            const response = await axios.get(`http://localhost:8080/admin/user/?page=${page}&size=${size}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const response = await axios.get(
+                `http://localhost:8080/admin/user/get-all-role-manager?page=${page}&size=${size}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 },
-            });
+            );
             let fetchedUsers = response.data.data.data;
             if (role === 'admin') {
                 fetchedUsers = fetchedUsers.filter((user) => user.role.name === 'ROLE_MANAGER');
@@ -171,11 +174,11 @@ function AdminUser() {
                     <h6 className="mb-0">Quản Lý người quản lý</h6>
 
                     {role === 'manager' ? (
-                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-user')}>
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/manager/add-manager')}>
                             Thêm Người Quản Lý
                         </button>
                     ) : (
-                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-user')}>
+                        <button className="btn btn-sm btn-primary" onClick={() => navigate('/admin/add-manager')}>
                             Thêm Người Quản Lý
                         </button>
                     )}
@@ -228,11 +231,13 @@ function AdminUser() {
                                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
                                         >
                                             {Array.isArray(roles) &&
-                                                roles.map((role) => (
-                                                    <option key={role.id} value={role.id}>
-                                                        {role.name.replace('ROLE_', '')}
-                                                    </option>
-                                                ))}
+                                                roles
+                                                    .filter((role) => role.name !== 'ROLE_ADMIN') // Loại bỏ quyền admin
+                                                    .map((role) => (
+                                                        <option key={role.id} value={role.id}>
+                                                            {role.name.replace('ROLE_', '')}
+                                                        </option>
+                                                    ))}
                                         </select>
                                     </td>
 

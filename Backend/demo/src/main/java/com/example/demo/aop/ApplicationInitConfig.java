@@ -53,6 +53,7 @@ public class ApplicationInitConfig {
             } else {
                 log.info("Người dùng 'admin' đã tồn tại.");
             }
+            createUserIfNotExist("user", "dung", "ROLE_USER");
             // Tạo người dùng "manager"
             createUserIfNotExist("manager", "dung", "ROLE_MANAGER");
 

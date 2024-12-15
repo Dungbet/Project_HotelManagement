@@ -3,6 +3,7 @@ package com.example.demo.Entity;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class Bookings extends TimeAuditable {
 	private double totalAmount;
 	private int guest;
 	private int numChildren;
-	private String status; //
+	private String status;
 	private String bookingStatus;
 
 
@@ -48,6 +49,7 @@ public class Bookings extends TimeAuditable {
 	private String bookingPhone;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "employee_id")
+	@JsonIgnore
 	private Users employee; // Nhân viên xử lý đơn đặt phòng
 
 }

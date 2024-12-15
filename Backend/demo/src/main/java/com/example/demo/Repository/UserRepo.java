@@ -55,12 +55,15 @@ public interface UserRepo extends JpaRepository<Users, Integer>{
     @Query("SELECT u FROM Users u WHERE u.manager.id = :managerId")
     Page<Users> findEmployeesByManagerIdPaging(Pageable pageable,@Param("managerId") int managerId);
 
-    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_USER\"")
-    Page<Users> searchUser (Pageable pageable);
-    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_MANAGER\"")
-    Page<Users> searchManager (Pageable pageable);
+    @Query("SELECT u FROM Users u WHERE u.role.name = 'ROLE_USER'")
+    Page<Users> searchUser(Pageable pageable);
 
-    @Query("SELECT u FROM Users u WHERE u.role.name = \"ROLE_MANAGER\"")
-    Page<Users> searchAdmin (Pageable pageable);
+    @Query("SELECT u FROM Users u WHERE u.role.name = 'ROLE_MANAGER'")
+    Page<Users> searchManager(Pageable pageable);
+    @Query("SELECT u FROM Users u WHERE u.role.name = 'ROLE_EMPLOYEE'")
+    Page<Users> searchEmployee(Pageable pageable);
+
+
+
 
 }

@@ -34,6 +34,27 @@ public class AdminUserController {
         searchDTO.setSize(size);
         return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.getAll(searchDTO)).build();
     }
+    @GetMapping("/get-all-role-user")
+    public ResponseDTO<PageDTO<List<UsersDTO>>> searchUser(@RequestParam int page, @RequestParam int size){
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.searchUser(searchDTO)).build();
+    }
+    @GetMapping("/get-all-role-employee")
+    public ResponseDTO<PageDTO<List<UsersDTO>>> searchEmployee(@RequestParam int page, @RequestParam int size){
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.searchEmployee(searchDTO)).build();
+    }
+    @GetMapping("/get-all-role-manager")
+    public ResponseDTO<PageDTO<List<UsersDTO>>> searchManager(@RequestParam int page, @RequestParam int size){
+        SearchDTO searchDTO = new SearchDTO();
+        searchDTO.setCurrentPage(page);
+        searchDTO.setSize(size);
+        return  ResponseDTO.<PageDTO<List<UsersDTO>>>builder().status(200).msg("ok").data(userService.searchManager(searchDTO)).build();
+    }
     @GetMapping("/get-employee")
     public ResponseDTO<PageDTO<List<UsersDTO>>> getEmployee(@RequestParam int page, @RequestParam int size, @RequestParam int managerId){
         SearchDTO searchDTO = new SearchDTO();

@@ -7,6 +7,7 @@ import com.example.demo.Entity.Rooms;
 import com.example.demo.Entity.Users;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
@@ -24,6 +25,7 @@ public class BookingDTO {
 	private double totalAmount;
 	private String status;
 	private String bookingStatus;
+	@JsonIgnore
 	private Users user;
 	// Danh sách ID phòng, thường dùng khi tạo booking hoặc gửi yêu cầu từ client
 	private List<Integer> roomId;

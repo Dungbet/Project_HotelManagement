@@ -21,6 +21,7 @@ import UserChart from './UserChart';
 import MostRooms from './MostRooms';
 import EmployeePerformanceDashboard from './EmployeePerformanceDashboard';
 import EmployeeDashboard from './EmployeeDashboard';
+import { jwtDecode } from 'jwt-decode';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend, ArcElement);
 
@@ -43,12 +44,31 @@ function AdminDashboard() {
         userNew: 0,
         growth: 0,
     });
+    const [role, setRole] = useState(null);
 
     useEffect(() => {
         fetchTodayStatistics();
         fetchRoomStatistics();
         fetchUserStatistics();
+        decodeToken();
     }, []);
+
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                console.log('Full decoded token:', decoded); // In toàn bộ payload
+
+                // Kiểm tra chính xác key lưu role
+                setRole(decoded.role); // Thử với key khác nếu cần
+
+                return decoded.userId;
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
 
     const getToken = () => localStorage.getItem('token');
 
@@ -444,38 +464,24 @@ function AdminDashboard() {
                 </h3>
                 <MostRooms />
             </div>
-            <div className="room-empty row g-4">
-                <h3
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 'bold',
-                        color: '#333',
-                        marginBottom: '20px',
-                        textAlign: 'center',
-                        padding: '10px',
-                        borderBottom: '2px solid #007bff',
-                    }}
-                >
-                    Hiệu suất của nhân viên
-                </h3>
-                <EmployeePerformanceDashboard />
-            </div>
-            <div className="room-empty row g-4">
-                <h3
-                    style={{
-                        fontSize: '24px',
-                        fontWeight: 'bold',
-                        color: '#333',
-                        marginBottom: '20px',
-                        textAlign: 'center',
-                        padding: '10px',
-                        borderBottom: '2px solid #007bff',
-                    }}
-                >
-                    Hiệu suất của nhân viên
-                </h3>
-                <EmployeeDashboard />
-            </div>
+            {role === 'manager' && (
+                <div className="room-empty row g-4">
+                    <h3
+                        style={{
+                            fontSize: '24px',
+                            fontWeight: 'bold',
+                            color: '#333',
+                            marginBottom: '20px',
+                            textAlign: 'center',
+                            padding: '10px',
+                            borderBottom: '2px solid #007bff',
+                        }}
+                    >
+                        Hiệu suất của nhân viên
+                    </h3>
+                    <EmployeePerformanceDashboard />
+                </div>
+            )}
         </div>
     );
 }
