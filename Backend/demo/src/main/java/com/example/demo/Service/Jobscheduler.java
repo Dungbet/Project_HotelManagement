@@ -22,6 +22,7 @@ public class Jobscheduler {
     BookingRepo bookingRepo;
 
 
+
     public void exportExcel(Date startDate, Date endDate) throws IOException {
 
         // Tạo Workbook và định dạng tiêu đề
@@ -30,6 +31,7 @@ public class Jobscheduler {
         sheet.setColumnWidth(0, 6000);
         sheet.setColumnWidth(1, 4000);
         sheet.setColumnWidth(2, 4000);
+        sheet.setColumnWidth(3, 4000);
 
         // Tiêu đề bảng
         Row titleRow = sheet.createRow(0);
@@ -46,7 +48,7 @@ public class Jobscheduler {
         titleCell.setCellStyle(titleStyle);
 
         // Gộp các cột để tiêu đề chiếm hết các cột của bảng
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 2));
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
 
         // Tạo header row
         Row header = sheet.createRow(1);
@@ -67,7 +69,7 @@ public class Jobscheduler {
         headerStyle.setFont(font);
 
         // Các tiêu đề cột
-        String[] columnHeaders = {"Ngày tạo", "Số lượng booking", "Doanh thu"};
+        String[] columnHeaders = {"Ngày tạo", "Số lượng booking", "Đã hủy", "Doanh thu"};
         for (int i = 0; i < columnHeaders.length; i++) {
             Cell headerCell = header.createCell(i);
             headerCell.setCellValue(columnHeaders[i]);
@@ -97,6 +99,7 @@ public class Jobscheduler {
         int rowIndex = 2; // Bắt đầu từ dòng 2 vì dòng 0 là tiêu đề và dòng 1 là header
         double totalAmount = 0;
         int totalBookings = 0;
+        int totalCanceled = 0;
 
         // Xuất dữ liệu ra file Excel
         for (CountBookingsFromDateDTO dto : countBookingsFromDateDTOS) {
@@ -112,8 +115,13 @@ public class Jobscheduler {
             cell.setCellValue(dto.getCountBooking());
             totalBookings += dto.getCountBooking();
 
-            // Cột doanh thu
+            // Cột Đã hủy (số lượng booking đã hủy)
             cell = row.createCell(2);
+            cell.setCellValue(dto.getCountCancel()); // Đây là thông tin về số booking "Đã hủy"
+            totalCanceled += dto.getCountCancel();
+
+            // Cột doanh thu
+            cell = row.createCell(3);
             cell.setCellValue(dto.getTotalAmount());
             cell.setCellStyle(currencyCellStyle);
             totalAmount += dto.getTotalAmount();
@@ -129,14 +137,17 @@ public class Jobscheduler {
         Cell totalBookingsCell = totalRow.createCell(1);
         totalBookingsCell.setCellValue(totalBookings);
 
+        // Cột tổng số booking "Đã hủy"
+        Cell totalCanceledCell = totalRow.createCell(2);
+        totalCanceledCell.setCellValue(totalCanceled);
 
         // Cột tổng doanh thu với định dạng đúng
-        Cell totalAmountCell = totalRow.createCell(2);
+        Cell totalAmountCell = totalRow.createCell(3);
         totalAmountCell.setCellValue(totalAmount);
         totalAmountCell.setCellStyle(currencyCellStyle);
 
         // Tạo bảng trong file Excel
-        sheet.setAutoFilter(new CellRangeAddress(1, rowIndex - 1, 0, 2));
+        sheet.setAutoFilter(new CellRangeAddress(1, rowIndex - 1, 0, 3));
 
         // Lưu lại file Excel
         File currDir = new File(".");

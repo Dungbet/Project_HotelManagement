@@ -107,7 +107,6 @@ const EmployeePerformanceDashboard = () => {
                             onChange={handleEndDateChange}
                             dateFormat="dd/MM/yyyy"
                             className="date-picker"
-                            minDate={startDate}
                             maxDate={new Date(startDate.getTime() + 24 * 60 * 60 * 1000)}
                         />
                     </div>

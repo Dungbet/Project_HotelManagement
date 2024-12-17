@@ -20,6 +20,7 @@ public class MessageDTO {
     private Date timestamp;
     private boolean isRead;
 
+
     // Constructor for creating MessageDTO from entity
     public MessageDTO(int id, String sender, String receiver, String content, Date timestamp, boolean isRead) {
         this.id = id;

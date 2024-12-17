@@ -4,7 +4,7 @@ import { Image } from 'primereact/image';
 import { Button } from 'primereact/button';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
+import './Dashboard.css';
 const MostRooms = () => {
     const [rooms, setRooms] = useState([]);
     const [startDate, setStartDate] = useState(null);
@@ -115,10 +115,11 @@ const MostRooms = () => {
             </div>
 
             {/* Hiển thị danh sách thẻ */}
-            <div className={`grid ${rooms.length === 1 ? 'center-card' : ''}`}>
+            {/* Hiển thị danh sách thẻ */}
+            <div className="flex flex-wrap gap-3 justify-content-center">
                 {rooms.map((room, index) => (
-                    <div className="col-4 mb-5" key={index}>
-                        <Card className="shadow-2 border-round">
+                    <div className="room-card" key={index}>
+                        <Card className="shadow-2 border-round" style={{ width: '300px' }}>
                             <Image src={room.url} alt={room.nameRooms} className="rounded-top" />
                             <div className="p-4">
                                 <h2 className="font-bold text-xl mb-2">{room.nameRooms}</h2>

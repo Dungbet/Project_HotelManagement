@@ -134,7 +134,7 @@ function Rooms() {
                                                     </tr>
                                                     <tr>
                                                         <td className="r-o">Dung tích:</td>
-                                                        <td>Tối đa {room.capacity} người + 1 trẻ nhỏ</td>
+                                                        <td>Tối đa {room.capacity} người</td>
                                                     </tr>
                                                     <tr>
                                                         <td className="r-o">Giường:</td>

@@ -50,6 +50,20 @@ public class AuthController {
     }
     @PostMapping("/register")
     public ResponseDTO<String> register(@RequestBody UsersDTO usersDTO) {
+        if(userService.existsUsername(usersDTO.getUsername())){
+            return ResponseDTO.<String>builder()
+                    .status(400)
+                    .msg("Tên tài khoản đã tồn tại")
+                    .build();
+        }
+
+        // Kiểm tra email đã tồn tại chưa
+        if(userService.existsByEmail(usersDTO.getEmail())){
+            return ResponseDTO.<String>builder()
+                    .status(400)
+                    .msg("Email đã tồn tại")
+                    .build();
+        }
 
         authService.registerUser(usersDTO);
         return ResponseDTO.<String>builder().status(200).data("Đăng ký thành công, vui lòng kiểm tra email để xác minh tài khoản.").build();

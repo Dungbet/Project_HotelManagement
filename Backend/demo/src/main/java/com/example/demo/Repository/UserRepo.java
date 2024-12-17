@@ -63,7 +63,11 @@ public interface UserRepo extends JpaRepository<Users, Integer>{
     @Query("SELECT u FROM Users u WHERE u.role.name = 'ROLE_EMPLOYEE'")
     Page<Users> searchEmployee(Pageable pageable);
 
+    @Query("SELECT u FROM Users u WHERE u.username = :username")
+    Users getUserByUsername(@Param("username") String userName);
 
 
+    @Query("SELECT u FROM Users u WHERE u.role.name = 'ROLE_EMPLOYEE'")
+ List<Users> getEmployees ();
 
 }

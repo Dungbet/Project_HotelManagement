@@ -50,7 +50,7 @@ function Header() {
         const fetchMessages = async () => {
             try {
                 const token = getToken();
-                const response = await axios.get(`http://localhost:8080/messages/user/${username}`, {
+                const response = await axios.get(`http://localhost:8080/messages/user/employee`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -223,7 +223,7 @@ function Header() {
                             showUserDropdown ? 'show' : ''
                         }`}
                     >
-                        <Link to="/admin/change-password" className="dropdown-item" onClick={handleChangePassword}>
+                        <Link to="/employee/change-password" className="dropdown-item" onClick={handleChangePassword}>
                             <i className="fa fa-user me-2"></i> Đổi mật khẩu
                         </Link>
                         <a href="#" className="dropdown-item" onClick={handleLogout}>

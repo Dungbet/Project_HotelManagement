@@ -11,8 +11,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")
+                // Thêm cả origin của Dialogflow
+                .allowedOrigins("http://localhost:3000", "https://dialogflow.googleapis.com")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
-                        .allowCredentials(true);
+                .allowedHeaders("*") // Cho phép tất cả các headers
+                .allowCredentials(true);
     }
 }

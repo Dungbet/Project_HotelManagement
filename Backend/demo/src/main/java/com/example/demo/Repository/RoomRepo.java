@@ -42,16 +42,22 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     void updateAllRoomsDiscount(@Param("discount") double discount);
 
     @Query(value = "SELECT * FROM rooms r WHERE r.id NOT IN (" +
-            "SELECT b.room_id FROM bookings b WHERE CURRENT_DATE < b.check_out_date " +
+            "SELECT br.room_id FROM booking_rooms br " +
+            "JOIN bookings b ON b.id = br.booking_id " +
+            "WHERE CURRENT_DATE < b.check_out_date " +
             "AND CURRENT_DATE + INTERVAL 1 DAY > b.check_in_date) " +
             "AND r.capacity >= :numberOfGuests", nativeQuery = true)
     List<Rooms> findAvailableRooms(@Param("numberOfGuests") int numberOfGuests);
+
 
     @Query("SELECT count(r) FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
     long countAvailableRoomsAdmin(@Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
 
     @Query("SELECT count(r) FROM Rooms r")
     long countAllRooms();
+
+    @Query("SELECT r FROM Rooms r WHERE r.discount > 0")
+    Page<Rooms> findRoomsByDiscount (Pageable pageable);
 
 
 

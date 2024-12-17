@@ -90,7 +90,7 @@ function Sidebar() {
                         to="/employee/review"
                         className={`nav-item nav-link ${location.pathname === '/employee/review' ? 'active' : ''}`}
                     >
-                        <i class="fa-solid fa-people-roof"></i>Đánh giá
+                        <i class="fa-solid fa-comment me-2"></i>Đánh giá
                     </Link>
                 </div>
             </nav>

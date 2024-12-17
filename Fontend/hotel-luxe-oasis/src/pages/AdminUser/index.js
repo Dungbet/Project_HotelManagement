@@ -109,11 +109,19 @@ function AdminUser() {
             setDialogOpen(false);
             setUserToDelete(null); // Xóa trạng thái phòng cần xóa
             fetchUsers(); // Lấy lại danh sách phòng
-            setMessages({ ...messages, deleteMessageSuccess: 'Xóa User thành công' });
+            setMessages({
+                ...messages,
+                deteleMessageSuccess: 'Xóa User thành công',
+                deteleMessageFail: '', // Đảm bảo không có thông báo lỗi
+            });
         } catch (error) {
             setDialogOpen(false);
-            setMessages({ ...messages, deleteMessageFail: 'Xóa User thất bại' });
-            console.error('Error deleting room', error);
+            setMessages({
+                ...messages,
+                deteleMessageFail: 'Xóa User thất bại',
+                deteleMessageSuccess: '', // Đảm bảo không có thông báo thành công
+            });
+            console.error('Error deleting user', error);
         }
     };
 
@@ -192,6 +200,7 @@ function AdminUser() {
                 <p className="text-danger">{messages.updateMessageFail}</p>
                 <p className="text-success">{messages.deteleMessageSuccess}</p>
                 <p className="text-danger">{messages.deteleMessageFail}</p>
+
                 <div className="table-responsive">
                     <table className="table text-start align-middle table-hover table-striped mb-0">
                         <thead>

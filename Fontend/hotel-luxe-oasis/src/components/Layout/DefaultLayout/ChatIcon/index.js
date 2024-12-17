@@ -66,8 +66,8 @@ function ChatIcon() {
 
                 // Check if the message is relevant to the user or admin
                 if (
-                    (message.receiver === 'admin' && message.sender === username) ||
-                    (message.receiver === username && message.sender === 'admin')
+                    (message.receiver === 'employee' && message.sender === username) ||
+                    (message.receiver === username && message.sender === 'employee')
                 ) {
                     setMessages((prevMessages) => {
                         const updatedMessages = [
@@ -124,7 +124,7 @@ function ChatIcon() {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = {
                     sender: username,
-                    receiver: 'admin',
+                    receiver: 'employee',
                     content: newMessage,
                     timestamp: format(new Date(), 'dd/MM/yyyy HH:mm'),
                 };
@@ -185,7 +185,7 @@ function ChatIcon() {
             </div>
 
             <div className={`chat-box ${isChatBoxOpen ? 'active' : ''}`} ref={chatBoxRef}>
-                <div className="chat-box-header">Nhắn tin với Admin</div>
+                <div className="chat-box-header">Nhắn tin với Nhân Viên</div>
                 {error && <div className="chat-box-error">{error}</div>}
                 <div className="chat-box-content">
                     {messages.map((msg, index) => (

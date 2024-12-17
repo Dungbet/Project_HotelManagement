@@ -107,7 +107,6 @@ public class RoomController {
             @RequestParam("checkinDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date checkinDate,
             @RequestParam("checkoutDate") @DateTimeFormat(pattern = "dd/MM/yyyy") Date  checkoutDate,@RequestParam("numAdults") int numAdults,
             @RequestParam("numChildren") int numChildren,
-
             SearchDTO searchDTO) {
         System.out.println("Check-in Date: " + checkinDate);
         System.out.println("Check-out Date: " + checkoutDate);

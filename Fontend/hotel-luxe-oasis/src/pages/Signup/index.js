@@ -24,14 +24,23 @@ function Signup() {
 
         try {
             const response = await axios.post('http://localhost:8080/auth/register', { email, username, password });
-            setSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản');
-            setError('');
-            setErrorEmail('');
-            setErrorUsername('');
-            setEmail('');
-            setUsername('');
-            setPassword('');
-            setConfirmPassword('');
+            const responseData = response.data;
+            if (responseData.status == 200) {
+                setSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản');
+                setError('');
+                setErrorEmail('');
+                setErrorUsername('');
+                setEmail('');
+                setUsername('');
+                setPassword('');
+                setConfirmPassword('');
+            } else if (responseData.msg.includes('Email đã tồn tại')) {
+                setErrorEmail('Email đã tồn tại');
+                setErrorUsername(''); // Clear lỗi tên tài khoản
+            } else if (responseData.msg.includes('Tên tài khoản đã tồn tại')) {
+                setErrorUsername('Tên tài khoản đã tồn tại');
+                setErrorEmail(''); // Clear lỗi email
+            }
         } catch (err) {
             const { data } = err.response;
             setError('');

@@ -24,3 +24,21 @@
 .epd-justify-between {
     justify-content: space-between; /* Căn đều hai bên */
 }
+
+/* css mostroom */
+.room-card {
+    margin: 1rem;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center; /* Giữ các thẻ nằm ở giữa nếu chưa đầy hàng */
+}
+
+.room-card img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}

@@ -13,4 +13,5 @@ public class CountBookingsFromDateDTO {
     private Date createAt;          // Date of booking creation
     private long countBooking;      // Number of bookings
     private double totalAmount;
+    private long countCancel;
 }

@@ -19,4 +19,5 @@ public class Messages {
     private String content;
     private Date timestamp;
     private boolean isRead;
+
 }

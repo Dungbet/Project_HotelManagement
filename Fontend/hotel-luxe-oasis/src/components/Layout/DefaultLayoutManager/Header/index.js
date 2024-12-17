@@ -223,7 +223,7 @@ function Header() {
                             showUserDropdown ? 'show' : ''
                         }`}
                     >
-                        <Link to="/admin/change-password" className="dropdown-item" onClick={handleChangePassword}>
+                        <Link to="/manager/change-password" className="dropdown-item" onClick={handleChangePassword}>
                             <i className="fa fa-user me-2"></i> Đổi mật khẩu
                         </Link>
                         <a href="#" className="dropdown-item" onClick={handleLogout}>

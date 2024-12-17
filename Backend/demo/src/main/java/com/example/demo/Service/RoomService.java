@@ -44,6 +44,7 @@ public interface RoomService {
     void delete (int id);
     List<RoomsDTO> findAvailableRooms(int numberOfGuests);
     List<MostBookedRoomsDTO> findMostBookedRooms( Date startDate, Date endDate);
+    List<MostBookedRoomsDTO> findAllMostBookedRoomsByCapacity (int count);
     List<MostBookedRoomsDTO> findMinBookedRooms();
     List<MostBookedRoomsDTO> findAllMostBookedRooms();
 }
@@ -152,14 +153,18 @@ public RoomsDTO convertToDTO(Rooms room){
 
     @Override
     public PageDTO<List<RoomsDTO>> findAvailableRooms(SearchDTO searchDTO, Date  checkinDate, Date  checkoutDate, int totalGuest) {
-        if (searchDTO.getCurrentPage() == null) {
+        Sort sort = Sort.by(searchDTO.getSortedField()).ascending();
+        if (searchDTO.getSortedField().equals("discount")) {
+            sort = Sort.by("discount").descending(); // Ưu tiên giảm giá cao nhất
+        }
+    if (searchDTO.getCurrentPage() == null) {
             searchDTO.setCurrentPage(0);
         }
         if (searchDTO.getSize() == null) {
             searchDTO.setSize(6);
         }
 
-        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize());
+        PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(), searchDTO.getSize(),sort);
         Page<Rooms> page = roomRepo.findAvailableRooms(pageRequest, checkinDate, checkoutDate, totalGuest);
 
         return PageDTO.<List<RoomsDTO>>builder()
@@ -222,7 +227,7 @@ public RoomsDTO convertToDTO(Rooms room){
 
     @Override
     public PageDTO<List<RoomsDTO>> sortByPrice(SearchDTO searchDTO) {
-        Sort sortBy = Sort.by("price").descending();
+        Sort sortBy = Sort.by("price").ascending();
         if(searchDTO.getCurrentPage() == null){
             searchDTO.setCurrentPage(0);
         }
@@ -269,7 +274,7 @@ public RoomsDTO convertToDTO(Rooms room){
             searchDTO.setSize(6);
         }
         PageRequest pageRequest = PageRequest.of(searchDTO.getCurrentPage(),searchDTO.getSize(),sort);
-        Page<Rooms> page = roomRepo.findAll(pageRequest);
+        Page<Rooms> page = roomRepo.findRoomsByDiscount(pageRequest);
 
         return PageDTO.<List<RoomsDTO>>builder()
                 .totalPages(page.getTotalPages())
@@ -424,6 +429,13 @@ public RoomsDTO convertToDTO(Rooms room){
         Pageable pageable = PageRequest.of(0, 10); // Lấy 10 kết quả đầu tiên
        return bookingRepo.findMostBookedRooms(startDate, endDate, pageable).stream().collect(Collectors.toList());
     }
+
+    @Override
+    public List<MostBookedRoomsDTO> findAllMostBookedRoomsByCapacity(int count) {
+        Pageable pageable = PageRequest.of(0, 3); // Lấy 10 kết quả đầu tiên
+        return bookingRepo.findAllMostBookedRoomsByCapacity(count, pageable).stream().collect(Collectors.toList());
+    }
+
     @Override
     public List<MostBookedRoomsDTO> findAllMostBookedRooms() {
 

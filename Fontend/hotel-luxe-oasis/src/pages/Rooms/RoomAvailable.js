@@ -6,7 +6,12 @@ import 'react-datepicker/dist/react-datepicker.css';
 import vi from 'date-fns/locale/vi';
 import { format, parse, isValid } from 'date-fns';
 import { Popover, InputNumber, Button } from 'antd';
-
+// Material-UI imports
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 // Helper function to convert date from YYYY-MM-DD to DD/MM/YYYY
 const formatDate = (date) => {
     return isValid(date) ? format(date, 'dd/MM/yyyy') : '';
@@ -46,6 +51,11 @@ function RoomAvailable() {
     const [numAdults, setNumAdults] = useState(null);
     const [numChildren, setNumChildren] = useState(null);
 
+    // State for max room selection dialog
+    const [openMaxRoomDialog, setOpenMaxRoomDialog] = useState(false);
+    const [maxRoomDialogRoom, setMaxRoomDialogRoom] = useState(null);
+    const [validationErrorsDialogOpen, setValidationErrorsDialogOpen] = useState(false);
+
     const handleReset = () => {
         setNumRooms(1);
         setNumAdults(1);
@@ -58,6 +68,15 @@ function RoomAvailable() {
             setNumRooms(numRooms + 1);
         } else if (action === 'decrease' && numRooms > 1) {
             setNumRooms(numRooms - 1);
+        }
+    };
+
+    // Handle dialog close
+    const handleMaxRoomDialogClose = () => {
+        setOpenMaxRoomDialog(false);
+        if (maxRoomDialogRoom) {
+            const checkbox = document.getElementById(`room-${maxRoomDialogRoom.id}`);
+            if (checkbox) checkbox.checked = false;
         }
     };
 
@@ -92,10 +111,8 @@ function RoomAvailable() {
             if (selectedRooms.length < numRooms) {
                 setSelectedRooms([...selectedRooms, room]);
             } else {
-                alert(`Bạn chỉ có thể chọn ${numRooms} phòng!`);
-                // Bỏ check checkbox nếu vượt quá số lượng cho phép
-                const checkbox = document.getElementById(`room-${room.id}`);
-                if (checkbox) checkbox.checked = false;
+                setOpenMaxRoomDialog(true);
+                setMaxRoomDialogRoom(room);
             }
         }
     };
@@ -202,11 +219,72 @@ function RoomAvailable() {
         const selectedSortOption = e.target.value;
         setSortOption(selectedSortOption);
         setPage(0); // Reset page to 0 when sorting changes
-        if (selectedSortOption === 'discount') {
-            setKeyword('des');
-        } else {
-            setKeyword('');
+
+        // Kiểm tra xem đã chọn ngày chưa
+        if (!checkinDate || !checkoutDate) {
+            alert('Vui lòng chọn ngày đến và ngày đi trước khi sắp xếp');
+            return;
         }
+
+        // Xác định các tham số cho từng loại sắp xếp
+        let sortParams = {};
+        switch (selectedSortOption) {
+            case '1': // Sắp xếp theo giá tăng dần
+                sortParams = {
+                    sortedField: 'price',
+                    keyword: 'asc',
+                };
+                break;
+            case '2': // Sắp xếp theo số lượng người
+                sortParams = {
+                    sortedField: 'capacity',
+                    keyword: 'asc',
+                };
+                break;
+            case '3': // Sắp xếp các phòng đang giảm giá
+                sortParams = {
+                    sortedField: 'discount',
+                    keyword: 'desc',
+                };
+                break;
+            default:
+                sortParams = {
+                    sortedField: '',
+                    keyword: '',
+                };
+        }
+
+        // Chuẩn bị các tham số cho URL và API call
+        const params = {
+            checkinDate: formatDate(checkinDate),
+            checkoutDate: formatDate(checkoutDate),
+            page: 0,
+            size: size,
+            ...sortParams,
+            numAdults: numAdults,
+            numChildren: numChildren,
+            numRooms: numRooms,
+        };
+
+        // Update URL query params
+        const queryString = new URLSearchParams(
+            Object.fromEntries(Object.entries(params).filter(([_, v]) => v != null && v !== '')),
+        ).toString();
+
+        // Navigate with updated query params
+        navigate(`?${queryString}`);
+
+        // Fetch rooms with new sorting parameters
+        fetchRooms(
+            checkinDate,
+            checkoutDate,
+            0, // reset to first page
+            sortParams.sortedField,
+            sortParams.keyword,
+            numAdults,
+            numChildren,
+            numRooms,
+        );
     };
 
     const handleSearch = () => {
@@ -255,6 +333,7 @@ function RoomAvailable() {
 
         if (errors.length > 0) {
             setValidationErrors(errors);
+            setValidationErrorsDialogOpen(true);
             return;
         }
 
@@ -277,6 +356,9 @@ function RoomAvailable() {
                 `numRooms=${numRooms}&` +
                 `id=${selectedRooms.map((room) => room.id).join(',')}`,
         );
+    };
+    const handleCloseValidationErrorsDialog = () => {
+        setValidationErrorsDialogOpen(false);
     };
     const GuestSelectionContent = (
         <div style={{ width: 250, padding: 10 }}>
@@ -460,7 +542,7 @@ function RoomAvailable() {
                                     <option value="">Sắp xếp</option>
                                     <option value="1">Giá (ưu tiên thấp nhất)</option>
                                     <option value="2">Số lượng người (ít - nhiều)</option>
-                                    <option value="3">Đang giảm giá</option>
+                                    <option value="3">Giảm giá (ưu tiên giảm nhiều)</option>
                                 </select>
                             </div>
                         </div>
@@ -584,6 +666,43 @@ function RoomAvailable() {
                     </button>
                 </div>
             </div>
+            <Dialog
+                open={openMaxRoomDialog}
+                onClose={handleMaxRoomDialogClose}
+                aria-labelledby="max-rooms-dialog-title"
+                aria-describedby="max-rooms-dialog-description"
+            >
+                <DialogTitle id="max-rooms-dialog-title">Giới Hạn Số Phòng</DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="max-rooms-dialog-description">
+                        {`Bạn chỉ có thể chọn ${numRooms} phòng!`}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleMaxRoomDialogClose} color="primary" autoFocus>
+                        Đóng
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog
+                open={validationErrorsDialogOpen}
+                onClose={handleCloseValidationErrorsDialog}
+                aria-labelledby="validation-errors-dialog-title"
+            >
+                <DialogTitle id="validation-errors-dialog-title">Lỗi Đặt Phòng</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {validationErrors.map((error, index) => (
+                            <div key={index}>{error}</div>
+                        ))}
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseValidationErrorsDialog} color="primary" autoFocus>
+                        Đóng
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

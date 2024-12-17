@@ -45,6 +45,7 @@ function AdminDashboard() {
         growth: 0,
     });
     const [role, setRole] = useState(null);
+    const [canceledBooking, setCanceledBooking] = useState(0);
 
     useEffect(() => {
         fetchTodayStatistics();
@@ -82,6 +83,7 @@ function AdminDashboard() {
             console.log('API response:', result);
             setTodayOrderCount(result.data.countBooking);
             setTodayRevenue(result.data.totalAmount);
+            setCanceledBooking(result.data.countCancel);
             setChartData(formatChartData([result.data]));
         } catch (error) {
             console.error('Error fetching today statistics:', error);
@@ -169,6 +171,7 @@ function AdminDashboard() {
         const labels = data.map((item) => item.createAt);
         const revenueData = data.map((item) => item.totalAmount);
         const orderCountData = data.map((item) => item.countBooking);
+        const canceledData = data.map((item) => item.countCancel);
 
         return {
             labels,
@@ -189,6 +192,14 @@ function AdminDashboard() {
                     borderColor: '#0dcaf0',
                     fill: false,
                 },
+                {
+                    type: 'line',
+                    label: 'Số booking đã hủy', // Thêm dataset cho số booking đã hủy
+                    data: canceledData,
+                    backgroundColor: '#FF0000',
+                    borderColor: '#FF0000',
+                    fill: false,
+                },
             ],
         };
     };
@@ -196,8 +207,10 @@ function AdminDashboard() {
     const updateSummary = (data) => {
         const totalBookings = data.reduce((acc, item) => acc + item.countBooking, 0);
         const totalRevenue = data.reduce((acc, item) => acc + item.totalAmount, 0);
+        const totalCanceled = data.reduce((acc, item) => acc + item.countCancel, 0);
         setTodayOrderCount(totalBookings);
         setTodayRevenue(totalRevenue);
+        setCanceledBooking(totalCanceled);
     };
 
     const formatCurrency = (value) => {
@@ -258,16 +271,25 @@ function AdminDashboard() {
                 Thống kê doanh thu
             </h3>
             <div className="row g-4">
-                <div className="col-sm-6 col-xl-6">
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-chart-area fa-3x text-primary"></i>
                         <div className="ms-3">
-                            <p className="mb-2">Số lượng booking</p>
+                            <p className="mb-2">Tổng booking</p>
                             <h3 className="mb-0 text-center">{todayOrderCount}</h3>
                         </div>
                     </div>
                 </div>
-                <div className="col-sm-6 col-xl-6">
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-times-circle fa-3x text-danger"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Đã hủy</p>
+                            <h3 className="mb-0 text-center">{canceledBooking}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-chart-pie fa-3x text-primary"></i>
                         <div className="ms-3">
@@ -289,13 +311,14 @@ function AdminDashboard() {
                                     onChange={handleStartDateChange}
                                     dateFormat="dd/MM/yyyy"
                                     className="py-1 px-3 rounded me-2"
+                                    maxDate={new Date()}
                                 />
                                 <DatePicker
                                     selected={endDate}
                                     onChange={handleEndDateChange}
                                     dateFormat="dd/MM/yyyy"
                                     className="py-1 px-3 rounded me-2"
-                                    maxDate={new Date()}
+                                    maxDate={new Date(startDate.getTime() + 24 * 60 * 60 * 1000)}
                                 />
                                 <button type="button" className="btn btn-primary px-3" onClick={fetchChartData}>
                                     <i className="fa-solid fa-filter me-2" style={{ color: '#ffffff' }}></i>Lọc

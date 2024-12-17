@@ -60,9 +60,9 @@ List<Object[]> countUserByDay();
     PageDTO<List<UsersDTO>> searchEmployee(SearchDTO searchDTO);
     PageDTO<List<UsersDTO>> searchManager(SearchDTO searchDTO);
 
+    Users getUserByUsername (String userName);
 
-
-
+    List<Users> getEmployees ();
 
 }
 @Service
@@ -214,6 +214,16 @@ class UserServiceImpl implements UserService, UserDetailsService {
                 .totalElements(page.getTotalElements())
                 .data(page.get().map(u -> convert(u)).collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    public Users getUserByUsername(String userName) {
+        return userRepo.getUserByUsername(userName) ;
+    }
+
+    @Override
+    public List<Users> getEmployees() {
+        return userRepo.getEmployees().stream().collect(Collectors.toList());
     }
 
 

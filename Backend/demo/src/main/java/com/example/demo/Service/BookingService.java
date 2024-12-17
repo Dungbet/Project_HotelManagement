@@ -50,6 +50,7 @@ public interface   BookingService {
 
 
 
+
 }
 @Service
 class BookingServiceImpl implements BookingService {
@@ -272,12 +273,21 @@ public BookingDTO create(BookingDTO bookingDTO, String token) {
 
     @Override
     public void requestCancel(BookingDTO bookingDTO) {
+
+        Date now = new Date();
         // Tìm đơn đặt phòng
         Bookings booking = bookingRepo.findById(bookingDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
 
         // Kiểm tra nếu trạng thái hiện tại chưa phải là "Yêu cầu hủy"
+
         if (!booking.getBookingStatus().equals("Yêu cầu hủy")) {
+
+            // Kiểm tra nếu ngày hủy phải trước ngày check-in
+            if (now.after(booking.getCheckInDate())) {
+                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
+            }
+
             booking.setBookingStatus("Yêu cầu hủy");
             bookingRepo.save(booking);
         } else {
@@ -292,6 +302,11 @@ public BookingDTO create(BookingDTO bookingDTO, String token) {
 
         // Kiểm tra nếu trạng thái hiện tại chưa phải là "Yêu cầu hủy"
         if (booking.getBookingStatus().equals("Chờ xác nhận") || booking.getBookingStatus().equals("Đã xác nhận")) {
+            Date now = new Date();
+            // Kiểm tra nếu ngày hủy phải trước ngày check-in
+            if (now.after(booking.getCheckInDate())) {
+                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
+            }
             booking.setBookingStatus("Đã hủy");
             if(booking.getStatus().equals("Đã thanh toán")){
                 booking.setStatus("Hoàn tiền");

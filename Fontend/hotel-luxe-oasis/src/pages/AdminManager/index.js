@@ -106,10 +106,18 @@ function AdminUser() {
             setDialogOpen(false);
             setUserToDelete(null); // Xóa trạng thái phòng cần xóa
             fetchUsers(); // Lấy lại danh sách phòng
-            setMessages({ ...messages, deleteMessageSuccess: 'Xóa User thành công' });
+            setMessages({
+                ...messages,
+                deteleMessageSuccess: 'Xóa User thành công',
+                deteleMessageFail: '', // Đảm bảo không có thông báo lỗi
+            });
         } catch (error) {
             setDialogOpen(false);
-            setMessages({ ...messages, deleteMessageFail: 'Xóa User thất bại' });
+            setMessages({
+                ...messages,
+                deteleMessageFail: 'Xóa User thất bại',
+                deteleMessageSuccess: '', // Đảm bảo không có thông báo thành công
+            });
             console.error('Error deleting room', error);
         }
     };

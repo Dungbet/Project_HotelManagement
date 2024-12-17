@@ -35,8 +35,8 @@ const ChatBox = ({ chatData, onClose }) => {
 
                 // Only add messages relevant to the current chat
                 if (
-                    (message.sender === chatData?.sender && message.receiver === 'admin') ||
-                    (message.receiver === chatData?.sender && message.sender === 'admin')
+                    (message.sender === chatData?.sender && message.receiver === 'employee') ||
+                    (message.receiver === chatData?.sender && message.sender === 'employee')
                 ) {
                     const formattedMessage = {
                         ...message,
@@ -69,7 +69,7 @@ const ChatBox = ({ chatData, onClose }) => {
     const handleSendMessage = () => {
         if (newMessage.trim() && ws) {
             const message = {
-                sender: 'admin',
+                sender: 'employee',
                 receiver: chatData?.sender,
                 content: newMessage,
                 timestamp: format(new Date(), 'dd/MM/yyyy HH:mm'), // Format timestamp here
@@ -96,7 +96,7 @@ const ChatBox = ({ chatData, onClose }) => {
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`chat-message ${msg.sender === 'admin' ? 'from-admin-admin' : 'from-admin-user'}`}
+                        className={`chat-message ${msg.sender === 'employee' ? 'from-admin-admin' : 'from-admin-user'}`}
                     >
                         <div className="message-content">{msg.content}</div>
                     </div>

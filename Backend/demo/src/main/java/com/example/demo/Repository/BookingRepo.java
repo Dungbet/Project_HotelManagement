@@ -29,19 +29,28 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
 
     // Statistics by date
 
-    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(DATE(b.createAt), COUNT(b.id), SUM(b.totalAmount)) " +
+    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO( " +
+            "DATE(b.createAt), " +
+            "COUNT(b.id), " +
+            "SUM(CASE WHEN b.bookingStatus <> 'Đã hủy' THEN b.totalAmount ELSE 0 END), " +
+            "SUM(CASE WHEN b.bookingStatus = 'Đã hủy' THEN 1 ELSE 0 END)) " +
             "FROM Bookings b " +
             "WHERE b.createAt BETWEEN :startDate AND :endDate " +
-            "AND b.bookingStatus <> 'Đã hủy' "+
             "GROUP BY DATE(b.createAt) " +
             "ORDER BY DATE(b.createAt)")
-    List<CountBookingsFromDateDTO> countBookingsFromDate(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    List<CountBookingsFromDateDTO> countBookingsFromDate(
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate);
 
 
-    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(CURRENT_DATE, COUNT(b), SUM(b.totalAmount)) " +
+
+    @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO( " +
+            "CURRENT_DATE, " +  // current date
+            "COUNT(b.id), " +   // total count of bookings
+            "SUM(CASE WHEN b.bookingStatus <> 'Đã hủy' THEN b.totalAmount ELSE 0 END), " +  // sum of total amount excluding canceled bookings
+            "SUM(CASE WHEN b.bookingStatus = 'Đã hủy' THEN 1 ELSE 0 END)) " +  // count of canceled bookings
             "FROM Bookings b " +
-            "WHERE DATE(b.createAt) = CURRENT_DATE " +
-            "AND b.bookingStatus <> 'Đã hủy'")
+            "WHERE DATE(b.createAt) = CURRENT_DATE")  // filter by today's date
     CountBookingsFromDateDTO statisticsDay();
     @Query("SELECT new com.example.demo.DTO.CountBookingsFromDateDTO(CURRENT_DATE, COUNT(b), SUM(b.totalAmount)) " +
             "FROM Bookings b " +
@@ -72,6 +81,13 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
             "GROUP BY r.id, r.name, r.roomImg, r.roomNumber, r.price " +
             "ORDER BY COUNT(r.id) DESC")
     Page<MostBookedRoomsDTO> findAllMostBookedRooms(Pageable pageable);
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id) ) " +
+            "FROM Bookings b " +
+            "JOIN b.rooms r " +
+            "WHERE b.bookingStatus = 'Hoàn thành' AND r.capacity >= :count " +
+            "GROUP BY r.id, r.name, r.roomImg, r.roomNumber, r.price " +
+            "ORDER BY COUNT(r.id) DESC")
+    Page<MostBookedRoomsDTO> findAllMostBookedRoomsByCapacity(@Param("count") int count, Pageable pageable);
 
 
 

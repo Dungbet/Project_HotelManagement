@@ -1,6 +1,7 @@
 package com.example.demo.Controller;
 
 import com.example.demo.DTO.CouponDTO;
+import com.example.demo.DTO.MostBookedRoomsDTO;
 import com.example.demo.DTO.RoomsDTO;
 import com.example.demo.Service.CouponService;
 import com.example.demo.Service.RoomService;
@@ -59,8 +60,23 @@ public class DialogflowController {
                     responseJson.put("fulfillmentText", "❌ Không thể lấy thông tin số người.");
                 }
                 break;
+            case "getMostBookedRooms":
+                Map<String, Object> params = (Map<String, Object>) queryResult.get("parameters");
+                if (params != null) {
+                    Object countObject = params.get("count");
+                    if (countObject instanceof Number) {
+                        int count = ((Number) countObject).intValue();
+                        responseJson = getMostBookedRooms(count); // JSON rich message
+                    } else {
+                        responseJson.put("fulfillmentText", "❌ Số lượng không hợp lệ.");
+                    }
+                } else {
+                    responseJson.put("fulfillmentText", "❌ Không thể lấy thông tin số lượng.");
+                }
+                break;
             default:
                 responseJson.put("fulfillmentText", "❌ Không xác định được yêu cầu.");
+
         }
 
         return responseJson;
@@ -94,29 +110,123 @@ public class DialogflowController {
         List<RoomsDTO> availableRooms = roomService.findAvailableRooms(numberOfGuests);
         Map<String, Object> responseJson = new HashMap<>();
 
+        // Danh sách các phần tử trong richContent
+        List<List<Map<String, Object>>> richContent = new ArrayList<>();
+
         if (availableRooms != null && !availableRooms.isEmpty()) {
-            List<List<Map<String, Object>>> richMessages = new ArrayList<>();
-
             for (RoomsDTO room : availableRooms) {
-                List<Map<String, Object>> card = new ArrayList<>();
-                Map<String, Object> cardDetails = new HashMap<>();
-                cardDetails.put("title", room.getName());
-                cardDetails.put("subtitle", String.format("Giá: %.2f VNĐ | Số giường: %d | Diện tích: %.1f m²",
-                        room.getPrice(), room.getBed(), room.getSize()));
-                cardDetails.put("imageUri","https://m.media-amazon.com/images/I/71oqfuWhjeL.jpg");
-                cardDetails.put("buttons", List.of(
-                        Map.of("text", "Xem chi tiết", "postback", "https://localhost:8080/rooms/" + room.getRoomNumber())
-                ));
+                // Phần tử hình ảnh
+                Map<String, Object> imageElement = new HashMap<>();
+                imageElement.put("rawUrl", room.getRoomImg()); // URL hình ảnh của phòng
+                imageElement.put("type", "image");
+                imageElement.put("accessibilityText", "Hình ảnh phòng: " + room.getName());
 
-                card.add(Map.of("card", cardDetails));
-                richMessages.add(card);
+                // Phần tử thông tin
+                Map<String, Object> infoElement = new HashMap<>();
+                infoElement.put("title", room.getName());
+                infoElement.put("subtitle", String.format("Giá: %.2f VNĐ | Tối đa: %d người | Số giường: %d | Diện tích: %.1f m²",
+                         room.getPrice(),room.getCapacity(), room.getBed(), room.getSize()));
+
+                infoElement.put("type", "info");
+                infoElement.put("actionLink", "http://localhost:3000/room-detail/" + room.getId());
+
+                // Thêm cả 2 phần tử vào một danh sách con
+                List<Map<String, Object>> roomContent = new ArrayList<>();
+                roomContent.add(imageElement);
+                roomContent.add(infoElement);
+
+                // Thêm danh sách con vào richContent
+                richContent.add(roomContent);
             }
-
-            responseJson.put("fulfillmentMessages", richMessages);
         } else {
-            responseJson.put("fulfillmentText", "❌ Không có phòng nào còn trống cho " + numberOfGuests + " người.");
+            // Xử lý khi không có phòng trống
+            List<Map<String, Object>> noRoomsContent = new ArrayList<>();
+
+            Map<String, Object> noRoomsInfo = new HashMap<>();
+            noRoomsInfo.put("title", "Không có phòng trống");
+            noRoomsInfo.put("subtitle", "❌ Không có phòng nào còn trống cho " + numberOfGuests + " người.");
+            noRoomsInfo.put("type", "info");
+            noRoomsInfo.put("actionLink", "https://example.com");
+
+            noRoomsContent.add(noRoomsInfo);
+            richContent.add(noRoomsContent);
         }
 
+        // Đặt richContent vào payload
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("richContent", richContent);
+
+        // Thêm payload vào fulfillmentMessages
+        List<Map<String, Object>> fulfillmentMessages = new ArrayList<>();
+        Map<String, Object> message = new HashMap<>();
+        message.put("payload", payload);
+        fulfillmentMessages.add(message);
+
+        responseJson.put("fulfillmentMessages", fulfillmentMessages);
         return responseJson;
     }
+    @GetMapping("/most-booked-rooms")
+    public Map<String, Object> getMostBookedRooms(@RequestParam("count") int count) {
+        // Gọi repository để lấy danh sách các phòng được đặt nhiều nhất
+        List<MostBookedRoomsDTO> mostBookedRooms = roomService.findAllMostBookedRoomsByCapacity(count);
+        Map<String, Object> responseJson = new HashMap<>();
+
+        // Danh sách các phần tử trong richContent
+        List<List<Map<String, Object>>> richContent = new ArrayList<>();
+
+        if (mostBookedRooms != null && !mostBookedRooms.isEmpty()) {
+            for (MostBookedRoomsDTO room : mostBookedRooms) {
+                // Phần tử hình ảnh
+                Map<String, Object> imageElement = new HashMap<>();
+                imageElement.put("rawUrl", room.getUrl()); // URL hình ảnh của phòng
+                imageElement.put("type", "image");
+                imageElement.put("accessibilityText", "Hình ảnh phòng: " + room.getNameRooms());
+
+                // Phần tử thông tin
+                Map<String, Object> infoElement = new HashMap<>();
+                infoElement.put("title", room.getNameRooms());
+                infoElement.put("subtitle", String.format("Số lượng booking: %d | Giá: %.2f VNĐ | Số phòng: %s",
+                        room.getCountBooked() ,room.getPrice(), room.getNumberRoom() ));
+
+                infoElement.put("type", "info");
+                infoElement.put("actionLink", "http://localhost:3000/room-detail/" + room.getNumberRoom());
+
+                // Thêm cả 2 phần tử vào một danh sách con
+                List<Map<String, Object>> roomContent = new ArrayList<>();
+                roomContent.add(imageElement);
+                roomContent.add(infoElement);
+
+                // Thêm danh sách con vào richContent
+                richContent.add(roomContent);
+            }
+        } else {
+            // Xử lý khi không có phòng phù hợp
+            List<Map<String, Object>> noRoomsContent = new ArrayList<>();
+
+            Map<String, Object> noRoomsInfo = new HashMap<>();
+            noRoomsInfo.put("title", "Không có phòng phù hợp");
+            noRoomsInfo.put("subtitle", "❌ Không có phòng nào phù hợp với tiêu chí của bạn.");
+            noRoomsInfo.put("type", "info");
+            noRoomsInfo.put("actionLink", "https://example.com");
+
+            noRoomsContent.add(noRoomsInfo);
+            richContent.add(noRoomsContent);
+        }
+
+        // Đặt richContent vào payload
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("richContent", richContent);
+
+        // Thêm payload vào fulfillmentMessages
+        List<Map<String, Object>> fulfillmentMessages = new ArrayList<>();
+        Map<String, Object> message = new HashMap<>();
+        message.put("payload", payload);
+        fulfillmentMessages.add(message);
+
+        responseJson.put("fulfillmentMessages", fulfillmentMessages);
+        return responseJson;
+    }
+
+
+
 }
