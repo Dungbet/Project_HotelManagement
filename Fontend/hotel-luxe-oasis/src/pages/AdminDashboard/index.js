@@ -266,6 +266,7 @@ function AdminDashboard() {
                     textAlign: 'center',
                     padding: '10px',
                     borderBottom: '2px solid #007bff',
+                    // marginTop: '50px',
                 }}
             >
                 Thống kê doanh thu
@@ -346,6 +347,7 @@ function AdminDashboard() {
                     textAlign: 'center',
                     padding: '10px',
                     borderBottom: '2px solid #007bff',
+                    marginTop: '50px',
                 }}
             >
                 Thống kê phòng
@@ -427,6 +429,7 @@ function AdminDashboard() {
                     textAlign: 'center',
                     padding: '10px',
                     borderBottom: '2px solid #007bff',
+                    marginTop: '50px',
                 }}
             >
                 Thống kê người dùng
@@ -481,6 +484,7 @@ function AdminDashboard() {
                         textAlign: 'center',
                         padding: '10px',
                         borderBottom: '2px solid #007bff',
+                        marginTop: '50px',
                     }}
                 >
                     Phòng được đặt nhiều
@@ -498,6 +502,7 @@ function AdminDashboard() {
                             textAlign: 'center',
                             padding: '10px',
                             borderBottom: '2px solid #007bff',
+                            marginTop: '50px',
                         }}
                     >
                         Hiệu suất của nhân viên

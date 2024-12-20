@@ -9,6 +9,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import RoomDetailsModal from './RoomDetailsModal.js';
 
 function AdminRoom() {
     const [rooms, setRooms] = useState([]);
@@ -28,6 +29,8 @@ function AdminRoom() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [roomToDelete, setRoomToDelete] = useState(null);
     const [role, setRole] = useState(null);
+    const [selectedBookingId, setSelectedBookingId] = useState(null); // ID đặt phòng được chọn
+    const [isRoomDetailsModalVisible, setIsRoomDetailsModalVisible] = useState(false);
 
     const navigate = useNavigate();
 
@@ -37,6 +40,7 @@ function AdminRoom() {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
+                console.log('Full decoded token:', decoded); // In toàn bộ payload
 
                 setRole(decoded.role); // Lấy giá trị 'sub' từ payload
             } catch (error) {
@@ -150,6 +154,11 @@ function AdminRoom() {
             console.error('Error updating all discounts', error);
         }
     };
+    const handleViewDetails = (bookingId) => {
+        console.log(bookingId);
+        setSelectedBookingId(bookingId);
+        setIsRoomDetailsModalVisible(true);
+    };
 
     return (
         <div className="container-fluid pt-4 px-4">
@@ -248,9 +257,24 @@ function AdminRoom() {
                                         </select>
                                     </td>
                                     <td>
-                                        <Link to={`/admin/edit-room/${room.id}`}>
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </Link>
+                                        {room && (
+                                            <i
+                                                className="fa-solid fa-eye"
+                                                style={{ color: '#007bff', cursor: 'pointer', marginRight: '10px' }}
+                                                onClick={() => handleViewDetails(room.id)}
+                                            ></i>
+                                        )}
+
+                                        {role === 'manager' ? (
+                                            <Link to={`/manager/edit-room/${room.id}`}>
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </Link>
+                                        ) : (
+                                            <Link to={`/admin/edit-room/${room.id}`}>
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </Link>
+                                        )}
+
                                         <a onClick={() => handleDeleteClick(room.id)}>
                                             <i className="fa-solid fa-trash-can"></i>
                                         </a>
@@ -311,6 +335,13 @@ function AdminRoom() {
                     </Button>
                 </DialogActions>
             </Dialog>
+            {isRoomDetailsModalVisible && (
+                <RoomDetailsModal
+                    isVisible={isRoomDetailsModalVisible}
+                    roomId={selectedBookingId}
+                    onClose={() => setIsRoomDetailsModalVisible(false)}
+                />
+            )}
         </div>
     );
 }

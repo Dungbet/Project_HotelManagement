@@ -18,18 +18,19 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Query(value = "SELECT * FROM Rooms ORDER BY RAND() LIMIT 4", nativeQuery = true)
     List<Rooms> getRoomsByRandom();
 
-    @Query("SELECT r FROM Rooms r WHERE r.capacity >= :totalGuest AND r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
-    Page<Rooms> findAvailableRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate, int totalGuest);
+    @Query("SELECT r FROM Rooms r WHERE r.capacity >= :totalGuest AND r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE b.bookingStatus != 'Đã hủy' AND :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    Page<Rooms> findAvailableRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate, @Param("totalGuest") int totalGuest);
+
 
     @Query("SELECT r FROM Rooms r " +
             "JOIN FETCH r.bookings b " +
-            "WHERE b.checkInDate < :checkoutDate AND b.checkOutDate > :checkinDate")
+            "WHERE b.checkInDate < :checkoutDate AND b.checkOutDate > :checkinDate AND b.bookingStatus <> 'Đã hủy'")
     Page<Rooms> findBookedRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
 
-    @Query("SELECT r FROM Rooms r WHERE  r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    @Query("SELECT r FROM Rooms r WHERE  r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate AND b.bookingStatus <> 'Đã hủy')")
     Page<Rooms> findEmptyRooms(Pageable pageable, @Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
 
-    @Query("SELECT r FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+    @Query("SELECT r FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate AND b.bookingStatus <> 'Đã hủy')")
     List<Rooms> findAvailableRoomsAdmin(@Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
     @Transactional
     @Modifying
@@ -41,16 +42,20 @@ public interface RoomRepo extends JpaRepository<Rooms, Integer> {
     @Query("UPDATE Rooms r SET r.discount = :discount, r.discountedPrice = r.price - (r.price * :discount / 100)")
     void updateAllRoomsDiscount(@Param("discount") double discount);
 
-    @Query(value = "SELECT * FROM rooms r WHERE r.id NOT IN (" +
-            "SELECT br.room_id FROM booking_rooms br " +
-            "JOIN bookings b ON b.id = br.booking_id " +
-            "WHERE CURRENT_DATE < b.check_out_date " +
-            "AND CURRENT_DATE + INTERVAL 1 DAY > b.check_in_date) " +
+    @Query(value = "SELECT * FROM rooms r " +
+            "WHERE r.id NOT IN (" +
+            "    SELECT br.room_id FROM booking_rooms br " +
+            "    JOIN bookings b ON b.id = br.booking_id " +
+            "    WHERE CURRENT_DATE < b.check_out_date " +
+            "    AND CURRENT_DATE + INTERVAL 1 DAY > b.check_in_date " +
+            "    AND b.booking_status != 'Đã hủy'" +
+            ") " +
             "AND r.capacity >= :numberOfGuests", nativeQuery = true)
     List<Rooms> findAvailableRooms(@Param("numberOfGuests") int numberOfGuests);
 
 
-    @Query("SELECT count(r) FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate)")
+
+    @Query("SELECT count(r) FROM Rooms r WHERE r.id NOT IN (SELECT br.id FROM Bookings b JOIN b.rooms br WHERE :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate AND b.bookingStatus <> 'Đã hủy')")
     long countAvailableRoomsAdmin(@Param("checkinDate") Date checkinDate, @Param("checkoutDate") Date checkoutDate);
 
     @Query("SELECT count(r) FROM Rooms r")

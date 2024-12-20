@@ -43,6 +43,11 @@ public class BookingController {
         bookingService.requestCancel(bookingDTO);
         return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").data(bookingService.getBookingById(bookingDTO.getId())).build();
     }
+    @PutMapping("/retract")
+    public ResponseDTO<BookingDTO> retract(@RequestParam int bookingId) {
+        bookingService.retract(bookingId);
+        return ResponseDTO.<BookingDTO>builder().status(200).msg("ok").build();
+    }
     @PostMapping("/create")
     public ResponseDTO<BookingDTO> createBooking(
             @RequestBody BookingDTO bookingDTO,

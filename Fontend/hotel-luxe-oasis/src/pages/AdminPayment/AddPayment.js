@@ -21,8 +21,10 @@ function AddPayment() {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
+                console.log('Full decoded token:', decoded);
 
                 setRole(decoded.role); // Lấy giá trị 'sub' từ payload
+                return decoded.userId;
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -33,12 +35,26 @@ function AddPayment() {
         const fetchBookings = async () => {
             try {
                 const token = getToken();
-                const response = await axios.get('http://localhost:8080/booking/get-all', {
+                const decoded = jwtDecode(token);
+                console.log('Full decoded token:', decoded);
+
+                const currentRole = decoded.role;
+                setRole(currentRole);
+                let url;
+                if (currentRole === 'employee') {
+                    console.log('da dang nhạp employee');
+                    const employeeId = decodeToken();
+                    url = `http://localhost:8080/admin/booking/get-all-booking-by-employee?employeeId=${employeeId}`;
+                } else {
+                    console.log('da dang nhạp manager');
+                    url = `http://localhost:8080/booking/get-all`;
+                }
+
+                const response = await axios.get(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                });
-                console.log('API Response:', response.data); // Log toàn bộ response để kiểm tra cấu trúc dữ liệu
+                }); // Log toàn bộ response để kiểm tra cấu trúc dữ liệu
                 if (response.data.status === 200) {
                     // Lọc các booking có status là false (Chưa thanh toán)
                     const filteredBookings = response.data.data.filter((booking) => {
@@ -54,8 +70,8 @@ function AddPayment() {
             }
         };
 
-        fetchBookings();
         decodeToken();
+        fetchBookings();
     }, []);
 
     const handleChange = (e) => {

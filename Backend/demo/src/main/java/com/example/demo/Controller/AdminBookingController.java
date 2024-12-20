@@ -95,6 +95,12 @@ public class AdminBookingController {
         PageDTO<List<BookingDTO>> listPageDTO = bookingService.searchBookingsByEmployee(searchDTO, employeeId);
         return ResponseDTO.<PageDTO<List<BookingDTO>>>builder().status(200).data(listPageDTO).msg("ok").build();
     }
+    @GetMapping("/get-all-booking-by-employee")
+    public ResponseDTO<List<BookingDTO>> getAllBookingsByEmployee(@RequestParam int employeeId) {
+
+        List<BookingDTO> listPageDTO = bookingService.getAllBookingsByEmployee( employeeId);
+        return ResponseDTO.<List<BookingDTO>>builder().status(200).data(listPageDTO).msg("ok").build();
+    }
 
     @PostMapping("update-status")
     public ResponseDTO<Void> updateStatus(@RequestParam("bookingStatus") boolean status, @RequestParam("bookingId") Integer bookingId) {

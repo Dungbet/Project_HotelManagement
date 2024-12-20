@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-
+import { jwtDecode } from 'jwt-decode';
 function EditRoom() {
     const { id } = useParams();
     const [formData, setFormData] = useState({
@@ -27,15 +27,30 @@ function EditRoom() {
     const [previewImage, setPreviewImage] = useState(''); // Thêm state để lưu URL ảnh xem trước
     const [previewImages, setPreviewImages] = useState([]); // Xem trước danh sách ảnh
     const [additionalImages, setAdditionalImages] = useState([]);
+    const [role, setRole] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchRoom();
         fetchHotels();
         fetchCategories();
+        decodeToken();
     }, [id]);
     const getToken = () => localStorage.getItem('token');
+    // Giải mã token để lấy role
+    const decodeToken = () => {
+        const token = getToken();
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
 
+                setRole(decoded.role); // Lấy giá trị 'sub' từ payload
+            } catch (error) {
+                console.error('Invalid token', error);
+            }
+        }
+    };
     const fetchRoom = async () => {
         try {
             const token = getToken();
@@ -201,7 +216,13 @@ function EditRoom() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            navigate('/admin/room');
+            if (role === 'admin') {
+                navigate('/admin/room');
+            } else if (role === 'manager') {
+                navigate('/manager/room');
+            } else {
+                navigate('/login'); // Default fallback
+            }
         } catch (error) {
             console.error('Error updating room', error);
         }

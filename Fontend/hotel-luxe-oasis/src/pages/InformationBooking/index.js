@@ -199,9 +199,7 @@ function InformationBooking() {
                                 <tr key={`${booking.id}-${roomIndex}`}>
                                     <td>{formatDate(booking.createAt) || 'N/A'}</td>
                                     <td>{booking.bookingName || 'N/A'}</td>
-                                    <td>
-                                        {room.roomNumber} - {room.name}
-                                    </td>
+                                    <td>{room.roomNumber}</td>
                                     <td>{booking.bookingPhone || 'N/A'}</td>
                                     <td>{booking.guest}</td>
                                     <td>{parseDate(booking.checkInDate)}</td>

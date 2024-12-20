@@ -101,7 +101,7 @@ public class DialogflowController {
             );
         } else {
             // Thông điệp không có coupon
-            return "❌ Không có thông tin mã giảm giá nào.";
+            return "❌ Hiện tại Hotel không có mã giảm giá nào.";
         }
     }
 

@@ -7,7 +7,7 @@ import BookingDetailsModal from './DetailBoooking.js';
 const RoomList = () => {
     const [rooms, setRooms] = useState([]);
     const [page, setPage] = useState(0);
-    const [size] = useState(10); // Số lượng phòng mỗi trang
+    const [size] = useState(3); // Số lượng phòng mỗi trang
     const [endPage, setEndPage] = useState(1); // Tổng số trang
     const [filter, setFilter] = useState('booked'); // Lọc: 'booked' hoặc 'empty'
     const [role, setRole] = useState(null);
@@ -73,6 +73,9 @@ const RoomList = () => {
         } else if (role === 'manager') {
             const { checkInDate, checkOutDate } = getDates();
             navigate(`/manager/add-booking?roomId=${roomId}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`);
+        } else if (role === 'employee') {
+            const { checkInDate, checkOutDate } = getDates();
+            navigate(`/employee/add-booking?roomId=${roomId}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}`);
         } else {
             navigate('/login');
         }

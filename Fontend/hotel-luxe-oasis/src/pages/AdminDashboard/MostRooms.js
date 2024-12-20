@@ -5,10 +5,11 @@ import { Button } from 'primereact/button';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Dashboard.css';
+
 const MostRooms = () => {
     const [rooms, setRooms] = useState([]);
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
 
     const getToken = () => localStorage.getItem('token');
 
@@ -19,6 +20,7 @@ const MostRooms = () => {
     const handleEndDateChange = (date) => {
         setEndDate(date);
     };
+
     // Hàm gọi API mặc định (không lọc)
     const fetchDefaultRooms = () => {
         const token = getToken();
@@ -77,9 +79,11 @@ const MostRooms = () => {
                 console.error('Error fetching data:', error);
             });
     };
+
     useEffect(() => {
         fetchDefaultRooms();
     }, []);
+
     return (
         <div>
             <div className="p-4">
@@ -94,6 +98,7 @@ const MostRooms = () => {
                             onChange={handleStartDateChange}
                             dateFormat="dd/MM/yyyy"
                             className="date-picker"
+                            maxDate={new Date()}
                         />
                     </div>
                     <div className="filter-item">
@@ -105,7 +110,7 @@ const MostRooms = () => {
                             onChange={handleEndDateChange}
                             dateFormat="dd/MM/yyyy"
                             className="date-picker"
-                            maxDate={new Date()}
+                            maxDate={new Date(startDate.getTime() + 24 * 60 * 60 * 1000)}
                         />
                     </div>
                     <div className="filter-item">
@@ -115,14 +120,13 @@ const MostRooms = () => {
             </div>
 
             {/* Hiển thị danh sách thẻ */}
-            {/* Hiển thị danh sách thẻ */}
-            <div className="flex flex-wrap gap-3 justify-content-center">
+            <div className="rooms-container">
                 {rooms.map((room, index) => (
                     <div className="room-card" key={index}>
-                        <Card className="shadow-2 border-round" style={{ width: '300px' }}>
+                        <Card className="shadow-2 border-round">
                             <Image src={room.url} alt={room.nameRooms} className="rounded-top" />
                             <div className="p-4">
-                                <h2 className="font-bold text-xl mb-2">{room.nameRooms}</h2>
+                                <h2 className="font-bold small-text mb-2">{room.nameRooms}</h2>
                                 <p className="text-500 text-base mb-4">Room {room.numberRoom}</p>
                                 <h3 className="text-2xl font-bold mb-4">
                                     {room.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}

@@ -28,17 +28,35 @@
 /* css mostroom */
 .room-card {
     margin: 1rem;
+    width: 300px; /* Cố định kích thước của các thẻ */
 }
 
-.flex-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center; /* Giữ các thẻ nằm ở giữa nếu chưa đầy hàng */
+.rooms-container {
+    display: flex; /* Dàn các thẻ theo chiều ngang */
+    overflow-x: auto; /* Cho phép cuộn ngang khi các thẻ không vừa màn hình */
+    gap: 1rem; /* Khoảng cách giữa các thẻ */
+    padding: 1rem; /* Khoảng cách giữa các thẻ và rìa */
 }
 
 .room-card img {
     width: 100%;
     height: auto;
     object-fit: cover;
+}
+
+/* Ẩn thanh cuộn dọc */
+.rooms-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.rooms-container::-webkit-scrollbar-thumb {
+    background-color: #888;
+}
+
+.rooms-container::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+.small-text {
+    font-size: 20px; /* Kích thước chữ nhỏ hơn */
 }

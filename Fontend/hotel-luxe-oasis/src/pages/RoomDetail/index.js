@@ -195,7 +195,7 @@ function RoomDetail() {
                 <div className="container">
                     <div className="row">
                         <div className="col-lg-12">
-                            <div className="breadcrumb-text">
+                            <div className="breadcrumb-text" style={{ marginBottom: '50px' }}>
                                 <h2>Chi tiết phòng</h2>
                                 <div className="bt-option">
                                     <Link to="/">Trang Chủ</Link>

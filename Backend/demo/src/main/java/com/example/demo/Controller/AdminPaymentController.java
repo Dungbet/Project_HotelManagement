@@ -25,6 +25,10 @@ public class AdminPaymentController {
         paymentService.create(paymentsDTO);
         return ResponseDTO.<PaymentsDTO>builder().status(200).msg("ok").build();
     }
+    @GetMapping("/search")
+    public ResponseDTO<PaymentsDTO> search(@RequestParam int id){
+        return ResponseDTO.<PaymentsDTO>builder().status(200).msg("ok").data( paymentService.getById(id)).build();
+    }
     @GetMapping("/")
     public ResponseDTO<PageDTO<List<PaymentsDTO>>> getAllPayment(@RequestParam int page, @RequestParam int size){
         SearchDTO searchDTO = new SearchDTO();

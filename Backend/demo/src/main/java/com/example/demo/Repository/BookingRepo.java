@@ -22,7 +22,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("UPDATE Bookings b SET b.status = :bookingStatus WHERE b.id = :bookingId")
     void updateStatus(@Param("bookingStatus") boolean status,@Param("bookingId") Integer id);
 
-    @Query("SELECT b FROM Bookings b JOIN b.rooms r WHERE r.id = :roomId AND :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate")
+    @Query("SELECT b FROM Bookings b JOIN b.rooms r WHERE r.id = :roomId AND :checkinDate < b.checkOutDate AND :checkoutDate > b.checkInDate AND b.bookingStatus <> 'Đã hủy'")
     List<Bookings> checkBooked(@Param("roomId") int roomId,
                                @Param("checkinDate") Date checkinDate,
                                @Param("checkoutDate") Date checkoutDate);
@@ -161,5 +161,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     // lấy ra các booking mà employee đăng nhập phụ trách
     @Query("SELECT b FROM Bookings b WHERE b.employee.id =:employeeId")
     Page<Bookings> searchBookingsByEmployee (Pageable pageable, @Param("employeeId") int employeeId);
+    @Query("SELECT b FROM Bookings b WHERE b.employee.id =:employeeId")
+    List<Bookings> getAllBookingsByEmployee (@Param("employeeId") int employeeId);
 
 }

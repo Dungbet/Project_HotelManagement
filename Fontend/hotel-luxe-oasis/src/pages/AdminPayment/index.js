@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import PaymentDetailsModal from './PaymentDetailsModal.js';
 
 function AdminPayment() {
     const [payments, setPayments] = useState([]);
@@ -16,6 +17,8 @@ function AdminPayment() {
     const size = 10; // Number of payments per page
     const navigate = useNavigate();
     const [role, setRole] = useState(null);
+    const [selectedBookingId, setSelectedBookingId] = useState(null); // ID đặt phòng được chọn
+    const [isRoomDetailsModalVisible, setIsRoomDetailsModalVisible] = useState(false);
 
     const getToken = () => localStorage.getItem('token');
 
@@ -87,6 +90,11 @@ function AdminPayment() {
             }
         }
     };
+    const handleViewDetails = (bookingId) => {
+        console.log(bookingId);
+        setSelectedBookingId(bookingId);
+        setIsRoomDetailsModalVisible(true);
+    };
 
     return (
         <div className="container-fluid pt-4 px-4">
@@ -120,6 +128,7 @@ function AdminPayment() {
                                 <th scope="col">Ngày Thanh Toán</th>
                                 <th scope="col">Số Tiền</th>
                                 <th scope="col">Phương Thức Thanh Toán</th>
+                                <th scope="col">Hành Động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -135,6 +144,15 @@ function AdminPayment() {
                                     <td>{new Date(payment.paymentDate).toLocaleDateString()}</td>
                                     <td>{payment.amount}</td>
                                     <td>{payment.paymentMethod}</td>
+                                    <td>
+                                        {payment.booking && (
+                                            <i
+                                                className="fa-solid fa-eye"
+                                                style={{ color: '#007bff', cursor: 'pointer', marginRight: '10px' }}
+                                                onClick={() => handleViewDetails(payment.id)}
+                                            ></i>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -170,6 +188,13 @@ function AdminPayment() {
                     </div>
                 </div>
             </div>
+            {isRoomDetailsModalVisible && (
+                <PaymentDetailsModal
+                    isVisible={isRoomDetailsModalVisible}
+                    paymentId={selectedBookingId}
+                    onClose={() => setIsRoomDetailsModalVisible(false)}
+                />
+            )}
         </div>
     );
 }

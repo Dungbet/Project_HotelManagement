@@ -5,6 +5,7 @@ import { parse } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import { jwtDecode } from 'jwt-decode';
+import BookingDetailsModal from './DetailBoooking.js';
 
 function AdminBooking() {
     const [bookings, setBookings] = useState([]);
@@ -25,6 +26,8 @@ function AdminBooking() {
     const size = 10; // Number of bookings per page
     const [role, setRole] = useState(null);
     const [employees, setEmployees] = useState([]);
+    const [selectedBookingId, setSelectedBookingId] = useState(null); // ID đặt phòng được chọn
+    const [isRoomDetailsModalVisible, setIsRoomDetailsModalVisible] = useState(false);
 
     const navigate = useNavigate();
 
@@ -51,9 +54,9 @@ function AdminBooking() {
     }, [page]);
 
     useEffect(() => {
-        if (role === null) return; // Skip if role is not determined yet
+        if (role === null || page < 0 || page >= endPage) return;
         fetchBookings();
-    }, [role]);
+    }, [page, role, endPage]);
 
     // Fetch employees by manager ID
     const fetchEmployees = async () => {
@@ -310,6 +313,11 @@ function AdminBooking() {
         });
     };
 
+    // Hiển thị modal chi tiết phòng
+    const handleViewDetails = (bookingId) => {
+        setSelectedBookingId(bookingId);
+        setIsRoomDetailsModalVisible(true);
+    };
     // Convert date string from "dd/MM/yyyy" to JavaScript Date object
     const parseDate = (dateString) => {
         if (!dateString) return null;
@@ -442,6 +450,13 @@ function AdminBooking() {
                                         </td>
                                     )}
                                     <td>
+                                        {booking.rooms && booking.rooms.length > 0 && (
+                                            <i
+                                                className="fa-solid fa-eye"
+                                                style={{ color: '#007bff', cursor: 'pointer', marginRight: '10px' }}
+                                                onClick={() => handleViewDetails(booking.id)} // Hoặc một logic phù hợp hơn
+                                            ></i>
+                                        )}
                                         {booking.bookingStatus === 'Chờ xác nhận' && (
                                             <>
                                                 <a onClick={() => handleConfirm(booking.id)}>
@@ -513,6 +528,13 @@ function AdminBooking() {
                     </div>
                 </div>
             </div>
+            {isRoomDetailsModalVisible && (
+                <BookingDetailsModal
+                    isVisible={isRoomDetailsModalVisible}
+                    bookingId={selectedBookingId}
+                    onClose={() => setIsRoomDetailsModalVisible(false)}
+                />
+            )}
         </div>
     );
 }

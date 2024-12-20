@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Chart } from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { jwtDecode } from 'jwt-decode';
-
+import RoomList from './RoomList';
 const EmployeeDashboard = () => {
     const [startDate, setStartDate] = useState(() => {
         const today = new Date();
@@ -22,6 +23,11 @@ const EmployeeDashboard = () => {
         revenue: 0,
         totalHandled: 0,
         totalCanceled: 0,
+    });
+    const [roomStats, setRoomStats] = useState({
+        totalRooms: 0,
+        bookedRooms: 0,
+        emptyRooms: 0,
     });
     const [role, setRole] = useState(null);
     const getToken = () => localStorage.getItem('token');
@@ -55,6 +61,33 @@ const EmployeeDashboard = () => {
         setChartData(data);
         drawChart(data);
     };
+    const fetchRoomStatistics = async () => {
+        try {
+            const token = getToken();
+
+            const totalRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-all-room', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const bookedRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-room-booked', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const emptyRoomsResponse = await fetch('http://localhost:8080/admin/booking/count-room-empty', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const totalRooms = await totalRoomsResponse.json();
+            const bookedRooms = await bookedRoomsResponse.json();
+            const emptyRooms = await emptyRoomsResponse.json();
+
+            setRoomStats({
+                totalRooms: totalRooms.data,
+                bookedRooms: bookedRooms.data,
+                emptyRooms: emptyRooms.data,
+            });
+        } catch (error) {
+            console.error('Error fetching room statistics:', error);
+        }
+    };
     // Fetch data function defined outside of useEffect
     const fetchDataPerformance = async () => {
         const token = getToken();
@@ -76,6 +109,7 @@ const EmployeeDashboard = () => {
         fetchDataPerformance();
         // Fetch data when component mounts or when dates change
         fetchData();
+        fetchRoomStatistics();
     }, [startDate, endDate]);
 
     // Format the date to the format expected by API
@@ -158,7 +192,22 @@ const EmployeeDashboard = () => {
     };
 
     return (
-        <div>
+        <div className="container-fluid pt-4">
+            <h3
+                style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: '20px',
+                    textAlign: 'center',
+                    padding: '10px',
+                    borderBottom: '2px solid #007bff',
+                    // marginTop: '50px',
+                }}
+            >
+                Hiệu suất cá nhân
+            </h3>
+
             <div className="filter-container">
                 <div className="filter-item">
                     <label htmlFor="startDate" className="block">
@@ -193,7 +242,7 @@ const EmployeeDashboard = () => {
                 </div>
             </div>
             <div className="room-empty row g-4">
-                <div className="col-sm-6 col-xl-3">
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-check-circle fa-3x text-primary"></i>
                         <div className="ms-3">
@@ -204,7 +253,7 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-sm-6 col-xl-3">
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-clock fa-3x text-primary"></i>
                         <div className="ms-3">
@@ -213,7 +262,7 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-sm-6 col-xl-3">
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-dollar-sign fa-3x text-primary"></i>
                         <div className="ms-3">
@@ -224,17 +273,119 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-sm-6 col-xl-3">
+                <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-calendar-check fa-3x text-primary"></i>
                         <div className="ms-3">
-                            <p className="mb-2">Tổng booking</p>
+                            <p className="mb-2">Số Booking</p>
                             <h3 className="mb-0 text-center">{performanceData.totalHandled || '0'}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-times-circle fa-3x text-danger"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Đã hủy</p>
+                            <h3 className="mb-0 text-center">{performanceData.totalCanceled || '0'}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-book fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Tổng Booking</p>
+                            <h3 className="mb-0 text-center">
+                                {performanceData.totalCanceled + performanceData.totalHandled || '0'}
+                            </h3>
                         </div>
                     </div>
                 </div>
             </div>
             <canvas id="myChart" style={{ width: '100%', maxWidth: '600px' }}></canvas>
+
+            <h3
+                style={{
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#333',
+                    marginBottom: '20px',
+                    textAlign: 'center',
+                    padding: '10px',
+                    borderBottom: '2px solid #007bff',
+                    marginTop: '50px',
+                }}
+            >
+                Thống kê phòng
+            </h3>
+            <div className="room-empty row g-4">
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-bed fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Tổng số phòng</p>
+                            <h3 className="mb-0 text-center">{roomStats.totalRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-check-circle fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Số phòng đã đặt</p>
+                            <h3 className="mb-0 text-center">{roomStats.bookedRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-sm-6 col-xl-4">
+                    <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                        <i className="fa fa-door-open fa-3x text-primary"></i>
+                        <div className="ms-3">
+                            <p className="mb-2">Số phòng trống</p>
+                            <h3 className="mb-0 text-center">{roomStats.emptyRooms}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="container-fluid pt-4 px-4">
+                <div className="row g-4">
+                    <div className="col-12">
+                        <div className="bg-light text-center rounded p-4">
+                            <h3>Thống kê phòng hôm nay</h3>
+                            <div className="chart-container">
+                                <Pie
+                                    data={{
+                                        labels: ['Đã đặt', 'Trống'],
+                                        datasets: [
+                                            {
+                                                data: [roomStats.bookedRooms, roomStats.emptyRooms],
+                                                backgroundColor: ['#007bff', '#ff6600'],
+                                                borderWidth: 1,
+                                            },
+                                        ],
+                                    }}
+                                    options={{
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Thống kê phòng hôm nay',
+                                        },
+                                        maintainAspectRatio: false,
+                                    }}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-light text-center rounded p-4">
+                        {/* <h3>Danh sách phòng</h3> */}
+                        {/* Thêm RoomList tại đây */}
+                        <RoomList />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

@@ -47,6 +47,8 @@ public interface   BookingService {
 
     PageDTO<List<BookingDTO>> searchBookingsByEmployee(SearchDTO searchDTO, int employeeId);
      void confirmBooking(int bookingId);
+     void retract (int bookingId);
+     List<BookingDTO> getAllBookingsByEmployee(int employeeId);
 
 
 
@@ -100,6 +102,8 @@ class BookingServiceImpl implements BookingService {
         return  pageDTO;
     }
 
+
+
     @Override
     public void confirmBooking(int bookingId) {
         Bookings booking = bookingRepo.findById(bookingId).orElseThrow(() -> new RuntimeException("Booking not found"));
@@ -127,6 +131,35 @@ class BookingServiceImpl implements BookingService {
         } else {
             throw new RuntimeException("Booking không ở trạng thái 'Chờ xác nhận'");
         }
+    }
+
+    @Override
+    public void retract(int bookingId) {
+        Date now = new Date();
+        // Tìm đơn đặt phòng
+        Bookings booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tồn tại booking"));
+
+        // Kiểm tra nếu trạng thái hiện tại chưa phải là "Yêu cầu hủy"
+
+        if (booking.getBookingStatus().equals("Yêu cầu hủy")) {
+
+            // Kiểm tra nếu ngày hủy phải trước ngày check-in
+//            if (now.after(booking.getCheckInDate())) {
+//                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
+//            }
+
+            booking.setBookingStatus("Chờ xác nhận");
+            bookingRepo.save(booking);
+        } else {
+            throw new RuntimeException("Booking đã yêu cầu hủy");
+        }
+
+    }
+
+    @Override
+    public List<BookingDTO> getAllBookingsByEmployee(int employeeId) {
+        return bookingRepo.getAllBookingsByEmployee(employeeId).stream().map(r -> convertToDTO(r)).collect(Collectors.toList());
     }
 
 
@@ -284,9 +317,9 @@ public BookingDTO create(BookingDTO bookingDTO, String token) {
         if (!booking.getBookingStatus().equals("Yêu cầu hủy")) {
 
             // Kiểm tra nếu ngày hủy phải trước ngày check-in
-            if (now.after(booking.getCheckInDate())) {
-                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
-            }
+//            if (now.after(booking.getCheckInDate())) {
+//                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
+//            }
 
             booking.setBookingStatus("Yêu cầu hủy");
             bookingRepo.save(booking);
@@ -304,9 +337,9 @@ public BookingDTO create(BookingDTO bookingDTO, String token) {
         if (booking.getBookingStatus().equals("Chờ xác nhận") || booking.getBookingStatus().equals("Đã xác nhận")) {
             Date now = new Date();
             // Kiểm tra nếu ngày hủy phải trước ngày check-in
-            if (now.after(booking.getCheckInDate())) {
-                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
-            }
+//            if (now.after(booking.getCheckInDate())) {
+//                throw new RuntimeException("Ngày hủy phải trước ngày check-in.");
+//            }
             booking.setBookingStatus("Đã hủy");
             if(booking.getStatus().equals("Đã thanh toán")){
                 booking.setStatus("Hoàn tiền");

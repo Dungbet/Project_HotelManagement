@@ -82,11 +82,7 @@ function Header() {
                             </div>
                             <div className="col-lg-6">
                                 <div className="tn-right">
-                                    <div className="top-social">
-                                        <Link to="#">
-                                            <i class="fas fa-bed"></i>
-                                        </Link>
-                                    </div>
+                                    <div className="top-social"></div>
                                     <Link to="/rooms" className="bk-btn">
                                         Đặt Ngay
                                     </Link>

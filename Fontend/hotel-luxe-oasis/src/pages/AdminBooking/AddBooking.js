@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parse, differenceInDays } from 'date-fns';
@@ -29,7 +29,7 @@ function AddBooking() {
     const [discount, setDiscount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [role, setRole] = useState(null);
-
+    const location = useLocation();
     const navigate = useNavigate();
 
     const getToken = () => localStorage.getItem('token');
@@ -46,6 +46,66 @@ function AddBooking() {
             }
         }
     };
+    // Thêm useEffect mới sau useEffect xử lý URL params
+    useEffect(() => {
+        const autoSelectRoom = async () => {
+            if (formData.roomId && rooms.length > 0) {
+                const room = rooms.find((r) => r.id === parseInt(formData.roomId));
+                if (room) {
+                    setSelectedRoom(room);
+                    setFormData((prevState) => ({
+                        ...prevState,
+                        totalAmount: room.price,
+                        discountedPrice: room.price,
+                    }));
+                }
+            }
+        };
+
+        autoSelectRoom();
+    }, [rooms, formData.roomId]); // Thêm dependency array
+
+    // Lấy các tham số từ URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const roomId = urlParams.get('roomId');
+        const checkInDate = urlParams.get('checkInDate');
+        const checkOutDate = urlParams.get('checkOutDate');
+
+        if (roomId && checkInDate && checkOutDate) {
+            setFormData((prevData) => ({
+                ...prevData,
+                roomId: roomId,
+                startDate: new Date(checkInDate),
+                endDate: new Date(checkOutDate),
+            }));
+
+            // Gọi API để lấy danh sách phòng ngay lập tức
+            const fetchRooms = async () => {
+                try {
+                    const token = getToken();
+                    const formattedStartDate = format(new Date(checkInDate), 'dd/MM/yyyy');
+                    const formattedEndDate = format(new Date(checkOutDate), 'dd/MM/yyyy');
+                    const roomsResponse = await axios.get(
+                        `http://localhost:8080/admin/room/available-rooms?checkinDate=${formattedStartDate}&checkoutDate=${formattedEndDate}`,
+                        { headers: { Authorization: `Bearer ${token}` } },
+                    );
+
+                    const roomsData = Array.isArray(roomsResponse.data.data) ? roomsResponse.data.data : [];
+                    setRooms(roomsData);
+                } catch (error) {
+                    console.error('Error fetching available rooms', error);
+                }
+            };
+
+            fetchRooms();
+        }
+    }, [location]);
+    useEffect(() => {
+        if (formData.startDate && formData.endDate) {
+            fetchAvailableRooms(formData.startDate, formData.endDate);
+        }
+    }, [formData.startDate, formData.endDate]);
 
     useEffect(() => {
         const fetchUserInfo = async () => {
@@ -148,14 +208,26 @@ function AddBooking() {
         }
     };
     const handleApplyCoupon = async () => {
-        // Xóa thông báo cũ trước khi cập nhật thông báo mới
         setCuscess({});
         setErrors({});
+
+        // Ensure we have a valid total amount
+        const originalPrice = parseFloat(formData.totalAmount) || 0;
+        let finalPrice = originalPrice;
+
+        // Apply children discount first
+        const numChildren = parseInt(formData.numChildren) || 0;
+        if (numChildren > 0) {
+            const childrenDiscount = (10 / 100) * originalPrice * numChildren;
+            finalPrice -= childrenDiscount;
+        }
+
+        // If no coupon code, just update with children discount
         if (!formData.couponCode.trim()) {
             setDiscount(0);
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: prevData.totalAmount, // Giữ nguyên giá ban đầu
+                discountedPrice: finalPrice,
             }));
             return;
         }
@@ -164,58 +236,30 @@ function AddBooking() {
             const response = await axios.get(`http://localhost:8080/coupon/code?code=${formData.couponCode}`);
             if (response.data.status === 200) {
                 const coupon = response.data.data;
-                const originalPrice = parseFloat(formData.totalAmount);
-                const discountAmount = (coupon.discountPercentage / 100) * originalPrice;
-                let discountedPrice = originalPrice - discountAmount;
+                const couponDiscount = (coupon.discountPercentage / 100) * finalPrice;
+                finalPrice -= couponDiscount;
 
-                // Giảm thêm 10% cho mỗi trẻ em
-                if (formData.numChildren > 0) {
-                    const childrenDiscount = (10 / 100) * discountedPrice * formData.childrenCount;
-                    discountedPrice -= childrenDiscount;
-                }
-
-                setDiscount(discountAmount);
+                setDiscount(couponDiscount);
                 setFormData((prevData) => ({
                     ...prevData,
-                    discountedPrice: discountedPrice,
+                    discountedPrice: finalPrice,
                 }));
                 setCuscess({ couponCode: 'Áp dụng mã thành công!' });
             } else {
-                // Mã giảm giá sai, giữ nguyên giá hiện tại
                 setErrors({ couponCode: 'Mã giảm giá sai hoặc đã hết hạn!' });
                 setDiscount(0);
-
-                // Tính lại giá sau giảm giá với số trẻ em nếu có
-                const originalPrice = parseFloat(formData.totalAmount);
-                let discountedPrice = originalPrice;
-
-                if (formData.numChildren > 0) {
-                    const childrenDiscount = (10 / 100) * discountedPrice * formData.numChildren;
-                    discountedPrice -= childrenDiscount;
-                }
-
                 setFormData((prevData) => ({
                     ...prevData,
-                    discountedPrice: discountedPrice, // Giữ lại giá sau giảm giá (nếu có trẻ em)
+                    discountedPrice: finalPrice,
                 }));
             }
         } catch (error) {
             console.error('Error applying coupon:', error);
             setErrors({ couponCode: 'Mã giảm giá sai hoặc đã hết hạn!' });
             setDiscount(0);
-
-            // Tính lại giá sau giảm giá với số trẻ em nếu có
-            const originalPrice = parseFloat(formData.totalAmount);
-            let discountedPrice = originalPrice;
-
-            if (formData.numChildren > 0) {
-                const childrenDiscount = (10 / 100) * discountedPrice * formData.numChildren;
-                discountedPrice -= childrenDiscount;
-            }
-
             setFormData((prevData) => ({
                 ...prevData,
-                discountedPrice: discountedPrice, // Giữ lại giá sau giảm giá (nếu có trẻ em)
+                discountedPrice: finalPrice,
             }));
         }
     };
@@ -375,6 +419,7 @@ function AddBooking() {
                         </select>
                         {errors.roomId && <div className="text-danger">{errors.roomId}</div>}
                     </div>
+
                     {selectedRoom && (
                         <div className="mb-3">
                             <label className="form-label">Số người lớn:</label>
