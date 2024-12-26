@@ -251,7 +251,7 @@ public BookingDTO create(BookingDTO bookingDTO, String token) {
     }
 
     Bookings booking = new ModelMapper().map(bookingDTO, Bookings.class);
-
+    booking.setStatus("Chưa thanh toán");
     // Set the current user
     booking.setUser(currentUser);
     booking.setBookingStatus("Chờ xác nhận");

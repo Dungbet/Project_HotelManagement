@@ -205,7 +205,7 @@ function AddPayment() {
                         Trở lại
                     </Link>
                     <button type="submit" className="btn btn-primary">
-                        Thê.m
+                        Thêm
                     </button>
                 </form>
             </div>

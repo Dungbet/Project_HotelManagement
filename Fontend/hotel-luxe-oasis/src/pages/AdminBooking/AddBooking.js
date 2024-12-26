@@ -55,8 +55,8 @@ function AddBooking() {
                     setSelectedRoom(room);
                     setFormData((prevState) => ({
                         ...prevState,
-                        totalAmount: room.price,
-                        discountedPrice: room.price,
+                        totalAmount: room.discountedPrice,
+                        discountedPrice: room.discountedPrice,
                     }));
                 }
             }
@@ -412,7 +412,7 @@ function AddBooking() {
                             <option value="">Chọn phòng</option>
                             {rooms.map((room) => (
                                 <option key={room.id} value={room.id}>
-                                    Phòng {room.number} - {room.name} - {room.price.toLocaleString()} VNĐ -{' '}
+                                    Phòng {room.number} - {room.name} - {room.discountedPrice.toLocaleString()} VNĐ -{' '}
                                     {room.capacity} người
                                 </option>
                             ))}

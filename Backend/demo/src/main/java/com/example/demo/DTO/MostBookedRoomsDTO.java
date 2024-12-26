@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MostBookedRoomsDTO {
+
+    private int id;
     private String url;
     private String nameRooms;
     private String numberRoom;

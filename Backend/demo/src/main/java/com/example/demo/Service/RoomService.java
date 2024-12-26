@@ -227,7 +227,7 @@ public RoomsDTO convertToDTO(Rooms room){
 
     @Override
     public PageDTO<List<RoomsDTO>> sortByPrice(SearchDTO searchDTO) {
-        Sort sortBy = Sort.by("price").ascending();
+        Sort sortBy = Sort.by("discountedPrice").ascending();
         if(searchDTO.getCurrentPage() == null){
             searchDTO.setCurrentPage(0);
         }

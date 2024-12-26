@@ -277,7 +277,7 @@ const EmployeeDashboard = () => {
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-calendar-check fa-3x text-primary"></i>
                         <div className="ms-3">
-                            <p className="mb-2">Số Booking</p>
+                            <p className="mb-2">Tổng Booking</p>
                             <h3 className="mb-0 text-center">{performanceData.totalHandled || '0'}</h3>
                         </div>
                     </div>
@@ -291,7 +291,7 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="col-sm-6 col-xl-4">
+                {/* <div className="col-sm-6 col-xl-4">
                     <div className="bg-light rounded d-flex align-items-center justify-content-between p-4">
                         <i className="fa fa-book fa-3x text-primary"></i>
                         <div className="ms-3">
@@ -301,7 +301,7 @@ const EmployeeDashboard = () => {
                             </h3>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
             <canvas id="myChart" style={{ width: '100%', maxWidth: '600px' }}></canvas>
 
@@ -317,7 +317,7 @@ const EmployeeDashboard = () => {
                     marginTop: '50px',
                 }}
             >
-                Thống kê phòng
+                Thống kê đặt phòng
             </h3>
             <div className="room-empty row g-4">
                 <div className="col-sm-6 col-xl-4">

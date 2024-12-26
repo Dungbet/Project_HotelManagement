@@ -37,6 +37,7 @@ function AdminUser() {
                 const decoded = jwtDecode(token);
 
                 setRole(decoded.role); // Lấy giá trị 'sub' từ payload
+                return decoded.userId;
             } catch (error) {
                 console.error('Invalid token', error);
             }
@@ -44,29 +45,42 @@ function AdminUser() {
     };
 
     useEffect(() => {
-        decodeToken();
-        fetchUsers();
-        fetchRoles();
-    }, [page]);
+        const userId = decodeToken();
+        if (role) {
+            fetchUsers();
+            fetchRoles();
+        }
+    }, [role, page]);
 
     const fetchUsers = async () => {
         try {
             const token = getToken();
-            const response = await axios.get(
-                `http://localhost:8080/admin/user/get-all-role-employee?page=${page}&size=${size}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+            const managerId = decodeToken();
+
+            let apiUrl;
+            if (role === 'manager') {
+                console.log('manager');
+                apiUrl = `http://localhost:8080/admin/user/get-employee?page=${page}&size=${size}&managerId=${managerId}`;
+            } else {
+                console.log('admin');
+                apiUrl = `http://localhost:8080/admin/user/get-all-role-employee?page=${page}&size=${size}`;
+            }
+
+            const response = await axios.get(apiUrl, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-            );
+            });
+
             let fetchedUsers = response.data.data.data;
+
             if (role === 'manager') {
                 // Loại bỏ người dùng có quyền "Admin" hoặc "Manager"
                 fetchedUsers = fetchedUsers.filter(
                     (user) => user.role.name !== 'ROLE_ADMIN' && user.role.name !== 'ROLE_MANAGER',
                 );
             }
+
             setUsers(fetchedUsers);
             setEndPage(response.data.data.totalPages);
         } catch (error) {

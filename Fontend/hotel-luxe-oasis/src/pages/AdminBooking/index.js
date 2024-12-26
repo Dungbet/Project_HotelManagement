@@ -449,7 +449,13 @@ function AdminBooking() {
                                             </select>
                                         </td>
                                     )}
-                                    <td>
+                                    <td
+                                        style={{
+                                            width: '100px', // Đặt chiều rộng cố định
+                                            textAlign: 'left', // Căn trái
+                                            whiteSpace: 'nowrap', // Ngăn xuống dòng
+                                        }}
+                                    >
                                         {booking.rooms && booking.rooms.length > 0 && (
                                             <i
                                                 className="fa-solid fa-eye"

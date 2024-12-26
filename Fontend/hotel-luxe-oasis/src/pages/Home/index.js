@@ -277,7 +277,7 @@ function Home() {
                                         />
                                     </div>
                                     <div className="select-option">
-                                        <label htmlFor="guest">Phòng & Khách:</label>
+                                        <label htmlFor="guest">Phòng & Khách (Trẻ em dưới 12 tuổi):</label>
                                         <Popover content={GuestSelectionContent} trigger="click">
                                             <div className="guest-selector guest-info" style={{ cursor: 'pointer' }}>
                                                 {`${numRooms} phòng: ${numAdults} người lớn, ${numChildren} trẻ em/phòng`}

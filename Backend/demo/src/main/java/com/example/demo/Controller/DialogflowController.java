@@ -84,23 +84,24 @@ public class DialogflowController {
 
     @GetMapping("/getcoupon")
     private String getCouponDetails() {
-        List<CouponDTO> coupons = couponService.findCouponsByExpiryDateCurrent(); // Lấy danh sách coupon
+        List<CouponDTO> coupons = couponService.findCouponsByExpiryDateCurrent();
 
         if (coupons != null && !coupons.isEmpty()) {
-            CouponDTO coupon = coupons.get(0); // Lấy coupon đầu tiên
+            StringBuilder message = new StringBuilder("Bạn có thể sử dụng một trong các mã giảm giá sau:\n\n");
 
-            // Tạo thông điệp
-            return String.format(
-                    "Bạn hãy áp mã giảm giá dưới đây để nhận ưu đãi: \n" +
-                            "🎉 Mã: %s\n" +
-                            "📉 Giảm giá: %.2f%%\n" +
-                            "⏳ Ngày hết hạn: %s",
-                    coupon.getCode(),
-                    coupon.getDiscountPercentage(),
-                    coupon.getExpiryDate()
-            );
+            for (CouponDTO coupon : coupons) {
+                message.append(String.format(
+                        "🎉 Mã: %s\n" +
+                                "📉 Giảm giá: %.2f%%\n" +
+                                "⏳ Ngày hết hạn: %s\n\n",
+                        coupon.getCode(),
+                        coupon.getDiscountPercentage(),
+                        coupon.getExpiryDate()
+                ));
+            }
+
+            return message.toString().trim();
         } else {
-            // Thông điệp không có coupon
             return "❌ Hiện tại Hotel không có mã giảm giá nào.";
         }
     }
@@ -189,7 +190,7 @@ public class DialogflowController {
                         room.getCountBooked() ,room.getPrice(), room.getNumberRoom() ));
 
                 infoElement.put("type", "info");
-                infoElement.put("actionLink", "http://localhost:3000/room-detail/" + room.getNumberRoom());
+                infoElement.put("actionLink", "http://localhost:3000/room-detail/" + room.getId());
 
                 // Thêm cả 2 phần tử vào một danh sách con
                 List<Map<String, Object>> roomContent = new ArrayList<>();

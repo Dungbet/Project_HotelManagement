@@ -63,7 +63,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
     @Query("SELECT b FROM Bookings b JOIN FETCH b.rooms WHERE b.id = :bookingId")
     Bookings findByIdWithRooms(@Param("bookingId") int bookingId);
 
-    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.id,r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
             "FROM Bookings b " +
             "JOIN b.rooms r " +
             "WHERE b.bookingStatus = 'Hoàn thành' " +
@@ -74,14 +74,14 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
                                                             @Param("endDate") Date endDate,
                                                             Pageable pageable);
 
-    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.id,r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
             "FROM Bookings b " +
             "JOIN b.rooms r " +
             "WHERE b.bookingStatus = 'Hoàn thành' " +
             "GROUP BY r.id, r.name, r.roomImg, r.roomNumber, r.price " +
             "ORDER BY COUNT(r.id) DESC")
     Page<MostBookedRoomsDTO> findAllMostBookedRooms(Pageable pageable);
-    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id) ) " +
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.id,r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id) ) " +
             "FROM Bookings b " +
             "JOIN b.rooms r " +
             "WHERE b.bookingStatus = 'Hoàn thành' AND r.capacity >= :count " +
@@ -91,7 +91,7 @@ public interface BookingRepo extends JpaRepository<Bookings, Integer> {
 
 
 
-    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
+    @Query("SELECT new com.example.demo.DTO.MostBookedRoomsDTO (r.id,r.roomImg, r.name, r.roomNumber, r.price, COUNT(r.id)) " +
             "FROM Bookings b " +
             "JOIN b.rooms r " +
             "WHERE b.bookingStatus = 'Hoàn thành' " +
